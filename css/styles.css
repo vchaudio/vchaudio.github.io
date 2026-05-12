@@ -295,9 +295,10 @@ details.spoiler summary {
   list-style: none;
   cursor: pointer;
   position: relative;
-  display: block;
-  text-align: center;
-  padding: 1.15rem 2.85rem 1.15rem 1.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.15rem 1.35rem;
   font-weight: 500;
   font-size: 1.05rem;
   line-height: 1.3;
@@ -307,7 +308,7 @@ details.spoiler summary {
 }
 
 .spoiler-summary-label {
-  display: block;
+  text-align: center;
 }
 
 details.spoiler summary::-webkit-details-marker {
