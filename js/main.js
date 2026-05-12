@@ -30,11 +30,37 @@
       d.style.removeProperty("max-width");
     }
 
+    var lastTouchLikeEnd = 0;
+    function markTouchLikeEnd() {
+      lastTouchLikeEnd = Date.now();
+    }
+    document.addEventListener("touchend", markTouchLikeEnd, { capture: true, passive: true });
+    document.addEventListener("touchcancel", markTouchLikeEnd, { capture: true, passive: true });
+
     document.addEventListener(
       "pointerdown",
       function (e) {
-        /* Outside-tap close is for mouse/pen; touch would close while scrolling or mis-tapping */
+        /* Outside-close is for real mouse/pen on desktop-like UIs only. */
+        try {
+          if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) return;
+        } catch (err) {}
         if (e.pointerType === "touch") return;
+        /* iOS/Android sometimes emit a synthetic mouse pointer right after a finger lift */
+        if (
+          navigator.maxTouchPoints > 0 &&
+          e.pointerType === "mouse" &&
+          Date.now() - lastTouchLikeEnd < 500
+        ) {
+          return;
+        }
+        /* Touch hardware but unknown/empty pointerType (not declared mouse/pen) */
+        if (
+          navigator.maxTouchPoints > 0 &&
+          e.pointerType !== "mouse" &&
+          e.pointerType !== "pen"
+        ) {
+          return;
+        }
         document.querySelectorAll("details.spoiler[open]").forEach(function (d) {
           if (!d.contains(e.target)) closeSpoiler(d);
         });
