@@ -100,42 +100,43 @@ img {
   color: var(--accent);
 }
 
-/* Header logo (subpages only) */
-.site-header--with-logo .brand.brand--image {
+/* Header: VCHAudio left, logo center (subpages only) */
+.site-header--with-logo {
+  position: relative;
+}
+
+.site-header--with-logo .brand-logo-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   line-height: 0;
+  z-index: 1;
+}
+
+.site-header--with-logo > .brand {
+  position: relative;
+  z-index: 2;
+}
+
+.site-header--with-logo > .nav-back {
+  position: relative;
+  z-index: 2;
 }
 
 .brand-header-logo {
   display: block;
-  height: clamp(26px, 4.5vw, 36px);
+  height: clamp(24px, 4.2vw, 34px);
   width: auto;
-  max-width: min(58vw, 240px);
+  max-width: min(44vw, 210px);
   object-fit: contain;
-  animation: brand-header-logo-in 0.7s var(--ease-out) both;
-  transition: opacity 0.2s ease;
 }
 
-.brand--image:hover .brand-header-logo {
-  opacity: 0.92;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .brand-header-logo {
-    animation: none;
-  }
-}
-
-@keyframes brand-header-logo-in {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.94);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.brand-logo-center:hover .brand-header-logo {
+  opacity: 0.9;
 }
 
 .nav-back {
@@ -710,6 +711,24 @@ details.spoiler[open] .spoiler-body {
 .project-card:active {
   transform: translateY(0) scale(0.99);
   transition-duration: 0.12s;
+}
+
+.page-overview-banner {
+  width: 100%;
+  margin: 0 0 1.35rem;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  height: clamp(132px, 30vw, 220px);
+  background: var(--surface);
+}
+
+.page-overview-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .project-banner {
