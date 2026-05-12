@@ -711,6 +711,11 @@ details.spoiler[open] .spoiler-body {
   margin-bottom: 0;
 }
 
+.detail-list strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .detail-note {
   margin: 0;
   font-size: 0.92rem;
@@ -730,6 +735,10 @@ details.spoiler[open] .spoiler-body {
 .detail-links a {
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+.detail-links--tight {
+  margin-top: 1.25rem;
 }
 
 .video-stack {
