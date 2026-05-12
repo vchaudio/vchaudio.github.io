@@ -33,6 +33,8 @@
     document.addEventListener(
       "pointerdown",
       function (e) {
+        /* Outside-tap close is for mouse/pen; touch would close while scrolling or mis-tapping */
+        if (e.pointerType === "touch") return;
         document.querySelectorAll("details.spoiler[open]").forEach(function (d) {
           if (!d.contains(e.target)) closeSpoiler(d);
         });
