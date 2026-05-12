@@ -148,22 +148,22 @@ main {
 
 .brand-logo {
   display: block;
-  width: min(100%, 520px);
+  width: min(100%, 720px);
   height: auto;
-  max-height: min(22vw, 140px);
+  max-height: min(32vw, 200px);
   object-fit: contain;
-  filter: brightness(0) invert(0.93) drop-shadow(0 4px 28px rgba(228, 160, 74, 0.12));
+  filter: brightness(0) invert(1) drop-shadow(0 6px 36px rgba(228, 160, 74, 0.18));
 }
 
 @media (min-width: 480px) {
   .brand-logo {
-    max-height: min(18vw, 168px);
+    max-height: min(28vw, 240px);
   }
 }
 
 @media (min-width: 720px) {
   .brand-logo {
-    max-height: 188px;
+    max-height: min(24vw, 300px);
   }
 }
 
@@ -179,15 +179,24 @@ main {
   width: min(200px, 52vw);
   height: min(200px, 52vw);
   border-radius: var(--radius-full);
-  padding: 4px;
-  overflow: hidden;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transform-style: preserve-3d;
   transition: transform 0.4s var(--ease-out);
-  background: linear-gradient(145deg, var(--ring), rgba(80, 60, 40, 0.35) 40%, var(--accent-dim));
+  background: linear-gradient(
+    145deg,
+    rgba(255, 220, 190, 0.95) 0%,
+    var(--accent) 38%,
+    rgba(180, 110, 40, 0.85) 62%,
+    rgba(90, 55, 28, 0.95) 100%
+  );
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 0 0 2px rgba(228, 160, 74, 0.25),
     0 20px 50px rgba(0, 0, 0, 0.5),
-    0 0 80px rgba(228, 160, 74, 0.08);
+    0 0 80px rgba(228, 160, 74, 0.12);
 }
 
 .avatar-ring::after {
@@ -195,20 +204,31 @@ main {
   position: absolute;
   inset: -12px;
   border-radius: inherit;
-  background: radial-gradient(circle, rgba(255, 220, 180, 0.15), transparent 65%);
+  background: radial-gradient(circle, rgba(255, 220, 180, 0.22), transparent 65%);
   z-index: -1;
   pointer-events: none;
 }
 
-.avatar-ring img {
+.avatar-photo-crop {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 2px solid rgba(18, 16, 14, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(255, 220, 190, 0.12);
+}
+
+.avatar-photo-crop img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 22%;
-  transform: scale(1.22);
-  transform-origin: 50% 34%;
-  border-radius: var(--radius-full);
-  border: 3px solid var(--bg);
+  object-position: 50% 24%;
+  transform: scale(1.08);
+  transform-origin: 50% 32%;
+  display: block;
 }
 
 .intro-block {
@@ -228,22 +248,34 @@ main {
 }
 
 .intro-role {
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.75rem;
   font-size: clamp(0.95rem, 2.8vw, 1.08rem);
   font-weight: 500;
   color: var(--text-muted);
   line-height: 1.45;
 }
 
-.intro-tagline {
+.intro-tagline-wrap {
   margin: 0;
-  font-size: clamp(1rem, 2.9vw, 1.12rem);
+  display: flex;
+  justify-content: center;
+}
+
+.intro-tagline {
+  display: inline-block;
+  margin: 0;
+  padding: 0.38rem 0.85rem;
+  font-size: clamp(0.78rem, 2.15vw, 0.88rem);
   font-style: italic;
   font-weight: 400;
-  letter-spacing: 0.03em;
-  color: rgba(244, 238, 232, 0.78);
-  line-height: 1.55;
-  text-shadow: 0 0 42px rgba(228, 160, 74, 0.08);
+  letter-spacing: 0.04em;
+  line-height: 1.45;
+  color: rgba(244, 238, 232, 0.72);
+  text-shadow: 0 0 28px rgba(228, 160, 74, 0.06);
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(228, 160, 74, 0.28);
+  background: rgba(228, 160, 74, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* ——— Spoiler / details ——— */
