@@ -294,23 +294,20 @@ details.spoiler + details.spoiler {
 details.spoiler summary {
   list-style: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 1.1rem 1.25rem;
-  font-weight: 600;
-  font-size: 1rem;
+  position: relative;
+  display: block;
+  text-align: center;
+  padding: 1.15rem 2.85rem 1.15rem 1.35rem;
+  font-weight: 500;
+  font-size: 1.05rem;
+  line-height: 1.3;
   color: var(--text);
   user-select: none;
   transition: background 0.25s var(--ease-out);
 }
 
-.spoiler-summary-inner {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
+.spoiler-summary-label {
+  display: block;
 }
 
 details.spoiler summary::-webkit-details-marker {
@@ -326,8 +323,12 @@ details.spoiler summary:active {
 }
 
 .spoiler-chevron {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
   width: 1.5rem;
   height: 1.5rem;
+  margin-top: -0.75rem;
   border-radius: var(--radius-full);
   background: var(--surface);
   display: flex;
