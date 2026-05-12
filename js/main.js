@@ -22,51 +22,13 @@
     inner.style.removeProperty("animation");
   }
 
-  /* Home spoilers: instant tile width; roll on open only; instant close */
+  /* Home spoilers: instant tile width; roll on open; close only from summary */
   function initSpoilers() {
     function closeSpoiler(d) {
       if (!d.open) return;
       d.open = false;
       d.style.removeProperty("max-width");
     }
-
-    var lastTouchLikeEnd = 0;
-    function markTouchLikeEnd() {
-      lastTouchLikeEnd = Date.now();
-    }
-    document.addEventListener("touchend", markTouchLikeEnd, { capture: true, passive: true });
-    document.addEventListener("touchcancel", markTouchLikeEnd, { capture: true, passive: true });
-
-    document.addEventListener(
-      "pointerdown",
-      function (e) {
-        /* Outside-close is for real mouse/pen on desktop-like UIs only. */
-        try {
-          if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) return;
-        } catch (err) {}
-        if (e.pointerType === "touch") return;
-        /* iOS/Android sometimes emit a synthetic mouse pointer right after a finger lift */
-        if (
-          navigator.maxTouchPoints > 0 &&
-          e.pointerType === "mouse" &&
-          Date.now() - lastTouchLikeEnd < 500
-        ) {
-          return;
-        }
-        /* Touch hardware but unknown/empty pointerType (not declared mouse/pen) */
-        if (
-          navigator.maxTouchPoints > 0 &&
-          e.pointerType !== "mouse" &&
-          e.pointerType !== "pen"
-        ) {
-          return;
-        }
-        document.querySelectorAll("details.spoiler[open]").forEach(function (d) {
-          if (!d.contains(e.target)) closeSpoiler(d);
-        });
-      },
-      true
-    );
 
     document.querySelectorAll("details.spoiler").forEach(function (details) {
       const body = details.querySelector(".spoiler-body");
