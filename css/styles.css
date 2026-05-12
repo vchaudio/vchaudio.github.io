@@ -32,6 +32,7 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--bg);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -50,16 +51,29 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   font-family: var(--font);
   font-weight: 400;
   font-size: 1rem;
   line-height: 1.6;
   color: var(--text);
-  background: var(--bg);
+  background: transparent;
+  isolation: isolate;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Full-viewport gradient on a fixed layer: scrolls cheaply vs painting gradients on the scrolling body */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  contain: paint;
+  background-color: var(--bg);
   background-image:
     radial-gradient(ellipse 120% 80% at 50% -20%, var(--glow), transparent 55%),
     radial-gradient(ellipse 60% 40% at 100% 50%, rgba(228, 160, 74, 0.04), transparent 50%);
-  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -88,8 +102,8 @@ img {
   align-items: center;
   justify-content: space-between;
   padding: 0 clamp(1.25rem, 4vw, 2.5rem);
-  background: rgba(18, 16, 14, 0.72);
-  backdrop-filter: blur(14px);
+  /* Opaque bar: backdrop-filter on sticky headers repaints/blurs every scroll frame (jank). */
+  background: rgba(18, 16, 14, 0.97);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
