@@ -524,6 +524,166 @@ details.spoiler[open] .spoiler-body {
   color: var(--text);
 }
 
+/* ——— Game audio projects ——— */
+.game-projects {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.project-card {
+  position: relative;
+  padding: 1.5rem 1.35rem 1.4rem;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  transition:
+    transform 0.35s var(--ease-out),
+    border-color 0.25s,
+    box-shadow 0.35s var(--ease-out);
+}
+
+.project-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, rgba(228, 160, 74, 0.04), transparent 42%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-out);
+}
+
+.project-card:hover {
+  border-color: rgba(228, 160, 74, 0.28);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(228, 160, 74, 0.1);
+}
+
+.project-card:hover::before {
+  opacity: 1;
+}
+
+.project-card:active {
+  transform: translateY(0) scale(0.99);
+  transition-duration: 0.12s;
+}
+
+.project-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.2rem;
+  min-height: 5.5rem;
+}
+
+.project-logo img {
+  display: block;
+  max-width: min(100%, 280px);
+  width: auto;
+  height: auto;
+  max-height: 5rem;
+  object-fit: contain;
+}
+
+.project-logo--moonray {
+  background: #0a0a0a;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  min-height: 6.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.project-logo--moonray img {
+  max-height: 3.25rem;
+  max-width: 220px;
+}
+
+.project-logo--lastflag img {
+  max-height: 5.25rem;
+  max-width: 300px;
+}
+
+.project-name {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.project-dates {
+  margin: 0 0 1rem;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.project-blurb {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.project-role {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text);
+  text-align: left;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.project-role-label {
+  display: block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.project-link {
+  display: block;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  background: rgba(228, 160, 74, 0.08);
+  border: 1px solid rgba(228, 160, 74, 0.2);
+  color: var(--accent);
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+
+.project-link:hover {
+  background: rgba(228, 160, 74, 0.14);
+  border-color: rgba(228, 160, 74, 0.35);
+  color: #f0be6e;
+}
+
+.project-link:active {
+  transform: scale(0.98);
+}
+
+.project-card[data-i="0"] {
+  animation: fade-up 0.65s var(--ease-out) 0.15s both;
+}
+
+.project-card[data-i="1"] {
+  animation: fade-up 0.65s var(--ease-out) 0.26s both;
+}
+
 .site-footer {
   text-align: center;
   padding: 2rem 1rem;
