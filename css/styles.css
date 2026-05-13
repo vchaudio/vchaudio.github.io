@@ -2634,7 +2634,7 @@ a.job-card.job-card--to-project:focus-visible {
   max-width: 100%;
   min-width: 0;
   margin-inline: auto;
-  padding: 0;
+  padding: 3px 4px;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   border-radius: var(--radius-md);
@@ -2651,10 +2651,42 @@ a.job-card.job-card--to-project:focus-visible {
   scroll-snap-align: start;
   scroll-snap-stop: always;
   border-radius: var(--radius-md);
+  border: none;
+  /* Hairline inset frame (static); hover adds outer glow only on this page */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  background: #080706;
+  transition: box-shadow 0.45s var(--ease-out), filter 0.45s var(--ease-out);
+}
+
+.page-other-projects .other-projects-scroller .video-thumb:hover {
+  transform: none;
+  border-color: transparent;
+  box-shadow:
+    inset 0 0 0 1px rgba(228, 160, 74, 0.38),
+    0 0 18px 1px rgba(228, 160, 74, 0.28),
+    0 0 42px 10px rgba(255, 200, 120, 0.14),
+    0 0 72px 20px rgba(255, 180, 90, 0.06);
+}
+
+.page-other-projects .other-projects-scroller .video-thumb:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
 }
 
 .page-other-projects .other-projects-scroller .video-thumb img {
   border-radius: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-other-projects .other-projects-scroller .video-thumb {
+    transition-duration: 0.01ms;
+  }
+
+  .page-other-projects .other-projects-scroller .video-thumb:hover {
+    box-shadow:
+      inset 0 0 0 1px rgba(228, 160, 74, 0.32),
+      0 0 14px rgba(228, 160, 74, 0.22);
+  }
 }
 
 @media (max-width: 720px) {
