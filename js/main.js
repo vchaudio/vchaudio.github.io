@@ -433,7 +433,15 @@
     });
   }
 
-  /* Which marketing carousel "page" (row of 4) is closest to current scrollLeft */
+  function marketingThumbsPerPageFromCss(thumbEl) {
+    if (!thumbEl) return 4;
+    var raw = window.getComputedStyle(thumbEl).getPropertyValue("--marketing-thumbs-per-view");
+    var n = parseInt(String(raw).trim(), 10);
+    if (!n || n < 1) return 4;
+    return Math.min(4, n);
+  }
+
+  /* Which marketing carousel "page" is closest to current scrollLeft */
   function marketingCarouselPageIndex(scrollLeft, pageW, maxScroll, numPages) {
     if (numPages <= 1) return 0;
     var best = 0;
@@ -471,20 +479,24 @@
           view.scrollTo({ left: idx * w, behavior: reduceMotion ? "auto" : "smooth" });
           return;
         }
-        /* Marketing & ads: align to rows of four thumbnails (viewport width can drift from 4×thumb+gap) */
+        /* Marketing & ads: paged scroll; thumbs per row from CSS --marketing-thumbs-per-view */
         if (root.closest(".marketing-showcase") != null) {
           var stripM = root.querySelector(".video-scroller__strip");
           var thumbsM = stripM ? stripM.querySelectorAll(":scope > .video-thumb") : [];
-          if (thumbsM.length >= 5) {
-            var pageW = thumbsM[4].offsetLeft - thumbsM[0].offsetLeft;
-            if (pageW > 0) {
-              var maxScrollM = Math.max(0, view.scrollWidth - view.clientWidth);
-              var numPages = Math.ceil(thumbsM.length / 4);
-              var curPage = marketingCarouselPageIndex(view.scrollLeft, pageW, maxScrollM, numPages);
-              var nextPage = Math.max(0, Math.min(numPages - 1, curPage + dir));
-              var targetLeft = nextPage >= numPages - 1 ? maxScrollM : nextPage * pageW;
-              view.scrollTo({ left: targetLeft, behavior: reduceMotion ? "auto" : "smooth" });
-              return;
+          if (thumbsM.length >= 2) {
+            var perPageM = marketingThumbsPerPageFromCss(thumbsM[0]);
+            var nM = thumbsM.length;
+            var numPagesM = Math.ceil(nM / perPageM);
+            if (numPagesM > 1 && perPageM < nM && thumbsM[perPageM]) {
+              var pageWM = thumbsM[perPageM].offsetLeft - thumbsM[0].offsetLeft;
+              if (pageWM > 0) {
+                var maxScrollM = Math.max(0, view.scrollWidth - view.clientWidth);
+                var curPage = marketingCarouselPageIndex(view.scrollLeft, pageWM, maxScrollM, numPagesM);
+                var nextPage = Math.max(0, Math.min(numPagesM - 1, curPage + dir));
+                var targetLeft = nextPage >= numPagesM - 1 ? maxScrollM : nextPage * pageWM;
+                view.scrollTo({ left: targetLeft, behavior: reduceMotion ? "auto" : "smooth" });
+                return;
+              }
             }
           }
         }
@@ -511,15 +523,19 @@
         if (isMarketing) {
           var stripB = root.querySelector(".video-scroller__strip");
           var thumbsB = stripB ? stripB.querySelectorAll(":scope > .video-thumb") : [];
-          if (thumbsB.length >= 5) {
-            var pageWB = thumbsB[4].offsetLeft - thumbsB[0].offsetLeft;
-            if (pageWB > 0) {
-              var maxSB = Math.max(0, view.scrollWidth - view.clientWidth);
-              var numPB = Math.ceil(thumbsB.length / 4);
-              var pageIdx = marketingCarouselPageIndex(view.scrollLeft, pageWB, maxSB, numPB);
-              prev.disabled = pageIdx <= 0;
-              next.disabled = pageIdx >= numPB - 1;
-              return;
+          if (thumbsB.length >= 2) {
+            var perPB = marketingThumbsPerPageFromCss(thumbsB[0]);
+            var nB = thumbsB.length;
+            var numPB = Math.ceil(nB / perPB);
+            if (numPB > 1 && perPB < nB && thumbsB[perPB]) {
+              var pageWB = thumbsB[perPB].offsetLeft - thumbsB[0].offsetLeft;
+              if (pageWB > 0) {
+                var maxSB = Math.max(0, view.scrollWidth - view.clientWidth);
+                var pageIdx = marketingCarouselPageIndex(view.scrollLeft, pageWB, maxSB, numPB);
+                prev.disabled = pageIdx <= 0;
+                next.disabled = pageIdx >= numPB - 1;
+                return;
+              }
             }
           }
         }

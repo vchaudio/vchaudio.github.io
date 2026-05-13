@@ -2448,7 +2448,7 @@ a.job-card.job-card--to-project:focus-visible {
   container-name: marketing-videos-col;
 }
 
-/* Marketing & ads showcase only: four thumbnails per visible track (not other pages that reuse .video-scroller) */
+/* Marketing & ads showcase: thumbs per row from --marketing-thumbs-per-view (container queries; not other .video-scroller pages) */
 .marketing-main .marketing-showcase .video-scroller__viewport {
   container-type: inline-size;
   container-name: marketing-viewport;
@@ -2468,6 +2468,24 @@ a.job-card.job-card--to-project:focus-visible {
   max-width: none;
 }
 
+@container marketing-viewport (max-width: 920px) {
+  .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
+    --marketing-thumbs-per-view: 3;
+  }
+}
+
+@container marketing-viewport (max-width: 620px) {
+  .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
+    --marketing-thumbs-per-view: 2;
+  }
+}
+
+@container marketing-viewport (max-width: 380px) {
+  .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
+    --marketing-thumbs-per-view: 1;
+  }
+}
+
 .marketing-main .marketing-showcase .video-scroller__strip:not(:has(> .video-thumb:nth-child(4))) > .video-thumb {
   width: clamp(118px, min(42cqw, 220px), 260px);
   flex: 0 0 clamp(118px, min(42cqw, 220px), 260px);
@@ -2475,8 +2493,33 @@ a.job-card.job-card--to-project:focus-visible {
 
 @supports not (container-type: inline-size) {
   .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
+    --marketing-thumbs-per-view: 4;
     width: clamp(68px, calc((100vw - 7.5rem) / 4.2), 280px);
     flex: 0 0 clamp(68px, calc((100vw - 7.5rem) / 4.2), 280px);
+  }
+
+  @media (max-width: 920px) {
+    .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
+      --marketing-thumbs-per-view: 3;
+      width: clamp(68px, calc((100vw - 7.5rem) / 3.15), 280px);
+      flex: 0 0 clamp(68px, calc((100vw - 7.5rem) / 3.15), 280px);
+    }
+  }
+
+  @media (max-width: 620px) {
+    .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
+      --marketing-thumbs-per-view: 2;
+      width: clamp(68px, calc((100vw - 7.5rem) / 2.1), 280px);
+      flex: 0 0 clamp(68px, calc((100vw - 7.5rem) / 2.1), 280px);
+    }
+  }
+
+  @media (max-width: 380px) {
+    .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
+      --marketing-thumbs-per-view: 1;
+      width: clamp(68px, calc((100vw - 7.5rem) / 1.05), 280px);
+      flex: 0 0 clamp(68px, calc((100vw - 7.5rem) / 1.05), 280px);
+    }
   }
 
   .marketing-main .marketing-showcase .video-scroller__strip:not(:has(> .video-thumb:nth-child(4))) > .video-thumb {
@@ -2690,15 +2733,49 @@ a.job-card.job-card--to-project:focus-visible {
 }
 
 @media (max-width: 720px) {
+  .page-other-projects {
+    overflow-x: clip;
+    padding-bottom: max(2.25rem, env(safe-area-inset-bottom, 0px));
+  }
+
   .other-projects-showcase {
-    --op-slide: min(560px, calc(100vw - 2.5rem));
+    --op-slide: 100%;
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0px));
+  }
+
+  .other-projects-player {
+    padding-inline: 0.25rem;
+    max-width: 100%;
+  }
+
+  .page-other-projects .other-projects-scroller {
+    flex-wrap: wrap;
+    gap: 0.5rem 0.4rem;
+    width: 100%;
+    max-width: 100%;
+    align-items: stretch;
   }
 
   .page-other-projects .other-projects-scroller .video-scroller__viewport {
     flex: 1 1 100%;
-    width: min(var(--op-slide), 100%);
-    max-width: min(560px, 100%);
-    margin-inline: auto;
+    width: 100%;
+    max-width: 100%;
+    order: -1;
+    margin-inline: 0;
+    touch-action: pan-x pinch-zoom;
+  }
+
+  .page-other-projects .other-projects-scroller .video-scroller__btn {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-height: 2.75rem;
+    box-sizing: border-box;
+  }
+
+  .page-other-projects .other-projects-scroller .video-thumb {
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
   }
 }
 
