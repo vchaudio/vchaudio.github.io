@@ -2,10 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta
       name="description"
-      content="VCHAudio private studio — room, monitoring, Apollo, Neumann KH 310, instruments, and workstation. Valentyn Chumachenko, Odesa."
+      content="Private studio — DIY acoustic treatment, calibrated monitoring, recording and mixing chain. Valentyn Chumachenko."
     />
     <title>My studio · VCHAudio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,15 +46,14 @@
           </nav>
           <h1>My studio</h1>
         </div>
-        <p class="lead">VCHAudio — treated room, monitoring, and the chain I compose and mix on every day.</p>
+        <p class="lead">
+          A treated room with DIY acoustic work, measured and calibrated so monitoring stays honest for everyday recording and
+          mixing.
+        </p>
       </div>
 
       <section class="studio-gallery reveal" aria-label="Studio photos">
-        <!-- Carousel and lightbox use the same PNG files below — full exports, not recompressed in the repo. -->
-        <p class="studio-gallery__hint">
-          Swipe or use the arrows to browse. Tap a photo to open it full size — scroll the mouse wheel or use + / − to
-          zoom, drag to pan when zoomed, double-click the picture to reset.
-        </p>
+        <!-- Carousel: WebP previews; tap opens full PNG (data-lightbox-hq). Regenerate previews: python scripts/build-studio-previews.py -->
         <div class="video-scroller studio-gallery__carousel" data-video-scroller aria-label="Studio photo carousel">
           <button type="button" class="video-scroller__btn video-scroller__btn--prev" aria-label="Scroll photos left">
             <span aria-hidden="true">‹</span>
@@ -65,15 +64,15 @@
                 type="button"
                 class="studio-gallery__tile studio-gallery__tile--portrait"
                 data-studio-lightbox
-                data-full-src="assets/studio-photo-1.png"
+                data-lightbox-hq="assets/studio-photo-1.png"
                 data-lightbox-caption="Main workstation — ultrawide DAW, X-Touch, Neumann KH&nbsp;310, and desk mic."
                 aria-label="Open full-size photo: main workstation"
               >
                 <img
-                  src="assets/studio-photo-1.png"
+                  src="assets/studio-photo-1-preview.webp"
                   alt="Studio workstation with ultrawide monitor, control surface, and Neumann monitors"
-                  width="576"
-                  height="1024"
+                  width="562"
+                  height="1000"
                   loading="lazy"
                   decoding="async"
                 />
@@ -82,15 +81,15 @@
                 type="button"
                 class="studio-gallery__tile studio-gallery__tile--landscape"
                 data-studio-lightbox
-                data-full-src="assets/studio-photo-2.png"
+                data-lightbox-hq="assets/studio-photo-2.png"
                 data-lightbox-caption="Wide room view — desk, monitors, guitars, SL88, and acoustic treatment."
                 aria-label="Open full-size photo: wide studio view"
               >
                 <img
-                  src="assets/studio-photo-2.png"
+                  src="assets/studio-photo-2-preview.webp"
                   alt="Wide view of the studio desk, Neumann monitors, guitars, and keyboard station"
-                  width="1024"
-                  height="576"
+                  width="1000"
+                  height="563"
                   loading="lazy"
                   decoding="async"
                 />
@@ -99,15 +98,15 @@
                 type="button"
                 class="studio-gallery__tile studio-gallery__tile--portrait"
                 data-studio-lightbox
-                data-full-src="assets/studio-photo-3.png"
+                data-lightbox-hq="assets/studio-photo-3.png"
                 data-lightbox-caption="Guitars, Neumann KH&nbsp;310 on stand, and desk with headphones."
                 aria-label="Open full-size photo: guitars and monitor"
               >
                 <img
-                  src="assets/studio-photo-3.png"
+                  src="assets/studio-photo-3-preview.webp"
                   alt="Fender Stratocaster and Jazz bass on stands beside a Neumann studio monitor"
-                  width="576"
-                  height="1024"
+                  width="562"
+                  height="1000"
                   loading="lazy"
                   decoding="async"
                 />
@@ -116,15 +115,15 @@
                 type="button"
                 class="studio-gallery__tile studio-gallery__tile--landscape"
                 data-studio-lightbox
-                data-full-src="assets/studio-photo-4.png"
+                data-lightbox-hq="assets/studio-photo-4.png"
                 data-lightbox-caption="Studiologic SL88, field mic on stand, Novation Impulse tray, and PC."
                 aria-label="Open full-size photo: keyboard corner"
               >
                 <img
-                  src="assets/studio-photo-4.png"
+                  src="assets/studio-photo-4-preview.webp"
                   alt="Studiologic SL88 on stand with tablet sheet music, shotgun mic, and desk corner"
-                  width="1024"
-                  height="576"
+                  width="1000"
+                  height="563"
                   loading="lazy"
                   decoding="async"
                 />
@@ -133,15 +132,15 @@
                 type="button"
                 class="studio-gallery__tile studio-gallery__tile--landscape"
                 data-studio-lightbox
-                data-full-src="assets/studio-photo-5.png"
+                data-lightbox-hq="assets/studio-photo-5.png"
                 data-lightbox-caption="Center desk — Apollo X4, Rode and Sennheiser mics, ultrawide DAW."
                 aria-label="Open full-size photo: desk center"
               >
                 <img
-                  src="assets/studio-photo-5.png"
+                  src="assets/studio-photo-5-preview.webp"
                   alt="Desk with curved monitor, Universal Audio Apollo, Rode and Sennheiser microphones"
-                  width="1024"
-                  height="576"
+                  width="1000"
+                  height="563"
                   loading="lazy"
                   decoding="async"
                 />
