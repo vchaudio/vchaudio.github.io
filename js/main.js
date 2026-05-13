@@ -444,12 +444,36 @@
       var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       function scrollPage(dir) {
+        if (root.hasAttribute("data-other-projects-sync")) {
+          var thumbs = root.querySelectorAll(".video-thumb");
+          if (!thumbs.length) return;
+          var w = thumbs[0].offsetWidth || view.clientWidth;
+          if (!w) return;
+          var maxI = thumbs.length - 1;
+          var idx = Math.floor((view.scrollLeft + w * 0.45) / w);
+          idx = Math.max(0, Math.min(maxI, idx + dir));
+          view.scrollTo({ left: idx * w, behavior: reduceMotion ? "auto" : "smooth" });
+          return;
+        }
         var amount = Math.max(120, view.clientWidth * 0.72);
         view.scrollBy({ left: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
       }
 
       function updateButtons() {
-        var eps = 3;
+        var eps = 8;
+        var isOther = root.hasAttribute("data-other-projects-sync");
+        if (isOther) {
+          var thumbs = root.querySelectorAll(".video-thumb");
+          var w = (thumbs[0] && thumbs[0].offsetWidth) || view.clientWidth;
+          if (w > 0) {
+            var maxI = thumbs.length - 1;
+            var idx = Math.floor((view.scrollLeft + w * 0.45) / w);
+            idx = Math.max(0, Math.min(maxI, idx));
+            prev.disabled = idx <= 0;
+            next.disabled = idx >= maxI;
+            return;
+          }
+        }
         prev.disabled = view.scrollLeft <= eps;
         next.disabled = view.scrollLeft + view.clientWidth >= view.scrollWidth - eps;
       }
@@ -473,6 +497,17 @@
         updateEdgeFades();
       }
 
+      root.querySelectorAll("img").forEach(function (im) {
+        if (im.complete) return;
+        im.addEventListener(
+          "load",
+          function () {
+            updateScrollerState();
+          },
+          { passive: true }
+        );
+      });
+
       prev.addEventListener("click", function () {
         scrollPage(-1);
       });
@@ -482,6 +517,63 @@
       view.addEventListener("scroll", updateScrollerState, { passive: true });
       window.addEventListener("resize", updateScrollerState, { passive: true });
       updateScrollerState();
+      requestAnimationFrame(function () {
+        requestAnimationFrame(updateScrollerState);
+      });
+    });
+  }
+
+  /* Other projects: sync category, video name, and description to active slide */
+  function initOtherProjectsSync() {
+    var root = document.querySelector("[data-other-projects-sync]");
+    if (!root) return;
+    var view = root.querySelector(".video-scroller__viewport");
+    var categoryEl = document.getElementById("other-projects-sync-category");
+    var titleEl = document.getElementById("other-projects-sync-title");
+    var descEl = document.getElementById("other-projects-sync-desc");
+    if (!view || !categoryEl || !titleEl || !descEl) return;
+    var thumbs = [].slice.call(root.querySelectorAll(".video-thumb[data-op-title]"));
+    if (!thumbs.length) return;
+
+    var raf = 0;
+
+    function activeThumb() {
+      var slide = (thumbs[0] && thumbs[0].offsetWidth) || view.clientWidth;
+      if (!slide) return thumbs[0];
+      var i = Math.floor((view.scrollLeft + slide * 0.45) / slide);
+      if (i < 0) i = 0;
+      if (i >= thumbs.length) i = thumbs.length - 1;
+      return thumbs[i];
+    }
+
+    function apply() {
+      var t = activeThumb();
+      var cat = (t && t.getAttribute("data-op-category")) || "";
+      var name = (t && t.getAttribute("data-op-title")) || "";
+      var desc = (t && t.getAttribute("data-op-desc")) || "";
+      if (categoryEl.textContent !== cat) categoryEl.textContent = cat;
+      if (titleEl.textContent !== name) titleEl.textContent = name;
+      if (descEl.textContent !== desc) descEl.textContent = desc;
+    }
+
+    function schedule() {
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        raf = 0;
+        apply();
+      });
+    }
+
+    view.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    if (typeof ResizeObserver !== "undefined") {
+      try {
+        var ro = new ResizeObserver(schedule);
+        ro.observe(view);
+      } catch (errRo) {}
+    }
+    requestAnimationFrame(function () {
+      requestAnimationFrame(apply);
     });
   }
 
@@ -537,6 +629,7 @@
       initSpoilers();
       initReveal();
       initVideoScrollers();
+      initOtherProjectsSync();
       initVideoLightbox();
       initImageLightbox();
       initAvatarParallax();
@@ -545,6 +638,7 @@
     initSpoilers();
     initReveal();
     initVideoScrollers();
+    initOtherProjectsSync();
     initVideoLightbox();
     initImageLightbox();
     initAvatarParallax();

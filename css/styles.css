@@ -2310,6 +2310,29 @@ a.job-card.job-card--to-project:focus-visible {
   }
 }
 
+/* Cap strip width by thumb count (fewer videos → narrower max); wide rows unchanged */
+@media (min-width: 721px) {
+  .marketing-main .marketing-split__col--videos:has(.video-scroller__strip > .video-thumb:only-child) .video-scroller {
+    max-width: fit-content;
+    margin-inline: auto;
+  }
+
+  .marketing-main .marketing-split__col--videos:has(.video-scroller__strip > .video-thumb:only-child) .video-scroller__viewport {
+    max-width: min(100%, 15.25rem);
+    flex: 0 1 auto;
+  }
+
+  .marketing-main .marketing-split__col--videos:has(.video-scroller__strip > .video-thumb:first-child:nth-last-child(2)) .video-scroller {
+    max-width: fit-content;
+    margin-inline: auto;
+  }
+
+  .marketing-main .marketing-split__col--videos:has(.video-scroller__strip > .video-thumb:first-child:nth-last-child(2)) .video-scroller__viewport {
+    max-width: min(100%, 29.75rem);
+    flex: 0 1 auto;
+  }
+}
+
 @media (max-width: 720px) {
   .marketing-split {
     grid-template-columns: 1fr;
@@ -2338,6 +2361,141 @@ a.job-card.job-card--to-project:focus-visible {
     flex: 1 1 calc(50% - 0.25rem);
     min-height: 2.75rem;
     box-sizing: border-box;
+  }
+}
+
+/* ——— Other projects: one preview at a time (scroll-snap), heading syncs to slide ——— */
+.other-projects-showcase {
+  --op-slide: min(560px, min(92vw, 100% - 2rem));
+  margin: 1.25rem auto 0;
+  max-width: min(1040px, 100%);
+  padding: 0 clamp(0.75rem, 4vw, 1.75rem) 2.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 1.65rem);
+  box-sizing: border-box;
+}
+
+.other-projects-player {
+  width: 100%;
+  max-width: min(960px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+}
+
+.other-projects-player > .other-projects-scroller {
+  margin-top: 0.35rem;
+}
+
+.other-projects-player__category {
+  margin: 0;
+  width: min(var(--op-slide), 100%);
+  max-width: 100%;
+  text-align: center;
+  font-size: clamp(1.45rem, 5.2vw, 2.05rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: #ffffff;
+  min-height: 2.35rem;
+  box-sizing: border-box;
+}
+
+.other-projects-player__title {
+  margin: 0;
+  width: min(var(--op-slide), 100%);
+  max-width: 100%;
+  text-align: center;
+  font-size: clamp(1.05rem, 3.35vw, 1.42rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: #f0d78c;
+  text-shadow:
+    0 0 10px rgba(255, 210, 100, 0.65),
+    0 0 22px rgba(255, 185, 60, 0.45),
+    0 0 40px rgba(255, 160, 40, 0.28);
+  min-height: 2.35rem;
+  box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .other-projects-player__title {
+    text-shadow:
+      0 0 8px rgba(255, 210, 100, 0.4),
+      0 0 16px rgba(255, 185, 60, 0.25);
+  }
+}
+
+.other-projects-player__desc {
+  margin: 0;
+  width: min(var(--op-slide), 100%);
+  max-width: 100%;
+  padding-top: 0.15rem;
+  text-align: center;
+  font-size: clamp(0.82rem, 2.85vw, 0.96rem);
+  line-height: 1.5;
+  color: var(--text-muted);
+  min-height: 2.75rem;
+  box-sizing: border-box;
+}
+
+.marketing-main .other-projects-scroller {
+  width: 100%;
+  max-width: min(960px, 100%);
+  margin-inline: auto;
+  justify-content: center;
+  align-items: center;
+}
+
+.marketing-main .other-projects-scroller .video-scroller__strip {
+  gap: 0;
+}
+
+.marketing-main .other-projects-scroller .video-scroller__viewport {
+  flex: 0 1 auto;
+  width: var(--op-slide);
+  max-width: 100%;
+  min-width: 0;
+  margin-inline: auto;
+  padding: 0;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  border-radius: var(--radius-md);
+  background: #0a0a0a;
+  box-shadow: none;
+  /* Rounded clip while scrolling (some engines square off overflow alone) */
+  clip-path: inset(0 round var(--radius-md));
+}
+
+.marketing-main .other-projects-scroller .video-thumb {
+  flex: 0 0 var(--op-slide);
+  width: var(--op-slide);
+  box-sizing: border-box;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  border-radius: var(--radius-md);
+}
+
+.marketing-main .other-projects-scroller .video-thumb img {
+  border-radius: inherit;
+}
+
+@media (max-width: 720px) {
+  .other-projects-showcase {
+    --op-slide: min(560px, calc(100vw - 2.5rem));
+  }
+
+  .marketing-main .other-projects-scroller .video-scroller__viewport {
+    flex: 1 1 100%;
+    width: min(var(--op-slide), 100%);
+    max-width: min(560px, 100%);
+    margin-inline: auto;
   }
 }
 

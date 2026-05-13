@@ -2,8 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Other projects — animation, TV, and freelance audio. Valentyn Chumachenko, VCHAudio." />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Other projects — short films, animated series, and TV mixing. Valentyn Chumachenko, VCHAudio."
+    />
     <title>Other projects · VCHAudio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,7 +32,7 @@
       <a class="nav-back" href="index.html">← Home</a>
     </header>
 
-    <main>
+    <main class="marketing-main">
       <div class="page-hero reveal">
         <div class="page-hero-title-row">
           <nav class="page-back-inline" aria-label="Section navigation">
@@ -44,14 +47,136 @@
           <h1>Other projects</h1>
         </div>
         <p class="lead">Animation, broadcast, and selected freelance work outside flagship game credits.</p>
-      </div>
-      <div class="sub-content reveal">
-        <p>
-          Use this page for reels, episode lists, and one-off collaborations — anything that does not live under Game Audio,
-          Marketing and Ads, or Music Composing.
+        <p class="marketing-scroll-hint marketing-scroll-hint--other-projects" aria-live="polite">
+          One preview at a time — swipe or tap the arrows. The name and credits below follow the clip in view.
         </p>
       </div>
+
+      <section class="other-projects-showcase reveal" aria-label="Video work carousel">
+        <div class="other-projects-player" id="other-projects-sync" aria-live="polite" aria-atomic="true">
+          <p class="other-projects-player__category" id="other-projects-sync-category">Short Movies</p>
+          <h2 class="other-projects-player__title" id="other-projects-sync-title">Touching the Skyline</h2>
+
+          <div
+            class="other-projects-scroller video-scroller"
+            data-video-scroller
+            data-other-projects-sync
+            aria-label="Other projects — video carousel"
+          >
+            <button type="button" class="video-scroller__btn video-scroller__btn--prev" aria-label="Scroll previews left">
+              <span aria-hidden="true">‹</span>
+            </button>
+            <div class="video-scroller__viewport">
+              <div class="video-scroller__strip">
+                <button
+                  type="button"
+                  class="video-thumb"
+                  data-youtube-id="zxH5DS7flZA"
+                  data-op-category="Short Movies"
+                  data-op-title="Touching the Skyline"
+                  data-op-desc="Music and sound design · 2018"
+                  aria-label="Play Touching the Skyline on YouTube"
+                >
+                  <img
+                    src="https://img.youtube.com/vi/zxH5DS7flZA/hqdefault.jpg"
+                    alt=""
+                    width="480"
+                    height="360"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+                <button
+                  type="button"
+                  class="video-thumb"
+                  data-youtube-id="WzfrL7wBoW8"
+                  data-op-category="Short Movies"
+                  data-op-title="The Second Life"
+                  data-op-desc="Music and sound design · 2019"
+                  aria-label="Play The Second Life on YouTube"
+                >
+                  <img
+                    src="https://img.youtube.com/vi/WzfrL7wBoW8/hqdefault.jpg"
+                    alt=""
+                    width="480"
+                    height="360"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+                <button
+                  type="button"
+                  class="video-thumb"
+                  data-youtube-id="mIOcG_AL5g4"
+                  data-op-category="Animation"
+                  data-op-title="Chortoviyky"
+                  data-op-desc="Sound design, mixing, and mastering · 10 episodes, 25 min each · 2019–2021"
+                  aria-label="Play Chortoviyky reel on YouTube"
+                >
+                  <img
+                    src="https://img.youtube.com/vi/mIOcG_AL5g4/hqdefault.jpg"
+                    alt=""
+                    width="480"
+                    height="360"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+                <button
+                  type="button"
+                  class="video-thumb"
+                  data-youtube-id="Cjyw3hssVd8"
+                  data-op-category="Broadcast"
+                  data-op-title="Discover Destination UA"
+                  data-op-desc="Mixing and mastering · 13 episodes, ca. 1 hour · 2020"
+                  aria-label="Play Discover Destination UA reel on YouTube"
+                >
+                  <img
+                    src="https://img.youtube.com/vi/Cjyw3hssVd8/hqdefault.jpg"
+                    alt=""
+                    width="480"
+                    height="360"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+              </div>
+            </div>
+            <button type="button" class="video-scroller__btn video-scroller__btn--next" aria-label="Scroll previews right">
+              <span aria-hidden="true">›</span>
+            </button>
+          </div>
+
+          <p class="other-projects-player__desc" id="other-projects-sync-desc">Music and sound design · 2018</p>
+        </div>
+      </section>
     </main>
+
+    <div
+      id="video-lightbox"
+      class="video-lightbox"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-label="Video player"
+    >
+      <div class="video-lightbox__backdrop" data-lightbox-close tabindex="-1"></div>
+      <div class="video-lightbox__panel">
+        <button type="button" class="video-lightbox__close" data-lightbox-close aria-label="Close video">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="video-lightbox__frame">
+          <iframe
+            id="video-lightbox-iframe"
+            title="YouTube video"
+            allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            loading="lazy"
+          ></iframe>
+        </div>
+        <div id="video-lightbox-caption" class="video-lightbox__caption" hidden></div>
+      </div>
+    </div>
 
     <footer class="site-footer">© VCHAudio · Valentyn Chumachenko</footer>
     <script src="js/main.js" defer></script>
