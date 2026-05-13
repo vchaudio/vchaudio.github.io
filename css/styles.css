@@ -2062,9 +2062,21 @@ a.job-card.job-card--to-project:focus-visible {
   padding-bottom: 1rem;
 }
 
+.marketing-scroll-hint {
+  display: none;
+  margin: 0.35rem auto 0;
+  max-width: 28rem;
+  padding: 0 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-align: center;
+  text-wrap: balance;
+}
+
 .marketing-split {
   display: grid;
-  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, min(220px, 40vw)) minmax(0, 1fr);
   gap: clamp(1rem, 3vw, 2rem);
   align-items: start;
   padding: 1.5rem 0 2rem;
@@ -2279,18 +2291,53 @@ a.job-card.job-card--to-project:focus-visible {
   cursor: not-allowed;
 }
 
+.marketing-split__col--videos {
+  min-width: 0;
+}
+
+.marketing-main .marketing-split__col--videos {
+  container-type: inline-size;
+  container-name: marketing-videos;
+}
+
+.marketing-main .marketing-split__col--videos .video-thumb {
+  width: clamp(118px, 88cqw, 220px);
+}
+
+@supports not (container-type: inline-size) {
+  .marketing-main .marketing-split__col--videos .video-thumb {
+    width: clamp(118px, 36vw, 220px);
+  }
+}
+
 @media (max-width: 720px) {
   .marketing-split {
     grid-template-columns: 1fr;
     gap: 1.15rem;
   }
 
-  .marketing-split__col--videos {
-    width: 100%;
+  .marketing-scroll-hint {
+    display: block;
   }
 
-  .video-thumb {
-    width: 168px;
+  /* Full-width strip first, then two large tap targets to scroll (thumb taps still open video) */
+  .marketing-main .video-scroller {
+    flex-wrap: wrap;
+    gap: 0.5rem 0.4rem;
+    align-items: stretch;
+  }
+
+  .marketing-main .video-scroller__viewport {
+    flex: 1 1 100%;
+    width: 100%;
+    order: -1;
+    touch-action: pan-x pinch-zoom;
+  }
+
+  .marketing-main .video-scroller__btn {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-height: 2.75rem;
+    box-sizing: border-box;
   }
 }
 
