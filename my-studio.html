@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="VCHAudio private studio — room, monitoring, Apollo, Neumann KH 310, instruments, and workstation. Valentyn Chumachenko, Odesa."
+    />
+    <title>My studio · VCHAudio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="site-header site-header--with-logo">
+      <a class="brand" href="index.html">VCH<span>Audio</span></a>
+      <a class="brand-logo-center" href="index.html" aria-label="VCH Audio home">
+        <img
+          class="brand-header-logo"
+          src="assets/brand-logo.png"
+          width="917"
+          height="239"
+          alt=""
+          loading="eager"
+        />
+      </a>
+      <a class="nav-back" href="index.html">← Home</a>
+    </header>
+
+    <main class="studio-page">
+      <div class="page-hero reveal">
+        <div class="page-hero-title-row">
+          <nav class="page-back-inline" aria-label="Section navigation">
+            <a class="page-back" href="index.html" aria-label="Back to home">
+              <span class="page-back-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </a>
+          </nav>
+          <h1>My studio</h1>
+        </div>
+        <p class="lead">VCHAudio — treated room, monitoring, and the chain I compose and mix on every day.</p>
+      </div>
+
+      <section class="studio-gallery reveal" aria-label="Studio photos">
+        <!-- Carousel and lightbox use the same PNG files below — full exports, not recompressed in the repo. -->
+        <p class="studio-gallery__hint">
+          Swipe or use the arrows to browse. Tap a photo to open it full size — scroll the mouse wheel or use + / − to
+          zoom, drag to pan when zoomed, double-click the picture to reset.
+        </p>
+        <div class="video-scroller studio-gallery__carousel" data-video-scroller aria-label="Studio photo carousel">
+          <button type="button" class="video-scroller__btn video-scroller__btn--prev" aria-label="Scroll photos left">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <div class="video-scroller__viewport">
+            <div class="video-scroller__strip">
+              <button
+                type="button"
+                class="studio-gallery__tile studio-gallery__tile--portrait"
+                data-studio-lightbox
+                data-full-src="assets/studio-photo-1.png"
+                data-lightbox-caption="Main workstation — ultrawide DAW, X-Touch, Neumann KH&nbsp;310, and desk mic."
+                aria-label="Open full-size photo: main workstation"
+              >
+                <img
+                  src="assets/studio-photo-1.png"
+                  alt="Studio workstation with ultrawide monitor, control surface, and Neumann monitors"
+                  width="576"
+                  height="1024"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+              <button
+                type="button"
+                class="studio-gallery__tile studio-gallery__tile--landscape"
+                data-studio-lightbox
+                data-full-src="assets/studio-photo-2.png"
+                data-lightbox-caption="Wide room view — desk, monitors, guitars, SL88, and acoustic treatment."
+                aria-label="Open full-size photo: wide studio view"
+              >
+                <img
+                  src="assets/studio-photo-2.png"
+                  alt="Wide view of the studio desk, Neumann monitors, guitars, and keyboard station"
+                  width="1024"
+                  height="576"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+              <button
+                type="button"
+                class="studio-gallery__tile studio-gallery__tile--portrait"
+                data-studio-lightbox
+                data-full-src="assets/studio-photo-3.png"
+                data-lightbox-caption="Guitars, Neumann KH&nbsp;310 on stand, and desk with headphones."
+                aria-label="Open full-size photo: guitars and monitor"
+              >
+                <img
+                  src="assets/studio-photo-3.png"
+                  alt="Fender Stratocaster and Jazz bass on stands beside a Neumann studio monitor"
+                  width="576"
+                  height="1024"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+              <button
+                type="button"
+                class="studio-gallery__tile studio-gallery__tile--landscape"
+                data-studio-lightbox
+                data-full-src="assets/studio-photo-4.png"
+                data-lightbox-caption="Studiologic SL88, field mic on stand, Novation Impulse tray, and PC."
+                aria-label="Open full-size photo: keyboard corner"
+              >
+                <img
+                  src="assets/studio-photo-4.png"
+                  alt="Studiologic SL88 on stand with tablet sheet music, shotgun mic, and desk corner"
+                  width="1024"
+                  height="576"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+              <button
+                type="button"
+                class="studio-gallery__tile studio-gallery__tile--landscape"
+                data-studio-lightbox
+                data-full-src="assets/studio-photo-5.png"
+                data-lightbox-caption="Center desk — Apollo X4, Rode and Sennheiser mics, ultrawide DAW."
+                aria-label="Open full-size photo: desk center"
+              >
+                <img
+                  src="assets/studio-photo-5.png"
+                  alt="Desk with curved monitor, Universal Audio Apollo, Rode and Sennheiser microphones"
+                  width="1024"
+                  height="576"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            </div>
+          </div>
+          <button type="button" class="video-scroller__btn video-scroller__btn--next" aria-label="Scroll photos right">
+            <span aria-hidden="true">›</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="studio-gear-grid reveal">
+        <article class="studio-gear-card">
+          <h2 class="studio-gear-card__title">Studio equipment</h2>
+          <dl class="studio-deflist">
+            <dt>Audio interface</dt>
+            <dd>Universal Audio Apollo&nbsp;X4</dd>
+            <dt>Monitors</dt>
+            <dd>Neumann KH&nbsp;310 — Sonarworks ID calibrated</dd>
+            <dt>Headphones</dt>
+            <dd>Sennheiser HD&nbsp;660S · Beyerdynamic DT&nbsp;770 Pro · Corsair HS80</dd>
+            <dt>Multichannel test</dt>
+            <dd>Samsung HW-Q990D · 11.1.4</dd>
+            <dt>Microphones</dt>
+            <dd>Røde NT1 · Sennheiser MKE&nbsp;600</dd>
+            <dt>Field recording</dt>
+            <dd>Zoom H6 + Rycote windshield</dd>
+            <dt>MIDI controllers</dt>
+            <dd>Novation Impulse 61 · Studiologic SL88 · Behringer X-Touch</dd>
+          </dl>
+        </article>
+
+        <article class="studio-gear-card">
+          <h2 class="studio-gear-card__title">PC &amp; power</h2>
+          <dl class="studio-deflist">
+            <dt>Motherboard</dt>
+            <dd>Asus ProArt X870E</dd>
+            <dt>Processor</dt>
+            <dd>AMD Ryzen 7 9800X3D</dd>
+            <dt>Graphics</dt>
+            <dd>MSI GeForce RTX&nbsp;5080 16&nbsp;GB</dd>
+            <dt>RAM</dt>
+            <dd>Kingston Fury DDR5 96&nbsp;GB @ 6000&nbsp;MT/s</dd>
+            <dt>Storage</dt>
+            <dd>10&nbsp;TB total</dd>
+            <dt>Battery backup</dt>
+            <dd>Ecoflow Delta Pro + extra batteries (~12&nbsp;kW)</dd>
+          </dl>
+        </article>
+
+        <article class="studio-gear-card studio-gear-card--wide">
+          <h2 class="studio-gear-card__title">Music instruments</h2>
+          <p class="studio-gear-card__text">
+            Fender Stratocaster Floyd Rose (1995) · Fender JB-62 Jazz Bass reissue (MIJ) · Yamaha W7 · bongos, shaker,
+            tambourine, darbuka
+          </p>
+        </article>
+      </div>
+    </main>
+
+    <div
+      id="image-lightbox"
+      class="image-lightbox"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-label="Enlarged photo"
+    >
+      <div class="image-lightbox__backdrop" data-image-lightbox-close tabindex="-1"></div>
+      <figure class="image-lightbox__figure">
+        <button type="button" class="image-lightbox__close" data-image-lightbox-close aria-label="Close photo">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="image-lightbox__toolbar" role="toolbar" aria-label="Zoom">
+          <button type="button" class="image-lightbox__tool" data-lb-zoom="out" aria-label="Zoom out">−</button>
+          <button type="button" class="image-lightbox__tool" data-lb-zoom="reset" aria-label="Reset zoom and position">
+            Fit
+          </button>
+          <button type="button" class="image-lightbox__tool" data-lb-zoom="in" aria-label="Zoom in">+</button>
+          <span id="image-lightbox-zoompct" class="image-lightbox__zoompct" aria-live="polite">100%</span>
+        </div>
+        <div id="image-lightbox-stage" class="image-lightbox__stage">
+          <div id="image-lightbox-pan" class="image-lightbox__pan">
+            <img id="image-lightbox-img" class="image-lightbox__img" src="" alt="" decoding="async" draggable="false" />
+          </div>
+        </div>
+        <figcaption id="image-lightbox-caption" class="image-lightbox__figcaption" hidden></figcaption>
+      </figure>
+    </div>
+
+    <footer class="site-footer">© VCHAudio · Valentyn Chumachenko</footer>
+    <script src="js/main.js" defer></script>
+  </body>
+</html>

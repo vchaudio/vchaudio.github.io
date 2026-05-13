@@ -1,0 +1,6 @@
+# Keep raster assets byte-for-byte (no line-ending normalization)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
