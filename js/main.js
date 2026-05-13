@@ -229,6 +229,7 @@
     var pan = document.getElementById("image-lightbox-pan");
     var cap = document.getElementById("image-lightbox-caption");
     var zoomPct = document.getElementById("image-lightbox-zoompct");
+    var fsBtn = root.querySelector("[data-lb-fullscreen]");
     if (!img || !stage || !pan) return;
 
     var prevBodyOverflow = "";
@@ -240,6 +241,14 @@
     var dragStartY = 0;
     var startPanX = 0;
     var startPanY = 0;
+    var capturedPointerId = null;
+    var pinchActive = false;
+    var pinchDist0 = 0;
+    var pinchScale0 = 1;
+    var pinchMid0X = 0;
+    var pinchMid0Y = 0;
+    var pinchPanX0 = 0;
+    var pinchPanY0 = 0;
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var stageBound = false;
 
@@ -271,6 +280,99 @@
       applyTransform();
     }
 
+    function isLightboxFullscreen() {
+      return (
+        document.fullscreenElement === root ||
+        document.webkitFullscreenElement === root ||
+        document.mozFullScreenElement === root
+      );
+    }
+
+    function exitLightboxFullscreen() {
+      if (!isLightboxFullscreen()) return;
+      var ex = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
+      if (ex) ex.call(document).catch(function () {});
+    }
+
+    function updateFullscreenButton() {
+      if (!fsBtn || fsBtn.hidden) return;
+      var on = isLightboxFullscreen();
+      fsBtn.textContent = on ? "Exit" : "Fullscreen";
+      fsBtn.setAttribute("aria-label", on ? "Exit fullscreen" : "Enter fullscreen");
+      fsBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    }
+
+    function toggleLightboxFullscreen() {
+      var enter = root.requestFullscreen || root.webkitRequestFullscreen || root.mozRequestFullScreen;
+      var ex = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
+      if (isLightboxFullscreen()) {
+        if (ex) ex.call(document).catch(function () {});
+      } else if (enter) {
+        enter.call(root).catch(function () {});
+      }
+    }
+
+    function releasePinchPointerCapture() {
+      dragging = false;
+      stage.classList.remove("is-grabbing");
+      if (capturedPointerId != null) {
+        try {
+          stage.releasePointerCapture(capturedPointerId);
+        } catch (errRel) {}
+        capturedPointerId = null;
+      }
+    }
+
+    function pinchMidFromTouches(e) {
+      var t0 = e.touches[0];
+      var t1 = e.touches[1];
+      var dx = t1.clientX - t0.clientX;
+      var dy = t1.clientY - t0.clientY;
+      return {
+        x: (t0.clientX + t1.clientX) / 2,
+        y: (t0.clientY + t1.clientY) / 2,
+        dist: Math.hypot(dx, dy)
+      };
+    }
+
+    function onTouchStartPinch(e) {
+      if (root.hidden) return;
+      if (e.touches.length !== 2) return;
+      releasePinchPointerCapture();
+      var m = pinchMidFromTouches(e);
+      if (m.dist < 8) return;
+      pinchDist0 = Math.max(m.dist, 8);
+      pinchScale0 = scale;
+      pinchMid0X = m.x;
+      pinchMid0Y = m.y;
+      pinchPanX0 = panX;
+      pinchPanY0 = panY;
+      pinchActive = true;
+    }
+
+    function onTouchMovePinch(e) {
+      if (root.hidden || !pinchActive || e.touches.length < 2) return;
+      e.preventDefault();
+      var m = pinchMidFromTouches(e);
+      var d = Math.max(m.dist, 1);
+      var next = pinchScale0 * (d / pinchDist0);
+      scale = Math.min(5, Math.max(1, next));
+      panX = pinchPanX0 + (m.x - pinchMid0X);
+      panY = pinchPanY0 + (m.y - pinchMid0Y);
+      if (scale <= 1) {
+        scale = 1;
+        panX = 0;
+        panY = 0;
+      }
+      pan.style.transition = "none";
+      pan.style.transform = "translate(" + panX + "px," + panY + "px) scale(" + scale + ")";
+      updateZoomLabel();
+    }
+
+    function onTouchEndPinch(e) {
+      if (e.touches.length < 2) pinchActive = false;
+    }
+
     function onWheel(e) {
       if (root.hidden) return;
       e.preventDefault();
@@ -280,6 +382,7 @@
 
     function onPointerDown(e) {
       if (root.hidden) return;
+      if (pinchActive) return;
       if (e.button !== 0) return;
       if (e.target.closest(".image-lightbox__toolbar") || e.target.closest(".image-lightbox__close")) return;
       if (scale <= 1) return;
@@ -290,11 +393,13 @@
       startPanY = panY;
       try {
         stage.setPointerCapture(e.pointerId);
+        capturedPointerId = e.pointerId;
       } catch (err) {}
       stage.classList.add("is-grabbing");
     }
 
     function onPointerMove(e) {
+      if (pinchActive) return;
       if (!dragging) return;
       panX = startPanX + (e.clientX - dragStartX);
       panY = startPanY + (e.clientY - dragStartY);
@@ -310,6 +415,7 @@
       try {
         if (e && e.pointerId != null) stage.releasePointerCapture(e.pointerId);
       } catch (err2) {}
+      if (e && e.pointerId != null && capturedPointerId === e.pointerId) capturedPointerId = null;
       applyTransform();
     }
 
@@ -329,6 +435,10 @@
       stage.addEventListener("pointerup", endDrag);
       stage.addEventListener("pointercancel", endDrag);
       stage.addEventListener("dblclick", onDoubleClickStage);
+      stage.addEventListener("touchstart", onTouchStartPinch, { passive: true });
+      stage.addEventListener("touchmove", onTouchMovePinch, { passive: false });
+      stage.addEventListener("touchend", onTouchEndPinch);
+      stage.addEventListener("touchcancel", onTouchEndPinch);
     }
 
     function unbindStage() {
@@ -340,9 +450,16 @@
       stage.removeEventListener("pointerup", endDrag);
       stage.removeEventListener("pointercancel", endDrag);
       stage.removeEventListener("dblclick", onDoubleClickStage);
+      stage.removeEventListener("touchstart", onTouchStartPinch);
+      stage.removeEventListener("touchmove", onTouchMovePinch);
+      stage.removeEventListener("touchend", onTouchEndPinch);
+      stage.removeEventListener("touchcancel", onTouchEndPinch);
     }
 
     function close() {
+      exitLightboxFullscreen();
+      pinchActive = false;
+      releasePinchPointerCapture();
       unbindStage();
       img.removeAttribute("src");
       img.removeAttribute("alt");
@@ -383,9 +500,25 @@
 
       var closeBtn = root.querySelector(".image-lightbox__close");
       if (closeBtn) closeBtn.focus();
+
+      if (fsBtn) {
+        var canFs =
+          typeof root.requestFullscreen === "function" ||
+          typeof root.webkitRequestFullscreen === "function" ||
+          typeof root.mozRequestFullScreen === "function";
+        fsBtn.hidden = !canFs;
+        updateFullscreenButton();
+      }
     }
 
     root.addEventListener("click", function (e) {
+      var fs = e.target.closest("[data-lb-fullscreen]");
+      if (fs && root.contains(fs)) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleLightboxFullscreen();
+        return;
+      }
       var zbtn = e.target.closest("[data-lb-zoom]");
       if (!zbtn || !root.contains(zbtn)) return;
       e.preventDefault();
@@ -412,6 +545,10 @@
         close();
       }
     });
+
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+    document.addEventListener("mozfullscreenchange", updateFullscreenButton);
 
     document.addEventListener("keydown", function (e) {
       if (root.hidden) return;

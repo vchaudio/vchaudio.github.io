@@ -1615,6 +1615,18 @@ a.job-card.job-card--to-project:focus-visible {
   line-height: 1;
   cursor: pointer;
   transition: background 0.2s var(--ease-out), border-color 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.image-lightbox__tool--text {
+  min-width: auto;
+  padding-inline: 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .image-lightbox__tool:hover {
@@ -1709,6 +1721,35 @@ a.job-card.job-card--to-project:focus-visible {
 
 .image-lightbox__figcaption[hidden] {
   display: none !important;
+}
+
+.image-lightbox:fullscreen,
+.image-lightbox:-webkit-full-screen,
+.image-lightbox:-moz-full-screen {
+  padding: max(0.65rem, env(safe-area-inset-top, 0px)) max(0.75rem, env(safe-area-inset-right, 0px))
+    max(0.65rem, env(safe-area-inset-bottom, 0px)) max(0.75rem, env(safe-area-inset-left, 0px));
+}
+
+.image-lightbox:fullscreen .image-lightbox__figure,
+.image-lightbox:-webkit-full-screen .image-lightbox__figure,
+.image-lightbox:-moz-full-screen .image-lightbox__figure {
+  max-width: 100%;
+  max-height: 100%;
+  min-height: 0;
+}
+
+.image-lightbox:fullscreen .image-lightbox__stage,
+.image-lightbox:-webkit-full-screen .image-lightbox__stage,
+.image-lightbox:-moz-full-screen .image-lightbox__stage {
+  max-width: min(100vw - 1.25rem, 1600px);
+  max-height: calc(100vh - 7.5rem);
+}
+
+.image-lightbox:fullscreen .image-lightbox__img,
+.image-lightbox:-webkit-full-screen .image-lightbox__img,
+.image-lightbox:-moz-full-screen .image-lightbox__img {
+  max-width: min(100vw - 1.25rem, 1600px);
+  max-height: calc(100vh - 7.5rem);
 }
 
 @media (max-width: 560px) {
@@ -2730,8 +2771,9 @@ a.job-card.job-card--to-project:focus-visible {
     padding-bottom: max(2.25rem, env(safe-area-inset-bottom, 0px));
   }
 
+  /* Definite slide width (vw), not % — avoids cyclic % inside strip { width: max-content } so previews shrink on narrow phones */
   .other-projects-showcase {
-    --op-slide: 100%;
+    --op-slide: min(560px, min(92vw, calc(100vw - max(1.5rem, env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px) + 0.5rem))));
     padding-left: max(0.65rem, env(safe-area-inset-left, 0px));
     padding-right: max(0.65rem, env(safe-area-inset-right, 0px));
   }
@@ -2751,10 +2793,11 @@ a.job-card.job-card--to-project:focus-visible {
 
   .page-other-projects .other-projects-scroller .video-scroller__viewport {
     flex: 1 1 100%;
-    width: 100%;
+    width: min(100%, var(--op-slide));
     max-width: 100%;
     order: -1;
-    margin-inline: 0;
+    margin-inline: auto;
+    box-sizing: border-box;
     touch-action: pan-x pinch-zoom;
   }
 
@@ -2765,9 +2808,9 @@ a.job-card.job-card--to-project:focus-visible {
   }
 
   .page-other-projects .other-projects-scroller .video-thumb {
-    flex: 0 0 100%;
-    width: 100%;
-    max-width: 100%;
+    flex: 0 0 var(--op-slide);
+    width: var(--op-slide);
+    box-sizing: border-box;
   }
 }
 

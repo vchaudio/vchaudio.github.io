@@ -212,13 +212,22 @@
         <button type="button" class="image-lightbox__close" data-image-lightbox-close aria-label="Close photo">
           <span aria-hidden="true">×</span>
         </button>
-        <div class="image-lightbox__toolbar" role="toolbar" aria-label="Zoom">
+        <div class="image-lightbox__toolbar" role="toolbar" aria-label="Photo controls">
           <button type="button" class="image-lightbox__tool" data-lb-zoom="out" aria-label="Zoom out">−</button>
           <button type="button" class="image-lightbox__tool" data-lb-zoom="reset" aria-label="Reset zoom and position">
             Fit
           </button>
           <button type="button" class="image-lightbox__tool" data-lb-zoom="in" aria-label="Zoom in">+</button>
           <span id="image-lightbox-zoompct" class="image-lightbox__zoompct" aria-live="polite">100%</span>
+          <button
+            type="button"
+            class="image-lightbox__tool image-lightbox__tool--text"
+            data-lb-fullscreen
+            hidden
+            aria-label="Enter fullscreen"
+          >
+            Fullscreen
+          </button>
         </div>
         <div id="image-lightbox-stage" class="image-lightbox__stage">
           <div id="image-lightbox-pan" class="image-lightbox__pan">
