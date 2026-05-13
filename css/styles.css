@@ -16,6 +16,8 @@
   --shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
   --font: "Outfit", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, monospace;
+  /* Experience dates / meta (index): distinct from body & mono UI */
+  --font-dates: "DM Sans", system-ui, sans-serif;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --header-h: 72px;
   /* Home: collapsed spoilers align with Explore nav tiles */
@@ -177,10 +179,35 @@ img {
   width: 100%;
 }
 
-.page-hero-title-row h1 {
+.page-hero-title-row > h1,
+.page-hero-title-stack {
   grid-column: 2;
   grid-row: 1;
+}
+
+.page-hero-title-row > h1 {
   text-align: center;
+}
+
+.page-hero-title-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.page-hero-title-stack h1 {
+  margin: 0 0 0.2rem;
+  text-align: center;
+}
+
+.page-hero-company {
+  margin: 0;
+  font-size: clamp(0.92rem, 2.1vw, 1.08rem);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: #9e8f7e;
 }
 
 .page-back-inline {
@@ -246,13 +273,34 @@ main {
 
 .page-hero h1 {
   margin: 0 0 0.5rem;
-  font-size: clamp(1.75rem, 4.5vw, 2.25rem);
+  font-size: clamp(2.05rem, 5.8vw, 2.9rem);
   font-weight: 600;
   letter-spacing: -0.02em;
 }
 
-.page-hero .page-hero-title-row h1 {
-  margin: 0;
+.page-hero .page-hero-title-row > h1 {
+  margin: 0 0 0.5rem;
+}
+
+.page-hero .page-hero-title-stack h1 {
+  margin: 0 0 0.2rem;
+}
+
+/* Project pages with top banner: cap image width, tighter hero, larger title */
+.page-overview-banner + main {
+  padding-top: clamp(0.65rem, 1.8vw, 1.1rem);
+}
+
+.page-overview-banner + main .page-hero {
+  padding: 0.35rem 0 1rem;
+}
+
+.page-overview-banner + main .page-hero-title-row {
+  margin-bottom: 0.35rem;
+}
+
+.page-overview-banner + main .page-hero h1 {
+  font-size: clamp(2.35rem, 6.5vw, 3.25rem);
 }
 
 .page-hero p.lead {
@@ -688,8 +736,11 @@ details.spoiler[open] .spoiler-inner {
 
 .experience-studio-meta {
   margin: 0 0 0.65rem;
-  font-family: var(--mono);
+  font-family: var(--font-dates);
   font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  font-feature-settings: "tnum" 1;
   color: var(--accent-dim);
 }
 
@@ -779,7 +830,10 @@ a.job-card.job-card--to-project:focus-visible {
 .job-meta {
   font-size: 0.82rem;
   color: var(--accent);
-  font-family: var(--mono);
+  font-family: var(--font-dates);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  font-feature-settings: "tnum" 1;
   margin-bottom: 0.5rem;
 }
 
@@ -816,14 +870,30 @@ a.job-card.job-card--to-project:focus-visible {
 .skills-heading--featured {
   font-size: clamp(0.95rem, 2.8vw, 1.08rem);
   letter-spacing: 0.04em;
-  color: var(--text);
   font-weight: 600;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(228, 160, 74, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   max-width: 18rem;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 0.95rem;
+}
+
+.skills-group--technical .skills-heading--featured {
+  color: #e8c9a8;
+  text-shadow: 0 0 22px rgba(228, 160, 74, 0.22);
+  border-bottom-color: rgba(196, 130, 88, 0.55);
+}
+
+.skills-group--core .skills-heading--featured {
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(228, 160, 74, 0.28);
+  border-bottom-color: rgba(228, 160, 74, 0.55);
+}
+
+.skills-group--soft .skills-heading--featured {
+  color: #ffffff;
+  border-bottom-color: rgba(255, 255, 255, 0.28);
 }
 
 .skills-heading--notes {
@@ -878,18 +948,7 @@ a.job-card.job-card--to-project:focus-visible {
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: rgba(232, 245, 246, 0.92);
   border-radius: var(--radius-md);
-  background: linear-gradient(
-    165deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.02) 40%,
-    rgba(95, 165, 178, 0.1) 100%
-  );
-  border: 1px solid rgba(120, 195, 205, 0.32);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    0 4px 14px rgba(0, 0, 0, 0.22);
   transition:
     border-color 0.22s var(--ease-out),
     box-shadow 0.22s var(--ease-out),
@@ -898,13 +957,102 @@ a.job-card.job-card--to-project:focus-visible {
     background 0.22s var(--ease-out);
 }
 
-.skill-list li:hover {
-  color: var(--text);
-  border-color: rgba(140, 215, 225, 0.55);
+/* Technical: bronze / brown-gold + warm shimmer (no green or blue) */
+.skills-group--technical .skill-list li {
+  position: relative;
+  overflow: hidden;
+  color: rgba(255, 236, 218, 0.96);
+  background: linear-gradient(
+    125deg,
+    rgba(72, 44, 30, 0.72) 0%,
+    rgba(140, 88, 52, 0.38) 22%,
+    rgba(255, 220, 190, 0.16) 45%,
+    rgba(165, 98, 58, 0.32) 58%,
+    rgba(42, 28, 20, 0.78) 100%
+  );
+  background-size: 240% 240%;
+  border: 1px solid rgba(200, 130, 82, 0.48);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 1px 0 rgba(255, 230, 200, 0.1) inset,
+    0 4px 14px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(228, 160, 74, 0.12);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skills-group--technical .skill-list li {
+    animation: skill-tech-shimmer-warm 6s ease-in-out infinite;
+  }
+}
+
+@keyframes skill-tech-shimmer-warm {
+  0%,
+  100% {
+    background-position: 0% 40%;
+  }
+
+  50% {
+    background-position: 100% 60%;
+  }
+}
+
+.skills-group--technical .skill-list li:hover {
+  color: #fff4e8;
+  border-color: rgba(220, 160, 110, 0.65);
+  box-shadow:
+    0 1px 0 rgba(255, 235, 210, 0.14) inset,
+    0 6px 20px rgba(0, 0, 0, 0.32),
+    0 0 26px rgba(228, 160, 74, 0.22);
+  transform: translateY(-2px);
+}
+
+/* Core: gold (site accent) */
+.skills-group--core .skill-list li {
+  color: #fff5e8;
+  background: linear-gradient(
+    158deg,
+    rgba(228, 160, 74, 0.28) 0%,
+    rgba(35, 32, 25, 0.92) 42%,
+    rgba(201, 138, 58, 0.18) 100%
+  );
+  border: 1px solid rgba(228, 160, 74, 0.48);
+  box-shadow:
+    0 1px 0 rgba(255, 220, 180, 0.14) inset,
+    0 4px 14px rgba(0, 0, 0, 0.24),
+    0 0 16px rgba(228, 160, 74, 0.14);
+}
+
+.skills-group--core .skill-list li:hover {
+  color: #fffaf2;
+  border-color: rgba(240, 190, 110, 0.65);
+  box-shadow:
+    0 1px 0 rgba(255, 230, 200, 0.2) inset,
     0 6px 20px rgba(0, 0, 0, 0.3),
-    0 0 22px rgba(100, 190, 205, 0.18);
+    0 0 28px rgba(228, 160, 74, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Soft: white */
+.skills-group--soft .skill-list li {
+  color: #ffffff;
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.03) 48%,
+    rgba(245, 239, 232, 0.06) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.09) inset,
+    0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+.skills-group--soft .skill-list li:hover {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.38);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 6px 20px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(255, 255, 255, 0.06);
   transform: translateY(-2px);
 }
 
@@ -1083,42 +1231,13 @@ a.job-card.job-card--to-project:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.28);
   overflow: hidden;
-  transition:
-    transform 0.35s var(--ease-out),
-    border-color 0.25s,
-    box-shadow 0.35s var(--ease-out);
-}
-
-.project-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(155deg, rgba(228, 160, 74, 0.04), transparent 42%);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.35s var(--ease-out);
-}
-
-.project-card:hover {
-  border-color: rgba(228, 160, 74, 0.28);
-  transform: translateY(-2px);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(228, 160, 74, 0.1);
-}
-
-.project-card:hover::before {
-  opacity: 1;
-}
-
-.project-card:active {
-  transform: translateY(0) scale(0.99);
-  transition-duration: 0.12s;
 }
 
 .page-overview-banner {
   position: relative;
-  width: 100%;
-  margin: 0;
-  height: clamp(168px, 38vw, 320px);
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  aspect-ratio: 1200 / 514;
   overflow: hidden;
   background: var(--bg);
 }
@@ -1131,19 +1250,20 @@ a.job-card.job-card--to-project:focus-visible {
   display: block;
 }
 
+/* Bottom ~35% of banner: long fade into page background (avoids harsh crop on ultrawide) */
 .page-overview-banner::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: min(52%, 220px);
+  height: 35%;
   pointer-events: none;
   background: linear-gradient(
     to bottom,
     rgba(18, 16, 14, 0) 0%,
-    rgba(18, 16, 14, 0.35) 38%,
-    var(--bg) 88%,
+    rgba(18, 16, 14, 0.12) 18%,
+    rgba(18, 16, 14, 0.45) 52%,
     var(--bg) 100%
   );
 }
@@ -1190,19 +1310,23 @@ a.job-card.job-card--to-project:focus-visible {
 .project-dates {
   margin: 0 0 0.5rem;
   text-align: center;
-  font-family: var(--mono);
+  font-family: var(--font-dates);
   font-size: 0.82rem;
   color: var(--accent);
   font-weight: 500;
+  letter-spacing: 0.03em;
+  font-feature-settings: "tnum" 1;
 }
 
 .project-platforms {
   margin: 0 0 1rem;
   text-align: center;
-  font-family: var(--mono);
-  font-size: 0.8rem;
+  font-family: var(--font-dates);
+  font-size: 0.82rem;
   color: var(--text-muted);
   font-weight: 500;
+  letter-spacing: 0.03em;
+  font-feature-settings: "tnum" 1;
 }
 
 .project-blurb {
@@ -1217,19 +1341,28 @@ a.job-card.job-card--to-project:focus-visible {
   display: block;
   text-align: center;
   font-size: 0.88rem;
-  font-weight: 500;
+  font-weight: 600;
   padding: 0.5rem;
   border-radius: var(--radius-md);
-  background: rgba(228, 160, 74, 0.08);
-  border: 1px solid rgba(228, 160, 74, 0.2);
-  color: var(--accent);
-  transition: background 0.25s, border-color 0.25s, color 0.25s;
+  background: rgba(228, 160, 74, 0.12);
+  border: 1px solid rgba(228, 160, 74, 0.28);
+  color: #ffffff;
+  text-shadow:
+    0 0 12px rgba(255, 255, 255, 0.45),
+    0 0 28px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 24px rgba(228, 160, 74, 0.15);
+  transition: background 0.25s, border-color 0.25s, color 0.25s, text-shadow 0.25s, box-shadow 0.25s;
 }
 
 .project-link:hover {
-  background: rgba(228, 160, 74, 0.14);
-  border-color: rgba(228, 160, 74, 0.35);
-  color: #f0be6e;
+  background: rgba(228, 160, 74, 0.18);
+  border-color: rgba(228, 160, 74, 0.45);
+  color: #ffffff;
+  text-shadow:
+    0 0 16px rgba(255, 255, 255, 0.55),
+    0 0 36px rgba(255, 255, 255, 0.28),
+    0 0 52px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 32px rgba(228, 160, 74, 0.22);
 }
 
 .project-link:active {
@@ -1247,12 +1380,17 @@ a.job-card.job-card--to-project:focus-visible {
   background: transparent;
   border: 1px solid rgba(228, 160, 74, 0.38);
   color: var(--text);
+  font-weight: 500;
+  text-shadow: none;
+  box-shadow: none;
 }
 
 .project-link--secondary:hover {
   background: rgba(228, 160, 74, 0.1);
   border-color: rgba(228, 160, 74, 0.52);
   color: var(--text);
+  text-shadow: none;
+  box-shadow: none;
 }
 
 .detail-section {
