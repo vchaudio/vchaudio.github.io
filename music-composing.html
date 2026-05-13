@@ -2,8 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Music composing — Valentyn Chumachenko, VCHAudio." />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Music composing — Tajikistan TV openings, trailers, advertisement, Moonray Soundtrack. Valentyn Chumachenko, VCHAudio."
+    />
     <title>Music composing · VCHAudio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,10 +15,12 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   </head>
   <body>
     <header class="site-header site-header--with-logo">
-      <a class="brand" href="index.html">VCH<span>Audio</span></a>
+      <a class="brand brand--with-vch-mark" href="index.html" aria-label="VCH Audio"><img class="brand-vch-mark" src="assets/vch-mark-transparent.png" width="762" height="330" alt="" decoding="sync" fetchpriority="high" loading="eager" /><span>Audio</span></a>
       <a class="brand-logo-center" href="index.html" aria-label="VCH Audio home">
         <img
           class="brand-header-logo"
@@ -29,7 +34,7 @@
       <a class="nav-back" href="index.html">← Home</a>
     </header>
 
-    <main>
+    <main class="marketing-main">
       <div class="page-hero reveal">
         <div class="page-hero-title-row">
           <nav class="page-back-inline" aria-label="Section navigation">
@@ -43,14 +48,161 @@
           </nav>
           <h1>Music composing</h1>
         </div>
-        <p class="lead">Scores and production across genres, from studio to picture.</p>
+        <p class="lead">Broadcast openings, trailers, advertising, game scores, and the Moonray soundtrack — collected below.</p>
       </div>
-      <div class="sub-content reveal">
-        <p>
-          Use this page for listening links (SoundCloud, Bandcamp, Spotify), stems, and scoring credits — games, animation,
-          and standalone releases.
-        </p>
-      </div>
+
+      <section class="music-work-panel reveal" aria-labelledby="tajikistan-music-heading">
+        <div class="music-work-panel__inner">
+          <header class="music-spotlight-head">
+            <h2 id="tajikistan-music-heading" class="music-spotlight-head__title">Tajikistan</h2>
+            <p class="music-spotlight-head__eyebrow">Music composing</p>
+          </header>
+          <p class="music-work-panel__desc">
+            Original music for large live national television openings in Tajikistan — scored to picture for premiere
+            broadcasts.
+          </p>
+          <div class="video-stack">
+            <figure class="video-item">
+              <p class="music-video-name-above">Navruz Show</p>
+              <div class="ratio-embed">
+                <iframe
+                  title="Navruz Show — opening block (2024)"
+                  src="https://www.youtube.com/embed/_Q3TJ1-nyLQ"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              </div>
+              <figcaption>
+                Tajikistan (2024)<br />
+                Premiere – 24th Match 2024<br />
+                Music Composing for opening block<br />
+                (6 minutes)
+              </figcaption>
+            </figure>
+            <figure class="video-item">
+              <p class="music-video-name-above">30yrs Independence Anniversary Show</p>
+              <div class="ratio-embed">
+                <iframe
+                  title="30yrs Independence Anniversary Show — opening block “History” (2021)"
+                  src="https://www.youtube.com/embed/xz7yLsHD1m4"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              </div>
+              <figcaption>
+                Tajikistan (2021)<br />
+                Premiere – 9th September 2021<br />
+                Music Composing for opening block “History”<br />
+                (12 minutes)
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="music-work-panel music-work-panel--moonray music-showcase reveal"
+        aria-labelledby="moonray-music-heading"
+      >
+        <div class="music-work-panel__inner">
+          <header class="music-spotlight-head">
+            <h2 id="moonray-music-heading" class="music-spotlight-head__title">Moonray: Battle Lands</h2>
+            <p class="music-spotlight-head__eyebrow">Game music</p>
+          </header>
+          <p class="music-work-panel__desc music-showcase__intro">
+            Full <strong>Moonray Soundtrack</strong> playlist on SoundCloud. For credits and implementation context, see the
+            <a href="moonray-battle-lands.html">Moonray project overview</a>.
+          </p>
+
+          <div class="soundcloud-stack">
+            <div class="soundcloud-embed soundcloud-embed--playlist">
+              <iframe
+                title="Moonray Soundtrack — SoundCloud playlist"
+                width="100%"
+                height="450"
+                scrolling="no"
+                frameborder="no"
+                allow="autoplay; encrypted-media"
+                loading="eager"
+                src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%3Aplaylists%3A2236702049%3Fsecret_token%3Ds-JiCMxK7Ur3m&amp;color=%23000000&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false&amp;show_teaser=true&amp;visual=false&amp;show_artwork=false"
+              ></iframe>
+              <div class="soundcloud-attribution">
+                <a href="https://soundcloud.com/valentyn-chumachenko" title="Valentyn Chumachenko" rel="noopener noreferrer" target="_blank">Valentyn Chumachenko</a>
+                ·
+                <a href="https://soundcloud.com/valentyn-chumachenko/sets/moonray-soundtrack/s-JiCMxK7Ur3m" title="Moonray Soundtrack" rel="noopener noreferrer" target="_blank">Moonray Soundtrack</a>
+              </div>
+            </div>
+          </div>
+
+          <p class="music-showcase__footer-note">
+            Open on SoundCloud:
+            <a href="https://soundcloud.com/valentyn-chumachenko/sets/moonray-soundtrack/s-JiCMxK7Ur3m" rel="noopener noreferrer" target="_blank">Moonray Soundtrack</a>
+            ·
+            <a href="https://soundcloud.com/valentyn-chumachenko" rel="noopener noreferrer" target="_blank">Profile</a>
+          </p>
+        </div>
+      </section>
+
+      <section class="music-work-panel reveal" aria-labelledby="trailers-music-heading">
+        <div class="music-work-panel__inner">
+          <header class="music-spotlight-head">
+            <h2 id="trailers-music-heading" class="music-spotlight-head__title">Trailers</h2>
+            <p class="music-spotlight-head__eyebrow">Music composing</p>
+          </header>
+          <div class="video-stack">
+            <figure class="video-item">
+              <p class="music-video-name-above">Delusion Out of Space Demo | Cinematic Gameplay Trailer | HD 2022</p>
+              <div class="ratio-embed">
+                <iframe
+                  title="Delusion Out of Space Demo — cinematic gameplay trailer (2022)"
+                  src="https://www.youtube.com/embed/QnoHjkcYLyA"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="music-work-panel reveal" aria-labelledby="advertisement-music-heading">
+        <div class="music-work-panel__inner">
+          <header class="music-spotlight-head">
+            <h2 id="advertisement-music-heading" class="music-spotlight-head__title">Advertisement</h2>
+            <p class="music-spotlight-head__eyebrow">Music composing &amp; sound design</p>
+          </header>
+          <div class="video-stack">
+            <figure class="video-item">
+              <p class="music-video-name-above">The Noblemen Hotel — Story 1. Hermanus Boerhaave</p>
+              <div class="ratio-embed">
+                <iframe
+                  title="The Noblemen Hotel — Story 1. Hermanus Boerhaave"
+                  src="https://www.youtube.com/embed/5CFfUO6qpnU"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              </div>
+              <figcaption>(music and sound design)</figcaption>
+            </figure>
+            <figure class="video-item">
+              <p class="music-video-name-above">YouTube channel jingles</p>
+              <div class="ratio-embed">
+                <iframe
+                  title="YouTube channel jingles"
+                  src="https://www.youtube.com/embed/FYxAnroxF5w"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </figure>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">© VCHAudio · Valentyn Chumachenko</footer>

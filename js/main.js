@@ -433,6 +433,22 @@
     });
   }
 
+  /* Which marketing carousel "page" (row of 4) is closest to current scrollLeft */
+  function marketingCarouselPageIndex(scrollLeft, pageW, maxScroll, numPages) {
+    if (numPages <= 1) return 0;
+    var best = 0;
+    var bestDist = Infinity;
+    for (var pi = 0; pi < numPages; pi++) {
+      var pos = pi === numPages - 1 ? maxScroll : pi * pageW;
+      var d = Math.abs(scrollLeft - pos);
+      if (d < bestDist) {
+        bestDist = d;
+        best = pi;
+      }
+    }
+    return best;
+  }
+
   /* Marketing page: horizontal video thumbnail strips, prev/next scroll */
   function initVideoScrollers() {
     document.querySelectorAll("[data-video-scroller]").forEach(function (root) {
@@ -455,6 +471,23 @@
           view.scrollTo({ left: idx * w, behavior: reduceMotion ? "auto" : "smooth" });
           return;
         }
+        /* Marketing & ads: align to rows of four thumbnails (viewport width can drift from 4×thumb+gap) */
+        if (root.closest(".marketing-showcase") != null) {
+          var stripM = root.querySelector(".video-scroller__strip");
+          var thumbsM = stripM ? stripM.querySelectorAll(":scope > .video-thumb") : [];
+          if (thumbsM.length >= 5) {
+            var pageW = thumbsM[4].offsetLeft - thumbsM[0].offsetLeft;
+            if (pageW > 0) {
+              var maxScrollM = Math.max(0, view.scrollWidth - view.clientWidth);
+              var numPages = Math.ceil(thumbsM.length / 4);
+              var curPage = marketingCarouselPageIndex(view.scrollLeft, pageW, maxScrollM, numPages);
+              var nextPage = Math.max(0, Math.min(numPages - 1, curPage + dir));
+              var targetLeft = nextPage >= numPages - 1 ? maxScrollM : nextPage * pageW;
+              view.scrollTo({ left: targetLeft, behavior: reduceMotion ? "auto" : "smooth" });
+              return;
+            }
+          }
+        }
         var amount = Math.max(120, view.clientWidth * 0.72);
         view.scrollBy({ left: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
       }
@@ -472,6 +505,22 @@
             prev.disabled = idx <= 0;
             next.disabled = idx >= maxI;
             return;
+          }
+        }
+        var isMarketing = !isOther && root.closest(".marketing-showcase") != null;
+        if (isMarketing) {
+          var stripB = root.querySelector(".video-scroller__strip");
+          var thumbsB = stripB ? stripB.querySelectorAll(":scope > .video-thumb") : [];
+          if (thumbsB.length >= 5) {
+            var pageWB = thumbsB[4].offsetLeft - thumbsB[0].offsetLeft;
+            if (pageWB > 0) {
+              var maxSB = Math.max(0, view.scrollWidth - view.clientWidth);
+              var numPB = Math.ceil(thumbsB.length / 4);
+              var pageIdx = marketingCarouselPageIndex(view.scrollLeft, pageWB, maxSB, numPB);
+              prev.disabled = pageIdx <= 0;
+              next.disabled = pageIdx >= numPB - 1;
+              return;
+            }
           }
         }
         prev.disabled = view.scrollLeft <= eps;
