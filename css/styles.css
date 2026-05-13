@@ -35,6 +35,7 @@
 html {
   scroll-behavior: smooth;
   background-color: var(--bg);
+  scroll-padding-top: var(--header-h);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -54,6 +55,7 @@ body {
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
+  padding-top: var(--header-h);
   font-family: var(--font);
   font-weight: 400;
   font-size: 1rem;
@@ -96,15 +98,17 @@ img {
 
 /* ——— Layout ——— */
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 40;
   height: var(--header-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 clamp(1.25rem, 4vw, 2.5rem);
-  /* Opaque bar: backdrop-filter on sticky headers repaints/blurs every scroll frame (jank). */
+  /* Opaque bar: no backdrop-filter on scroll (repaints every frame). */
   background: rgba(18, 16, 14, 0.97);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -120,11 +124,7 @@ img {
   color: var(--accent);
 }
 
-/* Header: VCHAudio left, logo center (subpages only) */
-.site-header--with-logo {
-  position: relative;
-}
-
+/* Header: VCHAudio left, logo center (subpages only); fixed bar — absolute logo positions vs header */
 .site-header--with-logo .brand-logo-center {
   position: absolute;
   left: 50%;
@@ -263,12 +263,12 @@ img {
 main {
   max-width: 720px;
   margin: 0 auto;
-  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 4vw, 2rem) 4rem;
+  padding: clamp(0.65rem, 1.8vw, 1.1rem) clamp(1.25rem, 4vw, 2rem) 4rem;
 }
 
 .page-hero {
   text-align: center;
-  padding: 2rem 0 1rem;
+  padding: 0.85rem 0 1rem;
 }
 
 .page-hero h1 {
@@ -286,9 +286,9 @@ main {
   margin: 0 0 0.2rem;
 }
 
-/* Project pages with top banner: cap image width, tighter hero, larger title */
+/* Project pages with top banner: tight under fixed header */
 .page-overview-banner + main {
-  padding-top: clamp(0.65rem, 1.8vw, 1.1rem);
+  padding-top: clamp(0.35rem, 1.1vw, 0.65rem);
 }
 
 .page-overview-banner + main .page-hero {
@@ -1378,7 +1378,7 @@ a.job-card.job-card--to-project:focus-visible {
 
 .project-link--secondary {
   background: transparent;
-  border: 1px solid rgba(228, 160, 74, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text);
   font-weight: 500;
   text-shadow: none;
@@ -1386,8 +1386,8 @@ a.job-card.job-card--to-project:focus-visible {
 }
 
 .project-link--secondary:hover {
-  background: rgba(228, 160, 74, 0.1);
-  border-color: rgba(228, 160, 74, 0.52);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.14);
   color: var(--text);
   text-shadow: none;
   box-shadow: none;
