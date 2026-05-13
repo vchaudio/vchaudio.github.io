@@ -438,7 +438,7 @@
     var raw = window.getComputedStyle(thumbEl).getPropertyValue("--marketing-thumbs-per-view");
     var n = parseInt(String(raw).trim(), 10);
     if (!n || n < 1) return 4;
-    return Math.min(4, n);
+    return Math.min(4, Math.max(2, n));
   }
 
   /* Which marketing carousel "page" is closest to current scrollLeft */

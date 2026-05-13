@@ -2400,6 +2400,10 @@ a.job-card.job-card--to-project:focus-visible {
   line-height: 1;
   cursor: pointer;
   transition: background 0.2s var(--ease-out), border-color 0.2s, color 0.2s, opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
 .video-scroller__btn:hover:not(:disabled) {
@@ -2480,11 +2484,7 @@ a.job-card.job-card--to-project:focus-visible {
   }
 }
 
-@container marketing-viewport (max-width: 380px) {
-  .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
-    --marketing-thumbs-per-view: 1;
-  }
-}
+/* Narrowest: stay at 2-up minimum (never 1) */
 
 .marketing-main .marketing-showcase .video-scroller__strip:not(:has(> .video-thumb:nth-child(4))) > .video-thumb {
   width: clamp(118px, min(42cqw, 220px), 260px);
@@ -2511,14 +2511,6 @@ a.job-card.job-card--to-project:focus-visible {
       --marketing-thumbs-per-view: 2;
       width: clamp(68px, calc((100vw - 7.5rem) / 2.1), 280px);
       flex: 0 0 clamp(68px, calc((100vw - 7.5rem) / 2.1), 280px);
-    }
-  }
-
-  @media (max-width: 380px) {
-    .marketing-main .marketing-showcase .video-scroller__strip:has(> .video-thumb:nth-child(4)) > .video-thumb {
-      --marketing-thumbs-per-view: 1;
-      width: clamp(68px, calc((100vw - 7.5rem) / 1.05), 280px);
-      flex: 0 0 clamp(68px, calc((100vw - 7.5rem) / 1.05), 280px);
     }
   }
 
