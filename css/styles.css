@@ -1878,7 +1878,7 @@ a.job-card.job-card--to-project:focus-visible {
   background: #000;
 }
 
-.page-overview-banner.page-overview-banner--vm-xctrl-dual {
+.page-overview-banner.page-overview-banner--vm-xctrl-hero {
   aspect-ratio: auto;
   width: fit-content;
   max-width: min(100%, 1200px);
@@ -1888,36 +1888,15 @@ a.job-card.job-card--to-project:focus-visible {
   background: #000;
 }
 
-.page-overview-banner.page-overview-banner--vm-xctrl-dual::after {
+.page-overview-banner.page-overview-banner--vm-xctrl-hero::after {
   display: none;
 }
 
-.page-overview-banner--vm-xctrl-dual .vm-xctrl-hero-pair {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(0.45rem, 1.8vw, 0.9rem);
-  width: min(max-content, 100%);
-  min-height: 0;
-  background: #000;
-}
-
-.page-overview-banner--vm-xctrl-dual .vm-xctrl-hero-pair__cell {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.1rem 0;
-  box-sizing: border-box;
-  background: #000;
-}
-
-/* +30% vs prior clamp(88px … 180px) */
-.page-overview-banner--vm-xctrl-dual .vm-xctrl-hero-pair__cell img {
+/* Same height rule as former dual cells; single composite scales with width: auto */
+.page-overview-banner--vm-xctrl-hero .vm-xctrl-hero-banner {
   height: clamp(115px, min(23.5vw, 29vh), 234px);
   width: auto;
+  max-width: 100%;
   object-fit: contain;
   object-position: center;
   display: block;
@@ -1927,22 +1906,12 @@ a.job-card.job-card--to-project:focus-visible {
 }
 
 @media (max-width: 640px) {
-  .page-overview-banner.page-overview-banner--vm-xctrl-dual {
+  .page-overview-banner.page-overview-banner--vm-xctrl-hero {
     width: 100%;
     max-width: 100%;
   }
 
-  .page-overview-banner--vm-xctrl-dual .vm-xctrl-hero-pair {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .page-overview-banner--vm-xctrl-dual .vm-xctrl-hero-pair__cell {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .page-overview-banner--vm-xctrl-dual .vm-xctrl-hero-pair__cell img {
+  .page-overview-banner--vm-xctrl-hero .vm-xctrl-hero-banner {
     width: 100%;
     max-width: 100%;
     height: auto;
