@@ -832,7 +832,6 @@ details.spoiler[open] .spoiler-inner {
   display: block;
   object-fit: contain;
   flex-shrink: 0;
-  transform: translateY(1px);
 }
 
 .experience-studio-title--wordmark .experience-studio-audio {
