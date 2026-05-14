@@ -151,7 +151,8 @@ img {
 }
 
 .brand.brand--with-vch-mark > span {
-  font-size: 1.125em;
+  font-size: 1.13em;
+  line-height: 1;
 }
 
 /* Match .experience-studio-title--wordmark: shared optical lock-up for mark + “Audio” */
@@ -160,18 +161,17 @@ img {
   align-items: center;
   justify-content: center;
   gap: 0.06em;
-  line-height: 1.1;
+  line-height: 1;
   animation: logo-fade-in 0.4s var(--ease-out) both;
 }
 
 .brand-vch-mark {
-  height: 1em;
+  height: 1.06em;
   width: auto;
-  max-height: 1.65rem;
+  max-height: min(1.78rem, 1.36em);
   display: block;
   flex-shrink: 0;
   object-fit: contain;
-  transform: translateY(1px);
   animation: logo-breathe 2s ease-in-out 0.45s infinite;
 }
 
@@ -822,13 +822,13 @@ details.spoiler[open] .spoiler-inner {
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--text);
-  line-height: 1.1;
+  line-height: 1;
 }
 
 .experience-studio-title--wordmark .experience-studio-mark {
-  height: 1em;
+  height: 1.06em;
   width: auto;
-  max-height: 1.65rem;
+  max-height: min(1.95rem, 1.36em);
   display: block;
   object-fit: contain;
   flex-shrink: 0;
@@ -836,7 +836,8 @@ details.spoiler[open] .spoiler-inner {
 
 .experience-studio-title--wordmark .experience-studio-audio {
   color: var(--accent);
-  font-size: 1.125em;
+  font-size: 1.13em;
+  line-height: 1;
 }
 
 .experience-studio-meta {
