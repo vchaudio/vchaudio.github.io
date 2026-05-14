@@ -2138,6 +2138,25 @@ a.job-card.job-card--to-project:focus-visible {
   font-weight: 600;
 }
 
+/* Moonray project page: cross-links to Music / Marketing spots (spotlight yellow) */
+.detail-role-link.detail-role-link--glow {
+  color: #f0d78c;
+  text-decoration: none;
+  text-shadow: 0 0 4px rgba(255, 210, 120, 0.2);
+}
+
+.detail-role-link.detail-role-link--glow:hover {
+  color: #f5e4a8;
+  text-shadow: 0 0 8px rgba(255, 210, 120, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detail-role-link.detail-role-link--glow,
+  .detail-role-link.detail-role-link--glow:hover {
+    text-shadow: none;
+  }
+}
+
 .detail-note {
   margin: 0;
   font-size: 0.92rem;
