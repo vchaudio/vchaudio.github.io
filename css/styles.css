@@ -13,7 +13,10 @@
   --radius-lg: 20px;
   --radius-md: 12px;
   --radius-full: 9999px;
-  --shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+  /* Drop shadow mostly below; negative spread avoids halo on rounded corners */
+  --shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-hover: 0 14px 26px -10px rgba(0, 0, 0, 0.48), 0 0 0 1px rgba(228, 160, 74, 0.08);
+  --card-stack-gap: 2rem;
   --font: "Outfit", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, monospace;
   /* Experience dates / meta (index): distinct from body & mono UI */
@@ -34,8 +37,22 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--bg);
+  background-color: #0a0908;
   scroll-padding-top: var(--header-h);
+}
+
+html::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(ellipse 115% 80% at 50% -10%, rgba(255, 200, 140, 0.24), transparent 52%),
+    radial-gradient(ellipse 65% 50% at 0% 100%, rgba(228, 160, 74, 0.1), transparent 58%),
+    linear-gradient(160deg, #2e261f 0%, #1a1612 32%, var(--bg) 58%, #080706 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -52,6 +69,8 @@ html {
 }
 
 body {
+  position: relative;
+  z-index: 1;
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
@@ -64,28 +83,6 @@ body {
   background: transparent;
   -webkit-font-smoothing: antialiased;
 }
-
-/*
- * OLD BACKGROUND — initial repo version (before perf experiments).
- * Fixed full-viewport pseudo behind content; dual radial using --glow (:root).
- *
- * To restore:
- *   1. On `body` above, add:  isolation: isolate;
- *   2. Uncomment the rules below.
- *
- * body::before {
- *   content: "";
- *   position: fixed;
- *   inset: 0;
- *   z-index: -1;
- *   pointer-events: none;
- *   contain: paint;
- *   background-color: var(--bg);
- *   background-image:
- *     radial-gradient(ellipse 120% 80% at 50% -20%, var(--glow), transparent 55%),
- *     radial-gradient(ellipse 60% 40% at 100% 50%, rgba(228, 160, 74, 0.04), transparent 50%);
- * }
- */
 
 a {
   color: var(--accent);
@@ -244,15 +241,9 @@ html.nav-from-index .brand-vch-mark {
   color: #9e8f7e;
 }
 
-/* Spotlight project hero: large title + yellow glow, white category under (e.g. Tajikistan) */
+/* Spotlight project pages: default banner title size, gold project name only */
 main.project-page--hero-glow .page-hero-title-stack h1 {
-  margin: 0 0 0.4rem;
-  font-size: clamp(2.85rem, 10vw, 4.35rem);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
   color: #f0d78c;
-  text-shadow: 0 0 4px rgba(255, 210, 120, 0.18);
 }
 
 main.project-page--hero-glow .page-hero-company--category {
@@ -260,20 +251,6 @@ main.project-page--hero-glow .page-hero-company--category {
   font-weight: 500;
   letter-spacing: 0.02em;
   color: #ffffff;
-}
-
-main.project-page--hero-glow .detail-intro {
-  margin: 0 0 1.1rem;
-  font-size: 0.95rem;
-  line-height: 1.65;
-  color: var(--text-muted);
-  text-align: left;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  main.project-page--hero-glow .page-hero-title-stack h1 {
-    text-shadow: none;
-  }
 }
 
 .page-back-inline {
@@ -528,11 +505,12 @@ details.spoiler {
   max-width: min(var(--home-tile-max), 100%);
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 0.75rem;
+  margin-bottom: calc(var(--card-stack-gap) * 0.7);
   background: var(--bg-elevated);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow: visible;
+  isolation: isolate;
   box-shadow: var(--shadow);
   animation: fade-up 0.8s var(--ease-out) 0s both;
   /* No max-width transition — JS resizes tile immediately */
@@ -548,7 +526,7 @@ details.spoiler[open] {
   transform: none;
   background: var(--bg-elevated);
   border-color: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 28px 56px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-hover);
 }
 
 details.spoiler:not([open]):hover,
@@ -568,7 +546,7 @@ details.spoiler[open]:focus-within {
   background: var(--bg-elevated);
   transform: none;
   border-color: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 28px 56px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow-hover);
 }
 
 details.spoiler:not([open]):hover summary,
@@ -612,7 +590,7 @@ details.spoiler summary:focus-visible {
 }
 
 details.spoiler:last-of-type {
-  margin-bottom: 2rem;
+  margin-bottom: var(--card-stack-gap);
 }
 
 details.spoiler summary {
@@ -628,9 +606,14 @@ details.spoiler summary {
   line-height: 1.3;
   color: var(--text);
   user-select: none;
+  border-radius: var(--radius-lg);
   transition:
     background 0.25s var(--ease-out),
     color 0.2s var(--ease-out);
+}
+
+details.spoiler[open] summary {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .spoiler-summary-label {
@@ -687,6 +670,7 @@ details.spoiler[open] .spoiler-chevron {
 .spoiler-body {
   max-height: 0;
   overflow: hidden;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   perspective: 1000px;
   transition: max-height var(--spoiler-roll) var(--ease-out);
 }
@@ -699,6 +683,24 @@ details.spoiler[open] .spoiler-body {
 @keyframes spoiler-roll-open {
   from {
     transform: rotateX(-88deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes spoiler-roll-close {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-88deg);
+  }
+}
+
+@keyframes spoiler-roll-open-reverse {
+  from {
+    transform: rotateX(88deg);
   }
   to {
     transform: rotateX(0deg);
@@ -896,7 +898,7 @@ a.job-card.job-card--to-project:focus-visible {
   background: linear-gradient(165deg, var(--glow), var(--bg-elevated));
   border-color: rgba(228, 160, 74, 0.38);
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(228, 160, 74, 0.1);
+  box-shadow: var(--shadow-hover);
 }
 
 a.job-card.job-card--to-project:hover h3,
@@ -1202,7 +1204,7 @@ a.job-card.job-card--to-project:focus-visible {
 .nav-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--card-stack-gap);
   max-width: var(--home-tile-max);
   margin: 0 auto;
 }
@@ -1218,13 +1220,14 @@ a.job-card.job-card--to-project:focus-visible {
   font-weight: 500;
   font-size: 1.05rem;
   text-align: center;
-  overflow: hidden;
+  overflow: visible;
+  isolation: isolate;
   transition:
     transform 0.35s var(--ease-out),
     border-color 0.25s,
     box-shadow 0.35s var(--ease-out),
     background 0.25s;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow);
 }
 
 .nav-card::before {
@@ -1239,7 +1242,7 @@ a.job-card.job-card--to-project:focus-visible {
 .nav-card:hover {
   border-color: rgba(228, 160, 74, 0.35);
   transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(228, 160, 74, 0.12);
+  box-shadow: var(--shadow-hover);
   background: var(--surface);
 }
 
@@ -1295,6 +1298,151 @@ a.job-card.job-card--to-project:focus-visible {
 .sub-content p {
   margin: 0;
   color: var(--text-muted);
+}
+
+/* Scroll to top — matches Resume button (premium bronze + shimmer) */
+.scroll-to-top {
+  position: fixed;
+  right: clamp(1rem, 3vw, 1.5rem);
+  bottom: clamp(1.25rem, 4vw, 2rem);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(228, 180, 110, 0.32);
+  border-radius: 50%;
+  background: linear-gradient(
+    155deg,
+    rgba(72, 58, 42, 0.92) 0%,
+    rgba(32, 26, 20, 0.98) 38%,
+    rgba(48, 38, 28, 0.96) 72%,
+    rgba(88, 68, 46, 0.88) 100%
+  );
+  color: #f0be6e;
+  box-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 228, 196, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 0 40px rgba(228, 160, 74, 0.1);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.5rem);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity 0.25s var(--ease-out),
+    visibility 0.25s var(--ease-out),
+    transform 0.35s var(--ease-out),
+    border-color 0.25s var(--ease-out),
+    box-shadow 0.35s var(--ease-out),
+    background 0.25s var(--ease-out),
+    color 0.25s var(--ease-out);
+}
+
+.scroll-to-top::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent 35%,
+    rgba(255, 220, 170, 0.14) 50%,
+    transparent 65%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s var(--ease-out);
+  pointer-events: none;
+}
+
+.scroll-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-to-top:hover,
+.scroll-to-top:focus-visible {
+  color: #fffaf3;
+  border-color: rgba(240, 200, 140, 0.48);
+  background: linear-gradient(
+    155deg,
+    rgba(98, 78, 54, 0.95) 0%,
+    rgba(42, 34, 26, 1) 40%,
+    rgba(62, 50, 36, 0.98) 72%,
+    rgba(118, 92, 58, 0.92) 100%
+  );
+  box-shadow:
+    0 14px 42px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 235, 210, 0.2),
+    0 0 56px rgba(228, 160, 74, 0.18);
+}
+
+.scroll-to-top.is-visible:hover,
+.scroll-to-top.is-visible:focus-visible,
+.scroll-to-top--dual:hover,
+.scroll-to-top--dual:focus-visible {
+  transform: translateY(-3px);
+}
+
+.scroll-to-top:hover::before,
+.scroll-to-top:focus-visible::before {
+  transform: translateX(100%);
+}
+
+.scroll-to-top:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.35),
+    inset 0 2px 8px rgba(0, 0, 0, 0.28);
+}
+
+.scroll-to-top.is-visible:active,
+.scroll-to-top--dual:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.scroll-to-top:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.scroll-to-top svg {
+  position: relative;
+  z-index: 1;
+  width: 1.75rem;
+  height: 1.75rem;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  fill: none;
+}
+
+.scroll-to-top--dual {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.scroll-to-top--dual .scroll-to-top__icon--up {
+  display: none;
+}
+
+.scroll-to-top--dual.is-scrolled .scroll-to-top__icon--home {
+  display: none;
+}
+
+.scroll-to-top--dual.is-scrolled .scroll-to-top__icon--up {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-to-top {
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+  }
 }
 
 /* ——— My studio (gallery + gear) ——— */
@@ -1512,7 +1660,7 @@ a.job-card.job-card--to-project:focus-visible {
   background: var(--bg-elevated);
   border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.22);
+  box-shadow: var(--shadow);
 }
 
 .studio-gear-card__title {
@@ -1739,33 +1887,22 @@ a.job-card.job-card--to-project:focus-visible {
   display: none !important;
 }
 
-.image-lightbox:fullscreen,
-.image-lightbox:-webkit-full-screen,
-.image-lightbox:-moz-full-screen {
-  padding: max(0.65rem, env(safe-area-inset-top, 0px)) max(0.75rem, env(safe-area-inset-right, 0px))
-    max(0.65rem, env(safe-area-inset-bottom, 0px)) max(0.75rem, env(safe-area-inset-left, 0px));
-}
-
-.image-lightbox:fullscreen .image-lightbox__figure,
-.image-lightbox:-webkit-full-screen .image-lightbox__figure,
-.image-lightbox:-moz-full-screen .image-lightbox__figure {
-  max-width: 100%;
-  max-height: 100%;
-  min-height: 0;
-}
-
-.image-lightbox:fullscreen .image-lightbox__stage,
-.image-lightbox:-webkit-full-screen .image-lightbox__stage,
-.image-lightbox:-moz-full-screen .image-lightbox__stage {
-  max-width: min(100vw - 1.25rem, 1600px);
-  max-height: calc(100vh - 7.5rem);
-}
-
-.image-lightbox:fullscreen .image-lightbox__img,
-.image-lightbox:-webkit-full-screen .image-lightbox__img,
-.image-lightbox:-moz-full-screen .image-lightbox__img {
-  max-width: min(100vw - 1.25rem, 1600px);
-  max-height: calc(100vh - 7.5rem);
+/* Native fullscreen: image only (no lightbox chrome) */
+.image-lightbox__img:fullscreen,
+.image-lightbox__img:-webkit-full-screen,
+.image-lightbox__img:-moz-full-screen {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  object-fit: contain;
+  background: #000;
 }
 
 @media (max-width: 560px) {
@@ -1799,6 +1936,7 @@ a.job-card.job-card--to-project:focus-visible {
   background: var(--surface);
   border-radius: var(--radius-md);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: var(--shadow);
 }
 
 .contact-card strong {
@@ -2305,19 +2443,35 @@ a.job-card.job-card--to-project:focus-visible {
   transition: box-shadow 0.3s var(--ease-out);
 }
 
-/* Feather only at the scroll clip: inset shadows sit on the viewport rim, not across thumbnails */
+/* Scroll edge feather — mask (transparent); no solid fill matching old flat bg */
 .video-scroller__viewport[data-fade-left="1"][data-fade-right="1"] {
-  box-shadow:
-    inset 20px 0 26px -12px var(--bg),
-    inset -20px 0 26px -12px var(--bg);
+  box-shadow: none;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 32px,
+    #000 calc(100% - 32px),
+    transparent 100%
+  );
 }
 
 .video-scroller__viewport[data-fade-left="1"]:not([data-fade-right="1"]) {
-  box-shadow: inset 20px 0 26px -12px var(--bg);
+  box-shadow: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 32px, #000 100%);
 }
 
 .video-scroller__viewport:not([data-fade-left="1"])[data-fade-right="1"] {
-  box-shadow: inset -20px 0 26px -12px var(--bg);
+  box-shadow: none;
+  -webkit-mask-image: linear-gradient(to left, transparent 0, #000 32px, #000 100%);
+  mask-image: linear-gradient(to left, transparent 0, #000 32px, #000 100%);
 }
 
 .video-scroller__viewport::-webkit-scrollbar {

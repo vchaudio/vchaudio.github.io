@@ -66,6 +66,13 @@
       var t = e.target;
       if (!t || !t.closest) return;
       var a = t.closest("a[href]");
+      var homeBtn = t.closest("[data-home-href]");
+      if (homeBtn && homeBtn.classList.contains("scroll-to-top--dual") && !homeBtn.classList.contains("is-scrolled")) {
+        try {
+          sessionStorage.setItem(STORAGE, "to-index");
+        } catch (e4) {}
+        return;
+      }
       if (!a || a.target === "_blank" || a.getAttribute("download")) return;
       var href = a.getAttribute("href");
       if (!href || href.charAt(0) === "#") return;

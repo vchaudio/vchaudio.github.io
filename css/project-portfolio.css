@@ -1,0 +1,553 @@
+/* Shared portfolio-style video grid (Show More + project overview pages) */
+
+main.project-page--hero-glow {
+  max-width: min(1200px, 100%);
+}
+
+/* Project overview pages: show all sections on load (no scroll reveal) */
+main.project-page--hero-glow .reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+main.project-page--hero-glow > .page-hero,
+main.project-page--hero-glow > .resume-section,
+main.project-page--hero-glow > .project-page-spoilers {
+  max-width: min(1000px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+main.project-page--hero-glow .project-page-spoilers {
+  margin-bottom: var(--card-stack-gap);
+}
+
+main.project-page--hero-glow .project-page-spoilers details.spoiler {
+  max-width: 100%;
+  margin-bottom: calc(var(--card-stack-gap) * 0.7);
+  animation: none;
+  overflow: visible;
+  isolation: isolate;
+}
+
+main.project-page--hero-glow .project-page-spoilers details.spoiler:last-of-type {
+  margin-bottom: 0;
+}
+
+main.project-page--hero-glow .project-page-spoilers details.spoiler summary {
+  padding: 1.15rem 1.35rem;
+  font-size: clamp(0.88rem, 2.1vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+main.project-page--hero-glow .project-page-spoilers .spoiler-summary-label {
+  color: var(--accent);
+}
+
+main.project-page--hero-glow .project-page-spoilers details.spoiler:not([open]):hover summary,
+main.project-page--hero-glow .project-page-spoilers details.spoiler:not([open]):focus-within summary {
+  color: var(--accent);
+}
+
+main.project-page--hero-glow .project-page-spoilers details.spoiler[open] summary,
+main.project-page--hero-glow .project-page-spoilers details.spoiler[open]:hover summary,
+main.project-page--hero-glow .project-page-spoilers details.spoiler[open]:focus-within summary {
+  color: var(--accent);
+}
+
+main.project-page--hero-glow .project-page-spoilers .spoiler-inner {
+  padding: 0.85rem 1.35rem 1.15rem;
+}
+
+main.project-page--hero-glow .resume-section__heading + .project-about {
+  margin-top: 0.5rem;
+}
+
+.page-overview-banner + main.project-page--hero-glow .page-hero-title-stack h1 {
+  color: #f0d78c;
+}
+
+main.project-page--hero-glow .page-hero-platform {
+  margin: 0 0 0.2rem;
+  font-size: clamp(0.82rem, 2vw, 0.95rem);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+main.project-page--hero-glow .page-hero-platform__label {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+main.project-page--hero-glow .page-hero-platform__values {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem 0.45rem;
+}
+
+main.project-page--hero-glow .page-hero-platform__sep {
+  color: var(--text-muted);
+  font-weight: 400;
+  user-select: none;
+}
+
+main.project-page--hero-glow .resume-section {
+  margin-bottom: var(--card-stack-gap);
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: var(--shadow);
+  overflow: visible;
+  isolation: isolate;
+}
+
+main.project-page--hero-glow .page-hero-company a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(158, 143, 126, 0.45);
+  text-underline-offset: 0.16em;
+  transition: color 0.2s var(--ease-out), text-decoration-color 0.2s var(--ease-out);
+}
+
+main.project-page--hero-glow .page-hero-company a:hover {
+  color: var(--accent);
+  text-decoration-color: rgba(228, 160, 74, 0.55);
+}
+
+main.project-page--hero-glow .resume-section__heading {
+  margin: 0 0 1rem;
+  text-align: center;
+  font-size: clamp(0.88rem, 2.1vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+main.project-page--hero-glow .project-section__date {
+  margin: -0.65rem 0 1rem;
+  text-align: center;
+  font-size: clamp(0.82rem, 2vw, 0.92rem);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+main.project-page--hero-glow .project-page__steam {
+  margin: 1rem 0 0;
+  text-align: center;
+}
+
+.project-steam-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #e8f4ff;
+  background: linear-gradient(145deg, #1a2f45 0%, #0f1923 48%, #162636 100%);
+  border: 1px solid rgba(102, 192, 244, 0.45);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(102, 192, 244, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition:
+    transform 0.25s var(--ease-out),
+    border-color 0.25s,
+    box-shadow 0.35s var(--ease-out),
+    color 0.25s;
+  overflow: hidden;
+}
+
+.project-steam-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 35%, rgba(102, 192, 244, 0.14) 50%, transparent 65%);
+  transform: translateX(-100%);
+  transition: transform 0.55s var(--ease-out);
+  pointer-events: none;
+}
+
+.project-steam-btn:hover {
+  color: #ffffff;
+  border-color: rgba(102, 192, 244, 0.75);
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.42),
+    0 0 24px rgba(102, 192, 244, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.project-steam-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.project-steam-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.project-steam-btn:focus-visible {
+  outline: 2px solid rgba(102, 192, 244, 0.85);
+  outline-offset: 3px;
+}
+
+main.project-page--hero-glow .project-about {
+  margin: 0;
+  text-align: start;
+  font-size: 0.96rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+main.project-page--hero-glow .project-about strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+main.project-page--hero-glow .resume-section__heading + .project-section__date {
+  margin-top: -0.35rem;
+}
+
+main.project-page--hero-glow .resume-section:last-child {
+  margin-bottom: 0;
+}
+
+.project-portfolio-block {
+  margin-bottom: 0;
+}
+
+.project-portfolio__subheading {
+  margin: 0 0 0.75rem;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+main.project-page--hero-glow .detail-links--tight {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+main.project-page--hero-glow .project-portfolio-block--music {
+  margin-bottom: 0;
+}
+
+/* Tajikistan: music-composing embeds inside project resume card */
+main.project-page--hero-glow .project-portfolio-block--embedded {
+  margin-bottom: 0;
+}
+
+.project-portfolio-music {
+  margin-top: 1.15rem;
+}
+
+.project-portfolio-block .video-scroller {
+  width: 100%;
+}
+
+.project-portfolio-block .video-scroller__viewport {
+  container-type: inline-size;
+  container-name: portfolio-viewport;
+}
+
+.project-portfolio-block .video-scroller__strip--grid-2 {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(var(--portfolio-grid-rows, 2), 1fr);
+  gap: var(--portfolio-grid-gap, 0.65rem);
+  width: max-content;
+  align-items: stretch;
+}
+
+.project-portfolio-block [data-portfolio-fit-all="true"] .video-scroller__viewport {
+  overflow-x: hidden;
+}
+
+.project-portfolio-block [data-portfolio-fit-all="true"] .video-scroller__strip--grid-2 {
+  width: 100%;
+  max-width: 100%;
+}
+
+.project-portfolio-block [data-portfolio-centered="true"] .video-scroller__viewport {
+  display: flex;
+  justify-content: center;
+  overflow-x: hidden;
+}
+
+.project-portfolio-block [data-portfolio-centered="true"] .video-scroller__strip--grid-2 {
+  width: max-content;
+  max-width: 100%;
+}
+
+.project-portfolio-block .video-scroller--fit-all .video-scroller__btn {
+  visibility: hidden;
+  pointer-events: none;
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+}
+
+.project-portfolio-block .video-scroller--fit-all {
+  gap: 0;
+}
+
+.project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
+.project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
+  --portfolio-cols-per-view: 3;
+  --portfolio-grid-gap: 0.5rem;
+  width: calc(
+    (100cqw - (var(--portfolio-cols-per-view) - 1) * var(--portfolio-grid-gap)) / var(--portfolio-cols-per-view)
+  );
+  min-width: 0;
+  max-width: none;
+}
+
+.project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb {
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  height: auto;
+}
+
+.project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap > .video-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 16 / 9;
+}
+
+@supports not (container-type: inline-size) {
+  .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
+  .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
+    width: clamp(92px, calc((100vw - 8rem) / var(--portfolio-cols-per-view, 3)), 220px);
+  }
+}
+
+.project-portfolio-block .video-scroller__btn {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+}
+
+.project-portfolio-block .video-thumb--ua-eva.video-thumb--poster img {
+  object-position: 24% 50%;
+  transform: scale(1.2);
+  transform-origin: 22% 48%;
+}
+
+.project-portfolio-block .video-thumb--ua-doove.video-thumb--poster img {
+  object-position: 30% 50%;
+  transform: scale(1.16);
+  transform-origin: 28% 52%;
+}
+
+.project-portfolio-block .video-thumb--ua-boxing.video-thumb--poster img {
+  object-position: 50% 44%;
+  transform: scale(1.06);
+  transform-origin: 50% 42%;
+}
+
+.project-portfolio-block .video-thumb--ua-bbk.video-thumb--poster img {
+  object-position: 76% 48%;
+  transform: scale(1.18);
+  transform-origin: 78% 48%;
+}
+
+/* Moonray — comic: trailers (left, stacked) + chapters (right, stacked) */
+.project-comic-layout {
+  --comic-poster-w: clamp(154px, 26.6vw, 244px);
+  --comic-caption-h: 2.2rem;
+  --comic-trailer-gap: clamp(0.85rem, 2vw, 1.35rem);
+  --comic-chapter-gap: clamp(1rem, 2.5vw, 1.5rem);
+  --comic-reflect-h: clamp(1.75rem, calc(var(--comic-poster-w) * 0.14), 4.25rem);
+  --comic-chapter-h: calc(
+    (var(--comic-poster-w) * 3 / 2) + 0.15rem + var(--comic-reflect-h) + 0.55rem + var(--comic-caption-h)
+  );
+  --comic-trailer-w: calc(
+    (
+        var(--comic-chapter-h) -
+        var(--comic-trailer-gap) -
+        (2 * (0.5rem + var(--comic-caption-h)))
+      ) * 16 / 18
+  );
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: clamp(1.25rem, 4vw, 2.5rem);
+  justify-content: center;
+  align-items: start;
+}
+
+.project-portfolio-block--comic .project-comic-trailers {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--comic-trailer-gap);
+  margin-bottom: 0;
+  justify-self: end;
+}
+
+.project-portfolio-block--comic .project-comic-trailers .video-thumb-wrap {
+  flex: 0 0 auto;
+  width: clamp(170px, var(--comic-trailer-w), 268px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+.project-portfolio-block--comic .project-comic-trailers .video-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.project-portfolio-block--comic .project-comic-trailers .video-thumb-caption {
+  width: 100%;
+  margin: 0;
+  text-align: center;
+}
+
+/* Make captions same height across trailers + chapters */
+.project-portfolio-block--comic .project-comic-trailers .video-thumb-caption,
+.project-portfolio-block--comic .video-thumb-wrap--comic .video-thumb-caption {
+  min-height: var(--comic-caption-h);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.project-portfolio-block--comic .project-comic-layout .project-comic-previews {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--comic-chapter-gap);
+  padding-bottom: 0.35rem;
+  justify-self: start;
+}
+
+@media (max-width: 720px) {
+  .project-comic-layout {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .project-portfolio-block--comic .project-comic-trailers {
+    justify-self: center;
+    margin-bottom: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  .project-portfolio-block--comic .project-comic-layout .project-comic-previews {
+    justify-self: center;
+  }
+}
+
+.project-portfolio-block--comic .video-thumb-wrap--comic {
+  flex: 0 0 auto;
+  width: var(--comic-poster-w);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.project-portfolio-block--comic .video-thumb-wrap--comic .video-thumb-caption {
+  width: 100%;
+}
+
+.comic-poster-reflect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.project-portfolio-block--comic .comic-poster-reflect > .video-thumb--poster-portrait {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  height: auto;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+}
+
+.project-portfolio-block--comic .video-thumb--poster-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.comic-poster-reflect__shine {
+  width: 88%;
+  height: clamp(1.75rem, 14%, 4.25rem);
+  margin-top: 0.15rem;
+  background-image: var(--comic-reflect);
+  background-size: 100% auto;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  transform: scaleY(-1);
+  opacity: 0.34;
+  filter: blur(0.4px);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, transparent 88%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, transparent 88%);
+  pointer-events: none;
+}
+
+.project-portfolio-block .video-thumb-caption {
+  margin: 0;
+  padding: 0 0.15rem;
+  text-align: center;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.project-portfolio-block .video-thumb-caption strong {
+  display: block;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.project-portfolio-block .video-thumb-caption--single {
+  font-weight: 500;
+  color: var(--text);
+}
