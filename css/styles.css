@@ -3245,26 +3245,6 @@ a.job-card.job-card--to-project:focus-visible {
   line-height: 1.45;
 }
 
-.video-lightbox__youtube-link {
-  display: block;
-  margin: 0.65rem 0 0;
-  padding: 0 0.15rem;
-  font-size: 0.82rem;
-  line-height: 1.45;
-  text-align: center;
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.video-lightbox__youtube-link[hidden] {
-  display: none !important;
-}
-
-.video-lightbox__youtube-link:hover {
-  color: var(--text);
-}
-
 @media (max-width: 560px) {
   .video-lightbox__close {
     top: 0.4rem;

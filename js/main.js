@@ -164,10 +164,6 @@
     );
   }
 
-  function youtubeWatchUrl(videoId) {
-    return "https://www.youtube.com/watch?v=" + encodeURIComponent(videoId);
-  }
-
   /* Marketing: centered YouTube lightbox from thumbnail buttons */
   function initVideoLightbox() {
     var root = document.getElementById("video-lightbox");
@@ -175,18 +171,6 @@
     var iframe = document.getElementById("video-lightbox-iframe");
     if (!iframe) return;
     var caption = document.getElementById("video-lightbox-caption");
-    var panel = root.querySelector(".video-lightbox__panel");
-    var youtubeLink = null;
-
-    if (panel) {
-      youtubeLink = document.createElement("a");
-      youtubeLink.className = "video-lightbox__youtube-link";
-      youtubeLink.target = "_blank";
-      youtubeLink.rel = "noopener noreferrer";
-      youtubeLink.textContent = "Watch on YouTube";
-      youtubeLink.hidden = true;
-      panel.appendChild(youtubeLink);
-    }
 
     iframe.referrerPolicy = "strict-origin-when-cross-origin";
 
@@ -220,30 +204,17 @@
       }
     }
 
-    function setYoutubeLink(id) {
-      if (!youtubeLink) return;
-      if (!id) {
-        youtubeLink.hidden = true;
-        youtubeLink.removeAttribute("href");
-        return;
-      }
-      youtubeLink.href = youtubeWatchUrl(id);
-      youtubeLink.hidden = false;
-    }
-
     function close() {
       iframe.removeAttribute("src");
       root.hidden = true;
       root.setAttribute("aria-hidden", "true");
       document.body.style.overflow = prevBodyOverflow;
       setCaptionFromThumb(null);
-      setYoutubeLink(null);
     }
 
     function open(id, thumb) {
       if (!id) return;
       iframe.src = youtubeEmbedSrc(id);
-      setYoutubeLink(id);
       root.hidden = false;
       root.setAttribute("aria-hidden", "false");
       prevBodyOverflow = document.body.style.overflow;
