@@ -112,6 +112,7 @@
     var VIDEOS_EXTRA_THUMB_MS = 850;
     var VIDEOS_EXTRA_STAGGER_END_MS = 360;
     var VIDEOS_EXTRA_TOTAL_MS = VIDEOS_EXTRA_THUMB_MS + VIDEOS_EXTRA_STAGGER_END_MS;
+    var VIDEOS_EXTRA_CONTAINER_START_MS = 720;
     var VIDEOS_EXTRA_CONTAINER_CLOSE_MS = 2200;
     var HOME_BOTTOM_HIDE_MS = 550;
 
@@ -477,6 +478,7 @@
       if (videosExtra) {
         videosExtra.classList.remove("is-closing", "is-container-closing", "is-hiding");
         videosExtra.style.transition = "";
+        videosExtra.style.maxHeight = "";
       }
       var homeBottom = document.getElementById("home-bottom");
       if (homeBottom) {
@@ -515,6 +517,7 @@
       videosExtra.setAttribute("aria-hidden", "true");
       void videosExtra.offsetWidth;
       videosExtra.style.transition = "";
+      videosExtra.style.maxHeight = "";
       extraThumbs().forEach(function (thumb) {
         thumb.style.animation = "none";
       });
@@ -529,13 +532,18 @@
 
     function beginContainerClose() {
       if (!videosExtra || videosCloseFinished) return;
+      var closeFromH = videosExtra.scrollHeight;
+      videosExtra.style.transition = "none";
+      videosExtra.style.maxHeight = closeFromH + "px";
       videosExtra.classList.add("is-container-closing");
       videosExtra.setAttribute("aria-hidden", "true");
       void videosExtra.offsetWidth;
+      videosExtra.style.transition = "";
+      videosExtra.style.maxHeight = "0px";
       videosExtra.classList.remove("is-open");
 
       function onTransitionEnd(e) {
-        if (e.target !== videosExtra || e.propertyName !== "grid-template-rows") return;
+        if (e.target !== videosExtra || e.propertyName !== "max-height") return;
         finishVideosClose();
       }
 
@@ -592,12 +600,12 @@
       pushVideosCloseTimer(
         window.setTimeout(function () {
           beginContainerClose();
-        }, VIDEOS_EXTRA_TOTAL_MS)
+        }, VIDEOS_EXTRA_CONTAINER_START_MS)
       );
       pushVideosCloseTimer(
         window.setTimeout(
           finishVideosClose,
-          VIDEOS_EXTRA_TOTAL_MS + VIDEOS_EXTRA_CONTAINER_CLOSE_MS + 100
+          VIDEOS_EXTRA_CONTAINER_START_MS + VIDEOS_EXTRA_CONTAINER_CLOSE_MS + 100
         )
       );
     }
