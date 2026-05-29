@@ -383,7 +383,7 @@ main.home-main {
 }
 
 .home-bottom.home-bottom--ready.home-bottom--puzzle.home-bottom--puzzle-after-close {
-  animation-delay: 0.12s;
+  animation-delay: var(--show-more-after-close-delay, 0.04s);
 }
 
 .home-bottom.home-bottom--hiding {

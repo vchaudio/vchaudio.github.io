@@ -108,13 +108,21 @@
     var videosTransitionTimer = null;
     var videosCloseTimers = [];
     var videosCloseFinished = false;
+    var showMoreRevealedAfterClose = false;
     var VIDEOS_EXTRA_OPEN_MS = 550;
     var VIDEOS_EXTRA_THUMB_MS = 850;
     var VIDEOS_EXTRA_STAGGER_END_MS = 360;
     var VIDEOS_EXTRA_TOTAL_MS = VIDEOS_EXTRA_THUMB_MS + VIDEOS_EXTRA_STAGGER_END_MS;
-    var VIDEOS_EXTRA_CONTAINER_START_MS = 720;
+    var VIDEOS_EXTRA_CONTAINER_START_MS = 200;
     var VIDEOS_EXTRA_CONTAINER_CLOSE_MS = 2200;
     var HOME_BOTTOM_HIDE_MS = 550;
+    var SHOW_MORE_AFTER_CLOSE_DELAY_MS = 40;
+    var SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO = 0.5;
+
+    root.style.setProperty(
+      "--show-more-after-close-delay",
+      (reduceMotion ? 0 : SHOW_MORE_AFTER_CLOSE_DELAY_MS) + "ms"
+    );
 
     function prepareBestWorksPuzzle() {
       var wrap = panelMain ? panelMain.querySelector(".best-works-wrap") : null;
@@ -201,6 +209,16 @@
           revealShowMore(true);
         });
       });
+    }
+
+    function revealShowMoreAfterClose() {
+      if (showMoreRevealedAfterClose || videosCloseFinished) return;
+      showMoreRevealedAfterClose = true;
+      if (showMoreBtn) {
+        showMoreBtn.textContent = "Show More";
+        showMoreBtn.setAttribute("aria-expanded", "false");
+      }
+      replayShowMoreButtonReveal();
     }
 
     function pushVideosCloseTimer(id) {
@@ -463,6 +481,7 @@
 
     function clearVideosAnimation() {
       videosCloseFinished = false;
+      showMoreRevealedAfterClose = false;
       videosCloseTimers.forEach(function (id) {
         window.clearTimeout(id);
       });
@@ -521,11 +540,7 @@
       extraThumbs().forEach(function (thumb) {
         thumb.style.animation = "none";
       });
-      if (showMoreBtn) {
-        showMoreBtn.textContent = "Show More";
-        showMoreBtn.setAttribute("aria-expanded", "false");
-      }
-      replayShowMoreButtonReveal();
+      revealShowMoreAfterClose();
       lockPanelMainHeight();
       videosAnimating = false;
     }
@@ -549,6 +564,12 @@
 
       videosExtra._onGridTransitionEnd = onTransitionEnd;
       videosExtra.addEventListener("transitionend", onTransitionEnd);
+      pushVideosCloseTimer(
+        window.setTimeout(
+          revealShowMoreAfterClose,
+          Math.round(VIDEOS_EXTRA_CONTAINER_CLOSE_MS * SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO)
+        )
+      );
       pushVideosCloseTimer(
         window.setTimeout(finishVideosClose, VIDEOS_EXTRA_CONTAINER_CLOSE_MS + 100)
       );
