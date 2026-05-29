@@ -467,15 +467,15 @@
       else switchView(VIEW_MAIN);
     });
 
-    function extraThumbs() {
-      return videosExtra ? videosExtra.querySelectorAll(".best-works__videos-extra-inner .video-thumb") : [];
+    function extraThumbWraps() {
+      return videosExtra ? videosExtra.querySelectorAll(".best-works__videos-extra-inner .video-thumb-wrap") : [];
     }
 
     function restartExtraThumbAnimations() {
-      extraThumbs().forEach(function (thumb) {
-        thumb.style.animation = "none";
-        void thumb.offsetWidth;
-        thumb.style.animation = "";
+      extraThumbWraps().forEach(function (wrap) {
+        wrap.style.animation = "none";
+        void wrap.offsetWidth;
+        wrap.style.animation = "";
       });
     }
 
@@ -537,8 +537,8 @@
       void videosExtra.offsetWidth;
       videosExtra.style.transition = "";
       videosExtra.style.maxHeight = "";
-      extraThumbs().forEach(function (thumb) {
-        thumb.style.animation = "none";
+      extraThumbWraps().forEach(function (wrap) {
+        wrap.style.animation = "none";
       });
       revealShowMoreAfterClose();
       lockPanelMainHeight();
