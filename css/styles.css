@@ -3245,6 +3245,14 @@ a.job-card.job-card--to-project:focus-visible {
   line-height: 1.45;
 }
 
+.video-lightbox__caption-year {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: rgba(244, 238, 232, 0.55);
+}
+
 @media (max-width: 560px) {
   .video-lightbox__close {
     top: 0.4rem;

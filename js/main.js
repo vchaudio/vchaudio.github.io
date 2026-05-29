@@ -185,7 +185,8 @@
       }
       var heading = thumb.getAttribute("data-lightbox-heading");
       var sub = thumb.getAttribute("data-lightbox-sub");
-      if (!heading && !sub) {
+      var year = thumb.getAttribute("data-lightbox-year");
+      if (!heading && !sub && !year) {
         caption.hidden = true;
         return;
       }
@@ -201,6 +202,12 @@
         meta.className = "video-lightbox__caption-sub";
         meta.textContent = sub;
         caption.appendChild(meta);
+      }
+      if (year) {
+        var date = document.createElement("p");
+        date.className = "video-lightbox__caption-year";
+        date.textContent = year;
+        caption.appendChild(date);
       }
     }
 
