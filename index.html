@@ -200,9 +200,12 @@
                     <label for="connect-subject">Subject</label>
                     <input type="text" id="connect-subject" name="subject" autocomplete="off" required placeholder="Subject" />
                   </div>
-                  <div class="home-connect__field">
+                  <div class="home-connect__field home-connect__field--message">
                     <label for="connect-message">Message</label>
-                    <textarea id="connect-message" name="message" required placeholder="Your message…"></textarea>
+                    <div class="home-connect__message-wrap">
+                      <textarea id="connect-message" name="message" required placeholder="Your message…"></textarea>
+                      <button type="button" class="home-connect__resize-handle" aria-label="Resize message field" tabindex="-1"></button>
+                    </div>
                   </div>
                   <p class="home-connect__status" data-connect-status aria-live="polite"></p>
                   <button type="submit" class="home-action-btn home-connect__submit">Send message</button>

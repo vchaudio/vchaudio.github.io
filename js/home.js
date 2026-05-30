@@ -109,6 +109,7 @@
     var videosCloseTimers = [];
     var videosCloseFinished = false;
     var showMoreRevealedAfterClose = false;
+    var videosOpenPendingLock = false;
     var VIDEOS_EXTRA_OPEN_MS = 550;
     var VIDEOS_EXTRA_THUMB_MS = 850;
     var VIDEOS_EXTRA_STAGGER_END_MS = 360;
@@ -118,6 +119,221 @@
     var HOME_BOTTOM_HIDE_MS = 550;
     var SHOW_MORE_AFTER_CLOSE_DELAY_MS = 40;
     var SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO = 0.5;
+    var MOBILE_BW_MQ = window.matchMedia("(max-width: 720px)");
+    var MOBILE_ANCHOR_MS = 1000;
+    var MOBILE_ANCHOR_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+    function isMobileBestWorks() {
+      return MOBILE_BW_MQ.matches;
+    }
+
+    function mobileGridAnchorWrap() {
+      var row = panelMain ? panelMain.querySelector(".best-works__row--videos") : null;
+      if (!row) return null;
+      var wraps = row.querySelectorAll(".video-thumb-wrap");
+      return wraps.length >= 5 ? wraps[4] : null;
+    }
+
+    function mobileOpenShiftX(wrap) {
+      var block = wrap ? wrap.closest(".best-works__videos-block") : null;
+      if (!block || !wrap) return 0;
+      var bwRoot = block.closest(".best-works") || block;
+      var gapToken = getComputedStyle(bwRoot).getPropertyValue("--bw-gap").trim();
+      var gap = 12;
+      if (gapToken) {
+        gap = parseFloat(gapToken);
+        if (gapToken.indexOf("rem") !== -1) {
+          gap *= parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        }
+      }
+      var blockRect = block.getBoundingClientRect();
+      var wrapRect = wrap.getBoundingClientRect();
+      var colW = (blockRect.width - gap) / 2;
+      var targetCenterX = blockRect.left + colW / 2;
+      var currentCenterX = wrapRect.left + wrapRect.width / 2;
+      return targetCenterX - currentCenterX;
+    }
+
+    function setMobileAnchorActive(wrap, active) {
+      if (!wrap) return;
+      if (active) wrap.classList.add("is-mobile-anchor");
+      else wrap.classList.remove("is-mobile-anchor");
+    }
+
+    function clearMobileAnchorMotion(wrap) {
+      if (!wrap) return;
+      if (wrap._mobileAnchorTimer) {
+        window.clearTimeout(wrap._mobileAnchorTimer);
+        wrap._mobileAnchorTimer = null;
+      }
+      if (wrap._mobileAnchorOnEnd) {
+        wrap.removeEventListener("transitionend", wrap._mobileAnchorOnEnd);
+        wrap._mobileAnchorOnEnd = null;
+      }
+      wrap.style.transition = "";
+      wrap.style.transform = "";
+      wrap.style.zIndex = "";
+    }
+
+    function freezePuzzleOnAnchor(wrap) {
+      if (!wrap || !wrap.closest(".best-works-wrap--puzzle")) return;
+      wrap.style.animation = "none";
+      wrap.style.opacity = "1";
+      wrap.style.filter = "none";
+    }
+
+    function releaseMobileAnchor(wrap) {
+      clearMobileAnchorMotion(wrap);
+      setMobileAnchorActive(wrap, false);
+      freezePuzzleOnAnchor(wrap);
+    }
+
+    function prepareMobileAnchor(wrap) {
+      clearMobileAnchorMotion(wrap);
+      setMobileAnchorActive(wrap, true);
+      freezePuzzleOnAnchor(wrap);
+    }
+
+    function isMobileAnchorMotionActive() {
+      var wrap = mobileGridAnchorWrap();
+      return !!(wrap && wrap.classList.contains("is-mobile-anchor") && wrap._mobileAnchorTimer);
+    }
+
+    function completeMobileAnchorOpen() {
+      releaseMobileAnchor(mobileGridAnchorWrap());
+      if (videosOpenPendingLock) {
+        videosOpenPendingLock = false;
+        lockPanelMainHeight();
+      }
+    }
+
+    function startMobileAnchorTransition(wrap, fromTransform, toTransform, onDone, motionOnly) {
+      function finish() {
+        if (motionOnly) clearMobileAnchorMotion(wrap);
+        else releaseMobileAnchor(wrap);
+        if (onDone) onDone();
+      }
+
+      wrap.style.zIndex = "2";
+      wrap.style.transition = "none";
+      wrap.style.transform = fromTransform;
+      void wrap.offsetWidth;
+      wrap.style.transition = "transform " + MOBILE_ANCHOR_MS / 1000 + "s " + MOBILE_ANCHOR_EASE;
+      wrap.style.transform = toTransform;
+
+      function onEnd(e) {
+        if (e.target !== wrap || e.propertyName !== "transform") return;
+        finish();
+      }
+
+      wrap._mobileAnchorOnEnd = onEnd;
+      wrap.addEventListener("transitionend", onEnd);
+      wrap._mobileAnchorTimer = window.setTimeout(finish, MOBILE_ANCHOR_MS + 80);
+    }
+
+    function runMobileAnchorOpen(wrap, applyLayout, onDone) {
+      if (!wrap || !isMobileBestWorks()) {
+        if (applyLayout) applyLayout();
+        if (onDone) onDone();
+        return;
+      }
+
+      prepareMobileAnchor(wrap);
+      var shiftXBefore = mobileOpenShiftX(wrap);
+      var first = wrap.getBoundingClientRect();
+      if (applyLayout) applyLayout();
+      prepareMobileAnchor(wrap);
+
+      var last = wrap.getBoundingClientRect();
+      var dx = first.left - last.left;
+      var dy = first.top - last.top;
+
+      if (Math.abs(dx) >= 0.5 || Math.abs(dy) >= 0.5) {
+        startMobileAnchorTransition(
+          wrap,
+          "translate3d(" + dx + "px," + dy + "px, 0)",
+          "translate3d(0, 0, 0)",
+          onDone,
+          true
+        );
+        return;
+      }
+
+      if (Math.abs(shiftXBefore) >= 0.5) {
+        startMobileAnchorTransition(
+          wrap,
+          "translate3d(0, 0, 0)",
+          "translate3d(" + shiftXBefore + "px, 0, 0)",
+          onDone,
+          true
+        );
+        return;
+      }
+
+      releaseMobileAnchor(wrap);
+      if (onDone) onDone();
+    }
+
+    function clearMobileAnchorStyles(wrap) {
+      releaseMobileAnchor(wrap);
+      if (!wrap) return;
+      wrap.style.animation = "";
+      wrap.style.opacity = "";
+      wrap.style.filter = "";
+    }
+
+    function resetMobileAnchor(wrap) {
+      clearMobileAnchorStyles(wrap);
+    }
+
+    function setMobileAnchorLayoutHidden(hidden) {
+      if (!videosExtra) return;
+      if (hidden) videosExtra.classList.add("is-mobile-anchor-layout");
+      else videosExtra.classList.remove("is-mobile-anchor-layout");
+    }
+
+    function holdMobileAnchorAtPairedSlot(wrap) {
+      if (!wrap || !videosExtra) return;
+      var pairedLeft = wrap.getBoundingClientRect().left;
+      var pairedTop = wrap.getBoundingClientRect().top;
+      videosExtra.classList.remove("is-open");
+      void videosExtra.offsetHeight;
+      var dx = pairedLeft - wrap.getBoundingClientRect().left;
+      var dy = pairedTop - wrap.getBoundingClientRect().top;
+      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+      setMobileAnchorActive(wrap, true);
+      wrap.style.zIndex = "2";
+      wrap.style.transition = "none";
+      wrap.style.transform = "translate(" + dx + "px," + dy + "px)";
+    }
+
+    function animateMobileAnchorToCenter(wrap) {
+      if (!wrap || !isMobileBestWorks()) return;
+      var fromTransform = wrap.style.transform;
+      if (!fromTransform) return;
+      setMobileAnchorActive(wrap, true);
+      startMobileAnchorTransition(wrap, fromTransform, "translate3d(0, 0, 0)", null, true);
+    }
+
+    function measureVideosExtraCloseHeight() {
+      if (!videosExtra) return 0;
+
+      var needsMobileMeasure =
+        isMobileBestWorks() &&
+        videosExtra.classList.contains("is-open") &&
+        !videosExtra.classList.contains("is-container-closing");
+
+      if (!needsMobileMeasure) {
+        return videosExtra.scrollHeight;
+      }
+
+      /* Unified grid uses display:contents — restore box layout to read height */
+      videosExtra.classList.add("is-close-measure");
+      void videosExtra.offsetHeight;
+      var h = videosExtra.scrollHeight;
+      videosExtra.classList.remove("is-close-measure");
+      return h;
+    }
 
     root.style.setProperty(
       "--show-more-after-close-delay",
@@ -217,6 +433,14 @@
       if (showMoreBtn) {
         showMoreBtn.textContent = "Show More";
         showMoreBtn.setAttribute("aria-expanded", "false");
+      }
+      if (
+        isMobileBestWorks() &&
+        !reduceMotion &&
+        videosExtra &&
+        videosExtra.classList.contains("is-hiding")
+      ) {
+        animateMobileAnchorToCenter(mobileGridAnchorWrap());
       }
       replayShowMoreButtonReveal();
     }
@@ -480,6 +704,7 @@
     }
 
     function clearVideosAnimation() {
+      videosOpenPendingLock = false;
       videosCloseFinished = false;
       showMoreRevealedAfterClose = false;
       videosCloseTimers.forEach(function (id) {
@@ -495,10 +720,18 @@
         videosExtra._onGridTransitionEnd = null;
       }
       if (videosExtra) {
-        videosExtra.classList.remove("is-closing", "is-container-closing", "is-hiding");
+        videosExtra.classList.remove(
+          "is-closing",
+          "is-container-closing",
+          "is-hiding",
+          "is-close-measure",
+          "is-mobile-anchor-layout"
+        );
         videosExtra.style.transition = "";
         videosExtra.style.maxHeight = "";
       }
+      resetMobileAnchor(mobileGridAnchorWrap());
+      setMobileAnchorLayoutHidden(false);
       var homeBottom = document.getElementById("home-bottom");
       if (homeBottom) {
         homeBottom.classList.remove("home-bottom--hiding", "home-bottom--puzzle-after-close");
@@ -517,6 +750,10 @@
         videosExtra._onGridTransitionEnd = null;
       }
       videosAnimating = false;
+      if (isMobileAnchorMotionActive()) {
+        videosOpenPendingLock = true;
+        return;
+      }
       lockPanelMainHeight();
     }
 
@@ -540,6 +777,8 @@
       extraThumbWraps().forEach(function (wrap) {
         wrap.style.animation = "none";
       });
+      releaseMobileAnchor(mobileGridAnchorWrap());
+      setMobileAnchorLayoutHidden(false);
       revealShowMoreAfterClose();
       lockPanelMainHeight();
       videosAnimating = false;
@@ -547,15 +786,22 @@
 
     function beginContainerClose() {
       if (!videosExtra || videosCloseFinished) return;
-      var closeFromH = videosExtra.scrollHeight;
+      var closeFromH = measureVideosExtraCloseHeight();
+      videosExtra.classList.remove("is-close-measure");
       videosExtra.style.transition = "none";
       videosExtra.style.maxHeight = closeFromH + "px";
+
+      if (isMobileBestWorks()) {
+        holdMobileAnchorAtPairedSlot(mobileGridAnchorWrap());
+      } else {
+        videosExtra.classList.remove("is-open");
+      }
+
       videosExtra.classList.add("is-container-closing");
       videosExtra.setAttribute("aria-hidden", "true");
       void videosExtra.offsetWidth;
       videosExtra.style.transition = "";
       videosExtra.style.maxHeight = "0px";
-      videosExtra.classList.remove("is-open");
 
       function onTransitionEnd(e) {
         if (e.target !== videosExtra || e.propertyName !== "max-height") return;
@@ -575,15 +821,7 @@
       );
     }
 
-    function beginVideosOpen() {
-      clearVideosAnimation();
-      videosAnimating = true;
-      unlockPanelMainFlow();
-      videosExtra.classList.remove("is-hiding", "is-container-closing", "is-closing");
-      videosExtra.setAttribute("aria-hidden", "false");
-      videosExtra.classList.remove("is-open");
-      void videosExtra.offsetWidth;
-      videosExtra.classList.add("is-open");
+    function beginVideosOpenAfterAnchor() {
       restartExtraThumbAnimations();
 
       function onTransitionEnd(e) {
@@ -594,6 +832,30 @@
       videosExtra._onGridTransitionEnd = onTransitionEnd;
       videosExtra.addEventListener("transitionend", onTransitionEnd);
       videosTransitionTimer = window.setTimeout(finishVideosOpen, VIDEOS_EXTRA_OPEN_MS + 100);
+    }
+
+    function beginVideosOpen() {
+      clearVideosAnimation();
+      videosAnimating = true;
+      unlockPanelMainFlow();
+      videosExtra.classList.remove("is-hiding", "is-container-closing", "is-closing");
+      videosExtra.setAttribute("aria-hidden", "false");
+
+      var anchor = mobileGridAnchorWrap();
+      if (isMobileBestWorks() && anchor && !reduceMotion) {
+        runMobileAnchorOpen(
+          anchor,
+          function () {
+            videosExtra.classList.add("is-open");
+            beginVideosOpenAfterAnchor();
+          },
+          completeMobileAnchorOpen
+        );
+        return;
+      }
+
+      videosExtra.classList.add("is-open");
+      beginVideosOpenAfterAnchor();
     }
 
     function beginVideosClose() {
@@ -623,12 +885,22 @@
           beginContainerClose();
         }, VIDEOS_EXTRA_CONTAINER_START_MS)
       );
-      pushVideosCloseTimer(
-        window.setTimeout(
-          finishVideosClose,
-          VIDEOS_EXTRA_CONTAINER_START_MS + VIDEOS_EXTRA_CONTAINER_CLOSE_MS + 100
-        )
-      );
+
+      var closeFinishMs =
+        VIDEOS_EXTRA_CONTAINER_START_MS + VIDEOS_EXTRA_CONTAINER_CLOSE_MS + 100;
+      if (isMobileBestWorks() && !reduceMotion) {
+        closeFinishMs = Math.max(
+          closeFinishMs,
+          VIDEOS_EXTRA_CONTAINER_START_MS +
+            Math.round(
+              VIDEOS_EXTRA_CONTAINER_CLOSE_MS * SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO
+            ) +
+            MOBILE_ANCHOR_MS +
+            100
+        );
+      }
+
+      pushVideosCloseTimer(window.setTimeout(finishVideosClose, closeFinishMs));
     }
 
     function setVideosExpanded(open) {
@@ -702,6 +974,89 @@
     );
 
     initContactForm();
+    initContactMessageField();
+  }
+
+  function remeasureVisibleContactPanel() {
+    var panel = document.getElementById("home-panel-contact");
+    if (!panel || !panel.classList.contains("is-visible")) return;
+    var inner = panel.querySelector(".home-panel__inner");
+    if (!inner) return;
+    panel.classList.add("home-panel--instant-height");
+    panel.style.maxHeight = inner.scrollHeight + "px";
+    panel.classList.remove("home-panel--instant-height");
+  }
+
+  function initContactMessageField() {
+    var textarea = document.getElementById("connect-message");
+    var handle = document.querySelector(".home-connect__resize-handle");
+    if (!textarea) return;
+
+    function maxMessageHeight() {
+      return Math.min(Math.round(window.innerHeight * 0.55), 520);
+    }
+
+    function minMessageHeight() {
+      return 88;
+    }
+
+    function clampMessageHeight(h) {
+      return Math.max(minMessageHeight(), Math.min(maxMessageHeight(), Math.round(h)));
+    }
+
+    function setMessageHeight(h) {
+      textarea.style.height = clampMessageHeight(h) + "px";
+      remeasureVisibleContactPanel();
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+      var panelObserver = new ResizeObserver(function () {
+        remeasureVisibleContactPanel();
+      });
+      panelObserver.observe(textarea);
+    }
+
+    window.addEventListener("resize", remeasureVisibleContactPanel, { passive: true });
+
+    if (!handle) return;
+
+    function startResize(clientY) {
+      var startY = clientY;
+      var startH = textarea.offsetHeight;
+
+      function onMove(e) {
+        var y = e.touches && e.touches.length ? e.touches[0].clientY : e.clientY;
+        setMessageHeight(startH + (y - startY));
+      }
+
+      function onEnd() {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onEnd);
+        document.removeEventListener("touchmove", onMove);
+        document.removeEventListener("touchend", onEnd);
+        document.removeEventListener("touchcancel", onEnd);
+      }
+
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onEnd);
+      document.addEventListener("touchmove", onMove, { passive: true });
+      document.addEventListener("touchend", onEnd);
+      document.addEventListener("touchcancel", onEnd);
+    }
+
+    handle.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+      startResize(e.clientY);
+    });
+
+    handle.addEventListener(
+      "touchstart",
+      function (e) {
+        if (!e.touches.length) return;
+        startResize(e.touches[0].clientY);
+      },
+      { passive: true }
+    );
   }
 
   function initContactForm() {
@@ -767,6 +1122,9 @@
           if (!res.ok) throw new Error("Bad response");
           setStatus("Sent. Thank you!", "success");
           form.reset();
+          var messageEl = form.querySelector('[name="message"]');
+          if (messageEl) messageEl.style.height = "";
+          remeasureVisibleContactPanel();
         })
         .catch(function () {
           setStatus("Sorry — sending failed. Please try again later.", "error");
