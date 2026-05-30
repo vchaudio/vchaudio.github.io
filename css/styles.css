@@ -102,7 +102,7 @@ img {
   display: block;
 }
 
-img:not(.brand-vch-mark) {
+img:not(.brand-vch-mark):not(.page-overview-banner__img) {
   height: auto;
 }
 
@@ -2010,8 +2010,6 @@ a.job-card.job-card--to-project:focus-visible {
   aspect-ratio: 1200 / 514;
   overflow: hidden;
   background: var(--bg);
-  isolation: isolate;
-  transform: translateZ(0);
 }
 
 /* VM-XCtrl hero: frame below header; no extra top chrome */
@@ -2069,14 +2067,24 @@ a.job-card.job-card--to-project:focus-visible {
   object-fit: cover;
   object-position: center;
   display: block;
-  transform: translateZ(0);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
 }
 
-/* Fade is baked into the image mask — no separate overlay layer to drift on scroll */
+/* Bottom ~35% of banner: fade into page (transparent only — no dark wash on the image) */
 .page-overview-banner::after {
-  content: none;
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(35% + 2px);
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 28%,
+    var(--bg) 100%
+  );
 }
 
 .project-banner {
