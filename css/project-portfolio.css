@@ -4,10 +4,44 @@ main.project-page--hero-glow {
   max-width: min(1200px, 100%);
 }
 
-/* Project overview pages: show all sections on load (no scroll reveal) */
+/* Project overview pages: load entrance (banner + staggered blocks), not scroll reveal */
+.page-overview-banner .page-overview-banner__img {
+  opacity: 0;
+  transform: scale(1.08) translateY(8px);
+}
+
+.page-overview-banner.project-enter .page-overview-banner__img {
+  animation: project-banner-in 0.9s var(--ease-out) 0.06s both;
+}
+
+@keyframes project-banner-in {
+  from {
+    opacity: 0;
+    transform: scale(1.08) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 main.project-page--hero-glow .reveal {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 0;
+  transform: translateY(18px);
+  transition: none;
+}
+
+main.project-page--hero-glow .reveal.project-enter {
+  animation: fade-up 0.8s var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-overview-banner .page-overview-banner__img,
+  main.project-page--hero-glow .reveal {
+    opacity: 1;
+    transform: none;
+    animation: none !important;
+  }
 }
 
 main.project-page--hero-glow > .page-hero,

@@ -23,6 +23,9 @@
   --font-dates: "DM Sans", system-ui, sans-serif;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --header-h: 72px;
+  --brand-header-inset: clamp(1.25rem, 4vw, 2.5rem);
+  /* Horizontal travel: bar brand center ↔ viewport center (mirrored on index/sub) */
+  --brand-rehome-offset: calc(50vw - var(--brand-header-inset) - 50%);
   /* Home: collapsed spoilers align with Explore nav tiles */
   --home-tile-max: 420px;
   /* Spoilers: roll only (tile width is instant with JS) */
@@ -176,13 +179,15 @@ img {
   filter: brightness(1.08);
 }
 
-/* In-document nav: index ↔ sub — strong motion so the bar “re-homes” visibly */
+/* In-document nav: index ↔ sub — same motion, mirrored (center ↔ left corner) */
 html.nav-from-sub .brand.brand--with-vch-mark {
-  animation: brand-arrive-into-index 0.95s var(--ease-out) both;
+  --brand-rehome-from: var(--brand-rehome-offset);
+  animation: brand-rehome 0.95s var(--ease-out) both;
 }
 
 html.nav-from-index .brand.brand--with-vch-mark {
-  animation: brand-arrive-into-sub 0.95s var(--ease-out) both;
+  --brand-rehome-from: calc(-1 * var(--brand-rehome-offset));
+  animation: brand-rehome 0.95s var(--ease-out) both;
 }
 
 html.nav-from-sub .brand-vch-mark,
@@ -3315,21 +3320,10 @@ a.job-card.job-card--to-project:focus-visible {
   }
 }
 
-@keyframes brand-arrive-into-index {
+@keyframes brand-rehome {
   0% {
     opacity: 0;
-    transform: translateX(clamp(2.5rem, 48vw, 32rem)) scale(0.94);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes brand-arrive-into-sub {
-  0% {
-    opacity: 0;
-    transform: translateX(clamp(-2.5rem, -48vw, -32rem)) scale(0.94);
+    transform: translateX(var(--brand-rehome-from)) scale(0.94);
   }
   100% {
     opacity: 1;
