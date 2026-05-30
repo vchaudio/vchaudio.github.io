@@ -1988,6 +1988,8 @@ a.job-card.job-card--to-project:focus-visible {
   aspect-ratio: 1200 / 514;
   overflow: hidden;
   background: var(--bg);
+  isolation: isolate;
+  transform: translateZ(0);
 }
 
 /* VM-XCtrl: black top bar + hero frame hugging the two images */
@@ -2068,23 +2070,14 @@ a.job-card.job-card--to-project:focus-visible {
   object-fit: cover;
   object-position: center;
   display: block;
+  transform: translateZ(0);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
 }
 
-/* Bottom ~35% of banner: fade into page (transparent only — no dark wash on the image) */
+/* Fade is baked into the image mask — no separate overlay layer to drift on scroll */
 .page-overview-banner::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 35%;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    transparent 28%,
-    var(--bg) 100%
-  );
+  content: none;
 }
 
 .project-banner {
