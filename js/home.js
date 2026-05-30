@@ -120,11 +120,16 @@
     var SHOW_MORE_AFTER_CLOSE_DELAY_MS = 40;
     var SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO = 0.5;
     var MOBILE_BW_MQ = window.matchMedia("(max-width: 720px)");
+    var MOBILE_NOBLEMEN_MQ = window.matchMedia("(max-width: 480px)");
     var MOBILE_ANCHOR_MS = 1000;
     var MOBILE_ANCHOR_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
     function isMobileBestWorks() {
       return MOBILE_BW_MQ.matches;
+    }
+
+    function isMobileNoblemenAnchor() {
+      return MOBILE_NOBLEMEN_MQ.matches;
     }
 
     function mobileGridAnchorWrap() {
@@ -175,20 +180,32 @@
       wrap.style.zIndex = "";
     }
 
+    function settlePuzzleTile(wrap) {
+      if (!wrap) return;
+      wrap.classList.add("is-puzzle-settled");
+      wrap.style.animation = "";
+      wrap.style.opacity = "";
+      wrap.style.filter = "";
+    }
+
     function freezePuzzleOnAnchor(wrap) {
       if (!wrap || !wrap.closest(".best-works-wrap--puzzle")) return;
+      wrap.classList.remove("is-puzzle-settled");
       wrap.style.animation = "none";
       wrap.style.opacity = "1";
       wrap.style.filter = "none";
     }
 
     function releaseMobileAnchor(wrap) {
+      if (!wrap) return;
+      var hadAnchor = wrap.classList.contains("is-mobile-anchor");
       clearMobileAnchorMotion(wrap);
       setMobileAnchorActive(wrap, false);
-      freezePuzzleOnAnchor(wrap);
+      if (hadAnchor) settlePuzzleTile(wrap);
     }
 
     function prepareMobileAnchor(wrap) {
+      if (!wrap || !isMobileNoblemenAnchor()) return;
       clearMobileAnchorMotion(wrap);
       setMobileAnchorActive(wrap, true);
       freezePuzzleOnAnchor(wrap);
@@ -208,6 +225,11 @@
     }
 
     function startMobileAnchorTransition(wrap, fromTransform, toTransform, onDone, motionOnly) {
+      if (!wrap || !isMobileNoblemenAnchor()) {
+        if (onDone) onDone();
+        return;
+      }
+
       function finish() {
         if (motionOnly) clearMobileAnchorMotion(wrap);
         else releaseMobileAnchor(wrap);
@@ -232,7 +254,7 @@
     }
 
     function runMobileAnchorOpen(wrap, applyLayout, onDone) {
-      if (!wrap || !isMobileBestWorks()) {
+      if (!wrap || !isMobileNoblemenAnchor()) {
         if (applyLayout) applyLayout();
         if (onDone) onDone();
         return;
@@ -274,16 +296,17 @@
       if (onDone) onDone();
     }
 
-    function clearMobileAnchorStyles(wrap) {
-      releaseMobileAnchor(wrap);
-      if (!wrap) return;
-      wrap.style.animation = "";
-      wrap.style.opacity = "";
-      wrap.style.filter = "";
-    }
-
     function resetMobileAnchor(wrap) {
-      clearMobileAnchorStyles(wrap);
+      if (!wrap) return;
+      var hadAnchor =
+        wrap.classList.contains("is-mobile-anchor") || !!wrap._mobileAnchorTimer;
+      var hadStaleFreeze =
+        !hadAnchor &&
+        wrap.style.animation === "none" &&
+        !!wrap.closest(".best-works-wrap--puzzle");
+      clearMobileAnchorMotion(wrap);
+      setMobileAnchorActive(wrap, false);
+      if (hadAnchor || hadStaleFreeze) settlePuzzleTile(wrap);
     }
 
     function setMobileAnchorLayoutHidden(hidden) {
@@ -293,7 +316,7 @@
     }
 
     function holdMobileAnchorAtPairedSlot(wrap) {
-      if (!wrap || !videosExtra) return;
+      if (!wrap || !videosExtra || !isMobileNoblemenAnchor()) return;
       var pairedLeft = wrap.getBoundingClientRect().left;
       var pairedTop = wrap.getBoundingClientRect().top;
       videosExtra.classList.remove("is-open");
@@ -308,7 +331,7 @@
     }
 
     function animateMobileAnchorToCenter(wrap) {
-      if (!wrap || !isMobileBestWorks()) return;
+      if (!wrap || !isMobileNoblemenAnchor()) return;
       var fromTransform = wrap.style.transform;
       if (!fromTransform) return;
       setMobileAnchorActive(wrap, true);
@@ -435,7 +458,7 @@
         showMoreBtn.setAttribute("aria-expanded", "false");
       }
       if (
-        isMobileBestWorks() &&
+        isMobileNoblemenAnchor() &&
         !reduceMotion &&
         videosExtra &&
         videosExtra.classList.contains("is-hiding")
@@ -777,7 +800,7 @@
       extraThumbWraps().forEach(function (wrap) {
         wrap.style.animation = "none";
       });
-      releaseMobileAnchor(mobileGridAnchorWrap());
+      resetMobileAnchor(mobileGridAnchorWrap());
       setMobileAnchorLayoutHidden(false);
       revealShowMoreAfterClose();
       lockPanelMainHeight();
@@ -791,7 +814,7 @@
       videosExtra.style.transition = "none";
       videosExtra.style.maxHeight = closeFromH + "px";
 
-      if (isMobileBestWorks()) {
+      if (isMobileNoblemenAnchor()) {
         holdMobileAnchorAtPairedSlot(mobileGridAnchorWrap());
       } else {
         videosExtra.classList.remove("is-open");
@@ -842,7 +865,7 @@
       videosExtra.setAttribute("aria-hidden", "false");
 
       var anchor = mobileGridAnchorWrap();
-      if (isMobileBestWorks() && anchor && !reduceMotion) {
+      if (isMobileNoblemenAnchor() && anchor && !reduceMotion) {
         runMobileAnchorOpen(
           anchor,
           function () {
@@ -888,7 +911,7 @@
 
       var closeFinishMs =
         VIDEOS_EXTRA_CONTAINER_START_MS + VIDEOS_EXTRA_CONTAINER_CLOSE_MS + 100;
-      if (isMobileBestWorks() && !reduceMotion) {
+      if (isMobileNoblemenAnchor() && !reduceMotion) {
         closeFinishMs = Math.max(
           closeFinishMs,
           VIDEOS_EXTRA_CONTAINER_START_MS +

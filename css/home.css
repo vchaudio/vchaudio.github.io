@@ -82,6 +82,13 @@ main.home-main {
 .best-works-wrap--puzzle .best-works__row--videos > *:nth-child(4) { animation-delay: 0.58s; }
 .best-works-wrap--puzzle .best-works__row--videos > *:nth-child(5) { animation-delay: 0.66s; }
 
+.best-works-wrap--puzzle .best-works__row--videos > .video-thumb-wrap.is-puzzle-settled {
+  animation: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none;
+}
+
 @keyframes best-works-puzzle-float {
   0% {
     opacity: 0;
@@ -132,8 +139,8 @@ main.home-main {
   }
 }
 
-/* Mobile: Noblemen anchor — JS owns transform; disable puzzle keyframes on this tile */
-@media (max-width: 720px) {
+/* Very narrow mobile only: Noblemen anchor — JS owns transform; disable puzzle keyframes on this tile */
+@media (max-width: 480px) {
   .best-works__row--videos > .video-thumb-wrap.is-mobile-anchor {
     animation: none !important;
     opacity: 1 !important;

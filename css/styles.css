@@ -99,8 +99,11 @@ a:hover {
 
 img {
   max-width: 100%;
-  height: auto;
   display: block;
+}
+
+img:not(.brand-vch-mark) {
+  height: auto;
 }
 
 /* ——— Layout ——— */
@@ -153,6 +156,25 @@ img {
 .brand.brand--with-vch-mark > span {
   font-size: 1.13em;
   line-height: 1;
+}
+
+/* Header wordmark — index and VM-XCtrl share this block (see index.html header) */
+.site-header .brand.brand--with-vch-mark {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.site-header .brand.brand--with-vch-mark > span {
+  font-size: 1.13em;
+  line-height: 1;
+}
+
+.site-header .brand-vch-mark {
+  height: 1.06em;
+  max-height: min(1.78rem, 1.36em);
+  width: auto;
+  max-width: none;
+  object-fit: contain;
 }
 
 /* Match .experience-studio-title--wordmark: shared optical lock-up for mark + “Audio” */
@@ -1992,35 +2014,12 @@ a.job-card.job-card--to-project:focus-visible {
   transform: translateZ(0);
 }
 
-/* VM-XCtrl: black top bar + hero frame hugging the two images */
-.page-vm-xctrl .site-header {
-  background: #000;
-  border-bottom-color: rgba(255, 255, 255, 0.08);
-}
-
-@media (max-width: 640px) {
-  .page-vm-xctrl .site-header {
-    padding: 0 clamp(0.45rem, 2.8vw, 1rem);
-  }
-
-  .page-vm-xctrl .brand {
-    font-size: clamp(0.78rem, 3.4vw, 1rem);
-    white-space: nowrap;
-  }
-
-  .page-vm-xctrl .nav-back {
-    font-size: clamp(0.72rem, 3.1vw, 0.88rem);
-    white-space: nowrap;
-  }
-}
-
-/* VM-XCtrl hero: same height for both images; black frame sized to content; square top, rounded bottom */
+/* VM-XCtrl hero: frame below header; no extra top chrome */
 .page-overview-banner--vm-xctrl {
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-  background: #000;
+  background: var(--bg-elevated);
 }
 
 .page-overview-banner.page-overview-banner--vm-xctrl-hero {
@@ -2029,8 +2028,8 @@ a.job-card.job-card--to-project:focus-visible {
   max-width: min(100%, 1200px);
   margin-left: auto;
   margin-right: auto;
-  padding: clamp(0.5rem, 1.8vw, 0.85rem) clamp(0.45rem, 1.6vw, 0.75rem);
-  background: #000;
+  padding: 0 clamp(0.45rem, 1.6vw, 0.75rem) clamp(0.5rem, 1.8vw, 0.85rem);
+  background: var(--bg-elevated);
 }
 
 .page-overview-banner.page-overview-banner--vm-xctrl-hero::after {
