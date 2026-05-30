@@ -361,12 +361,48 @@ main.project-page--hero-glow .project-portfolio-block--embedded {
 .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
 .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
   --portfolio-cols-per-view: 3;
-  --portfolio-grid-gap: 0.5rem;
+  --portfolio-grid-gap: 0.45rem;
   width: calc(
     (100cqw - (var(--portfolio-cols-per-view) - 1) * var(--portfolio-grid-gap)) / var(--portfolio-cols-per-view)
   );
-  min-width: 0;
+  min-width: 68px;
   max-width: none;
+}
+
+@container portfolio-viewport (max-width: 920px) {
+  .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
+  .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
+    --portfolio-cols-per-view: 3;
+  }
+}
+
+@container portfolio-viewport (max-width: 620px) {
+  .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
+  .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
+    --portfolio-cols-per-view: 2;
+  }
+}
+
+/* Mobile: same carousel chrome as Marketing & Ads — full-width strip, nav buttons below */
+@media (max-width: 720px) {
+  .project-portfolio-block .video-scroller {
+    flex-wrap: wrap;
+    gap: 0.5rem 0.4rem;
+    align-items: stretch;
+  }
+
+  .project-portfolio-block .video-scroller__viewport {
+    flex: 1 1 100%;
+    width: 100%;
+    order: -1;
+    touch-action: pan-x pinch-zoom;
+  }
+
+  .project-portfolio-block .video-scroller__btn {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-height: 2.75rem;
+    box-sizing: border-box;
+  }
 }
 
 .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb {
@@ -397,7 +433,24 @@ main.project-page--hero-glow .project-portfolio-block--embedded {
 @supports not (container-type: inline-size) {
   .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
   .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
-    width: clamp(92px, calc((100vw - 8rem) / var(--portfolio-cols-per-view, 3)), 220px);
+    --portfolio-cols-per-view: 3;
+    width: clamp(68px, calc((100vw - 7.5rem) / 3.15), 280px);
+  }
+
+  @media (max-width: 920px) {
+    .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
+    .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
+      --portfolio-cols-per-view: 3;
+      width: clamp(68px, calc((100vw - 7.5rem) / 3.15), 280px);
+    }
+  }
+
+  @media (max-width: 620px) {
+    .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
+    .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
+      --portfolio-cols-per-view: 2;
+      width: clamp(118px, calc((100vw - 7.5rem) / 2.1), 280px);
+    }
   }
 }
 

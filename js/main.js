@@ -653,8 +653,14 @@
     return best;
   }
 
-  function portfolioMaxVisibleCols(viewWidth, rows) {
+  function portfolioMaxVisibleCols(viewWidth, rows, opts) {
+    opts = opts || {};
     if (viewWidth <= 0) viewWidth = 960;
+    if (opts.projectMobile) {
+      if (viewWidth < 720) return 2;
+      if (viewWidth < 960) return rows === 1 ? 3 : 2;
+      return rows === 1 ? 4 : 3;
+    }
     if (viewWidth < 420) return 2;
     if (viewWidth < 720) return rows === 1 ? 3 : 2;
     return rows === 1 ? 4 : 3;
@@ -676,9 +682,19 @@
     var n = items.length;
     if (!n) return false;
 
-    var rows = n <= 3 ? 1 : 2;
+    var isProject = !!root.closest(".project-portfolio-block");
+    var viewWidth = view ? view.clientWidth : 960;
+
+    var rows;
+    if (isProject && viewWidth < 720) {
+      rows = 1;
+    } else {
+      rows = n <= 3 ? 1 : 2;
+    }
     var totalCols = Math.ceil(n / rows);
-    var maxVisible = portfolioMaxVisibleCols(view ? view.clientWidth : 960, rows);
+    var maxVisible = portfolioMaxVisibleCols(viewWidth, rows, {
+      projectMobile: isProject,
+    });
     var fitAll = totalCols <= maxVisible;
     var centered = fitAll && (n === 2 || n === 4);
     var colsPerView = fitAll && !centered ? totalCols : centered ? maxVisible : maxVisible;
@@ -690,7 +706,11 @@
     root.classList.toggle("video-scroller--fit-all", fitAll);
     strip.style.setProperty("--portfolio-grid-rows", String(rows));
     strip.style.setProperty("--portfolio-total-cols", String(totalCols));
-    strip.style.setProperty("--portfolio-cols-per-view", String(colsPerView));
+    if (isProject && viewWidth < 960) {
+      strip.style.removeProperty("--portfolio-cols-per-view");
+    } else {
+      strip.style.setProperty("--portfolio-cols-per-view", String(colsPerView));
+    }
     return true;
   }
 
@@ -885,7 +905,7 @@
         scrollPage(1);
       });
       function handleScrollerResize() {
-        if (root.closest(".home-portfolio-block")) {
+        if (root.closest(".home-portfolio-block") || root.closest(".project-portfolio-block")) {
           applyPortfolioGridLayout(root);
         }
         updateScrollerState();
