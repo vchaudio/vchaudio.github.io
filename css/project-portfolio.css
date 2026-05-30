@@ -59,9 +59,16 @@ main.project-page--hero-glow .project-page-spoilers {
 main.project-page--hero-glow .project-page-spoilers details.spoiler {
   max-width: 100%;
   margin-bottom: calc(var(--card-stack-gap) * 0.7);
-  animation: none;
   overflow: visible;
   isolation: isolate;
+}
+
+main.project-page--hero-glow .project-page-spoilers details.spoiler.reveal:not(.project-enter) {
+  animation: none;
+}
+
+main.project-page--hero-glow .project-page-spoilers details.spoiler.reveal.project-enter {
+  animation: fade-up 0.8s var(--ease-out) both;
 }
 
 main.project-page--hero-glow .project-page-spoilers details.spoiler:last-of-type {
