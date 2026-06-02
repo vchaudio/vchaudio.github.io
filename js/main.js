@@ -695,7 +695,7 @@
     var maxVisible = portfolioMaxVisibleCols(viewWidth, rows, {
       projectMobile: isProject,
     });
-    var fitAll = totalCols <= maxVisible;
+    var fitAll = root.hasAttribute("data-video-scroller-no-nav") || totalCols <= maxVisible;
     var centered = fitAll && (n === 2 || n === 4);
     var colsPerView = fitAll && !centered ? totalCols : centered ? maxVisible : maxVisible;
 
@@ -772,12 +772,42 @@
   }
 
   /* Marketing page: horizontal video thumbnail strips, prev/next scroll */
+  function initVideoScrollerNoNav(root, view) {
+    function refreshLayout() {
+      if (root.closest(".is-tab-inactive")) return;
+      if (root.closest(".home-portfolio-block") || root.closest(".project-portfolio-block")) {
+        applyPortfolioGridLayout(root);
+      }
+      view.scrollLeft = 0;
+      view.removeAttribute("data-fade-left");
+      view.removeAttribute("data-fade-right");
+    }
+
+    root.querySelectorAll("img").forEach(function (im) {
+      if (im.complete) return;
+      im.addEventListener("load", refreshLayout, { passive: true });
+    });
+    window.addEventListener("resize", refreshLayout, { passive: true });
+    root.addEventListener("vch:scroller-refresh", refreshLayout);
+    refreshLayout();
+    requestAnimationFrame(function () {
+      requestAnimationFrame(refreshLayout);
+    });
+  }
+
   function initVideoScrollers() {
     document.querySelectorAll("[data-video-scroller]").forEach(function (root) {
       var view = root.querySelector(".video-scroller__viewport");
+      if (!view) return;
+
+      if (root.hasAttribute("data-video-scroller-no-nav")) {
+        initVideoScrollerNoNav(root, view);
+        return;
+      }
+
       var prev = root.querySelector(".video-scroller__btn--prev");
       var next = root.querySelector(".video-scroller__btn--next");
-      if (!view || !prev || !next) return;
+      if (!prev || !next) return;
 
       if (root.closest(".home-portfolio-block") || root.closest(".project-portfolio-block")) {
         applyPortfolioGridLayout(root);
