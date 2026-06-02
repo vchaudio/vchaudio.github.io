@@ -1,4 +1,3 @@
-# CV / resume (local source + PDF, regenerate with scripts/build-cv-pdf.ps1)
+# CV source (regenerate PDF with scripts/build-cv-pdf.ps1; published PDF is tracked)
 cv-print.html
-Valentyn-Chumachenko-CV.pdf
 scripts/build-cv-pdf.ps1
