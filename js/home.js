@@ -116,20 +116,32 @@
     var VIDEOS_EXTRA_TOTAL_MS = VIDEOS_EXTRA_THUMB_MS + VIDEOS_EXTRA_STAGGER_END_MS;
     var VIDEOS_EXTRA_CONTAINER_START_MS = 200;
     var VIDEOS_EXTRA_CONTAINER_CLOSE_MS = 2200;
+    var VIDEOS_EXTRA_CONTAINER_CLOSE_NOBLEMEN_MS = 900;
     var HOME_BOTTOM_HIDE_MS = 550;
     var SHOW_MORE_AFTER_CLOSE_DELAY_MS = 40;
     var SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO = 0.5;
-    var MOBILE_BW_MQ = window.matchMedia("(max-width: 720px)");
-    var MOBILE_NOBLEMEN_MQ = window.matchMedia("(max-width: 480px)");
-    var MOBILE_ANCHOR_MS = 1000;
+    var VIDEOS_EXTRA_HIDE_LAST_DELAY_MS = 320;
+    var UNIFIED_VIDEOS_GRID_MQ = window.matchMedia("(max-width: 1100px)");
+    var MOBILE_ANCHOR_MS = 900;
     var MOBILE_ANCHOR_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-    function isMobileBestWorks() {
-      return MOBILE_BW_MQ.matches;
+    function isUnifiedVideosGrid() {
+      return UNIFIED_VIDEOS_GRID_MQ.matches;
     }
 
+    function bestWorksVideoCols() {
+      var bw = panelMain ? panelMain.querySelector(".best-works") : null;
+      if (!bw) return 5;
+      var cols = parseInt(getComputedStyle(bw).getPropertyValue("--bw-cols"), 10);
+      return cols > 0 ? cols : 5;
+    }
+
+    /* Orphan row: 5th thumb alone (4+1 @ ~1080px, 2+2+1 @ ~720px) — same anchor flow as mobile */
     function isMobileNoblemenAnchor() {
-      return MOBILE_NOBLEMEN_MQ.matches;
+      if (!isUnifiedVideosGrid()) return false;
+      var cols = bestWorksVideoCols();
+      var itemsInLastRow = 5 - Math.floor((5 - 1) / cols) * cols;
+      return itemsInLastRow === 1;
     }
 
     function mobileGridAnchorWrap() {
@@ -315,6 +327,44 @@
       else videosExtra.classList.remove("is-mobile-anchor-layout");
     }
 
+    function videosExtraContainerCloseMs() {
+      return isMobileNoblemenAnchor()
+        ? VIDEOS_EXTRA_CONTAINER_CLOSE_NOBLEMEN_MS
+        : VIDEOS_EXTRA_CONTAINER_CLOSE_MS;
+    }
+
+    function videosExtraContainerCloseDelay() {
+      if (!isMobileNoblemenAnchor()) return VIDEOS_EXTRA_CONTAINER_START_MS;
+      return VIDEOS_EXTRA_HIDE_LAST_DELAY_MS + VIDEOS_EXTRA_THUMB_MS;
+    }
+
+    function measurePanelMainAfterVideosClose() {
+      if (!panelMain || !videosExtra) return measurePanel(panelMain, { live: true });
+      var prevTransition = videosExtra.style.transition;
+      var prevMax = videosExtra.style.maxHeight;
+      videosExtra.style.transition = "none";
+      videosExtra.style.maxHeight = "0px";
+      void videosExtra.offsetHeight;
+      var h = measurePanel(panelMain, { live: true });
+      videosExtra.style.transition = prevTransition;
+      videosExtra.style.maxHeight = prevMax;
+      return h;
+    }
+
+    function runPanelMainShrinkForNoblemenClose(durationMs) {
+      if (!panelMain) return;
+      var fromH = panelMain.getBoundingClientRect().height;
+      var toH = measurePanelMainAfterVideosClose();
+      if (Math.abs(fromH - toH) < 2) return;
+      panelMain.classList.remove("home-panel--flow");
+      panelMain.style.maxHeight = fromH + "px";
+      panelMain.style.transition =
+        "max-height " + durationMs / 1000 + "s " + MOBILE_ANCHOR_EASE;
+      requestAnimationFrame(function () {
+        panelMain.style.maxHeight = toH + "px";
+      });
+    }
+
     function holdMobileAnchorAtPairedSlot(wrap) {
       if (!wrap || !videosExtra || !isMobileNoblemenAnchor()) return;
       var pairedLeft = wrap.getBoundingClientRect().left;
@@ -342,7 +392,7 @@
       if (!videosExtra) return 0;
 
       var needsMobileMeasure =
-        isMobileBestWorks() &&
+        isUnifiedVideosGrid() &&
         videosExtra.classList.contains("is-open") &&
         !videosExtra.classList.contains("is-container-closing");
 
@@ -746,12 +796,16 @@
         videosExtra.classList.remove(
           "is-closing",
           "is-container-closing",
+          "is-close-sync",
           "is-hiding",
           "is-close-measure",
           "is-mobile-anchor-layout"
         );
         videosExtra.style.transition = "";
         videosExtra.style.maxHeight = "";
+      }
+      if (panelMain) {
+        panelMain.style.transition = "";
       }
       resetMobileAnchor(mobileGridAnchorWrap());
       setMobileAnchorLayoutHidden(false);
@@ -792,7 +846,12 @@
         videosExtra._onGridTransitionEnd = null;
       }
       videosExtra.style.transition = "none";
-      videosExtra.classList.remove("is-open", "is-hiding", "is-container-closing");
+      videosExtra.classList.remove(
+        "is-open",
+        "is-hiding",
+        "is-container-closing",
+        "is-close-sync"
+      );
       videosExtra.setAttribute("aria-hidden", "true");
       void videosExtra.offsetWidth;
       videosExtra.style.transition = "";
@@ -803,12 +862,16 @@
       resetMobileAnchor(mobileGridAnchorWrap());
       setMobileAnchorLayoutHidden(false);
       revealShowMoreAfterClose();
+      if (panelMain) {
+        panelMain.style.transition = "";
+      }
       lockPanelMainHeight();
       videosAnimating = false;
     }
 
     function beginContainerClose() {
       if (!videosExtra || videosCloseFinished) return;
+      var closeMs = videosExtraContainerCloseMs();
       var closeFromH = measureVideosExtraCloseHeight();
       videosExtra.classList.remove("is-close-measure");
       videosExtra.style.transition = "none";
@@ -816,14 +879,19 @@
 
       if (isMobileNoblemenAnchor()) {
         holdMobileAnchorAtPairedSlot(mobileGridAnchorWrap());
+        runPanelMainShrinkForNoblemenClose(closeMs);
       } else {
         videosExtra.classList.remove("is-open");
       }
 
+      if (isMobileNoblemenAnchor()) {
+        videosExtra.classList.add("is-close-sync");
+      }
       videosExtra.classList.add("is-container-closing");
       videosExtra.setAttribute("aria-hidden", "true");
-      void videosExtra.offsetWidth;
-      videosExtra.style.transition = "";
+      void videosExtra.offsetHeight;
+      videosExtra.style.transition =
+        "max-height " + closeMs / 1000 + "s " + MOBILE_ANCHOR_EASE;
       videosExtra.style.maxHeight = "0px";
 
       function onTransitionEnd(e) {
@@ -833,15 +901,19 @@
 
       videosExtra._onGridTransitionEnd = onTransitionEnd;
       videosExtra.addEventListener("transitionend", onTransitionEnd);
-      pushVideosCloseTimer(
-        window.setTimeout(
-          revealShowMoreAfterClose,
-          Math.round(VIDEOS_EXTRA_CONTAINER_CLOSE_MS * SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO)
-        )
-      );
-      pushVideosCloseTimer(
-        window.setTimeout(finishVideosClose, VIDEOS_EXTRA_CONTAINER_CLOSE_MS + 100)
-      );
+
+      if (isMobileNoblemenAnchor()) {
+        revealShowMoreAfterClose();
+      } else {
+        pushVideosCloseTimer(
+          window.setTimeout(
+            revealShowMoreAfterClose,
+            Math.round(closeMs * SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO)
+          )
+        );
+      }
+
+      pushVideosCloseTimer(window.setTimeout(finishVideosClose, closeMs + 100));
     }
 
     function beginVideosOpenAfterAnchor() {
@@ -887,7 +959,8 @@
 
       videosAnimating = true;
       videosExpanded = false;
-      unlockPanelMainFlow();
+      if (isMobileNoblemenAnchor()) lockPanelMainHeight();
+      else unlockPanelMainFlow();
 
       if (showMoreBtn) {
         showMoreBtn.setAttribute("aria-expanded", "false");
@@ -903,23 +976,20 @@
       videosExtra.classList.add("is-hiding");
       restartExtraThumbAnimations();
 
+      var containerCloseDelay = videosExtraContainerCloseDelay();
+
       pushVideosCloseTimer(
         window.setTimeout(function () {
           beginContainerClose();
-        }, VIDEOS_EXTRA_CONTAINER_START_MS)
+        }, containerCloseDelay)
       );
 
-      var closeFinishMs =
-        VIDEOS_EXTRA_CONTAINER_START_MS + VIDEOS_EXTRA_CONTAINER_CLOSE_MS + 100;
+      var closeMs = videosExtraContainerCloseMs();
+      var closeFinishMs = containerCloseDelay + closeMs + 100;
       if (isMobileNoblemenAnchor() && !reduceMotion) {
         closeFinishMs = Math.max(
           closeFinishMs,
-          VIDEOS_EXTRA_CONTAINER_START_MS +
-            Math.round(
-              VIDEOS_EXTRA_CONTAINER_CLOSE_MS * SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO
-            ) +
-            MOBILE_ANCHOR_MS +
-            100
+          containerCloseDelay + MOBILE_ANCHOR_MS + 100
         );
       }
 

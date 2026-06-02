@@ -139,21 +139,19 @@ main.home-main {
   }
 }
 
-/* Very narrow mobile only: Noblemen anchor — JS owns transform; disable puzzle keyframes on this tile */
-@media (max-width: 480px) {
-  .best-works__row--videos > .video-thumb-wrap.is-mobile-anchor {
-    animation: none !important;
-    opacity: 1 !important;
-    filter: none !important;
-    will-change: transform;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-  }
+/* Noblemen anchor (orphan row) — JS owns transform; disable puzzle keyframes on this tile */
+.best-works__row--videos > .video-thumb-wrap.is-mobile-anchor {
+  animation: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
 
-  .best-works__videos-extra.is-mobile-anchor-layout .best-works__videos-extra-inner .video-thumb-wrap {
-    visibility: hidden;
-    pointer-events: none;
-  }
+.best-works__videos-extra.is-mobile-anchor-layout .best-works__videos-extra-inner .video-thumb-wrap {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -910,6 +908,11 @@ main.home-main {
   transition: max-height 2.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Noblemen close: JS sets inline duration; fallback matches home.js */
+.best-works__videos-extra.is-hiding.is-container-closing.is-close-sync {
+  transition: max-height 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .best-works__videos-extra-inner {
   overflow: hidden;
   min-height: 0;
@@ -1000,16 +1003,8 @@ main.home-main {
   }
 }
 
-@media (max-width: 720px) {
-  .best-works {
-    --bw-cols: 2;
-  }
-
-  .best-works__row--projects {
-    grid-template-columns: 1fr;
-  }
-
-  /* Show More open: one continuous 2-column grid (5th thumb pairs with 1st extra, not orphaned) */
+/* Show More open: one grid — 5th thumb pairs with 1st extra when it wraps to its own row (~1100px) */
+@media (max-width: 1100px) {
   .best-works__videos-block:has(.best-works__videos-extra.is-open:not(.is-container-closing)) {
     display: flex;
     flex-wrap: wrap;
@@ -1057,7 +1052,7 @@ main.home-main {
   }
 
   /*
-   * Show Less on 2-col flat grid: hide bottom → top (extra 8 → 1).
+   * Show Less on flat grid: hide bottom → top (extra 8 → 1).
    * Show More keeps the global 1 → 8 stagger — matches visual slots 6 → 13.
    */
   .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(8) { animation-delay: 0.04s; }
@@ -1072,6 +1067,16 @@ main.home-main {
   .best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap,
   .best-works__videos-extra.is-hiding .video-thumb-wrap {
     will-change: transform, opacity;
+  }
+}
+
+@media (max-width: 720px) {
+  .best-works {
+    --bw-cols: 2;
+  }
+
+  .best-works__row--projects {
+    grid-template-columns: 1fr;
   }
 
   /* Equal-height video cards: fixed caption block + 2-line clamp */

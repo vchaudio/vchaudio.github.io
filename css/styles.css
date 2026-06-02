@@ -2482,6 +2482,33 @@ a.job-card.job-card--to-project:focus-visible {
   display: none;
 }
 
+/* Mobile: allow vertical page scroll when swiping on thumbs / carousels */
+@media (max-width: 720px) {
+  .video-scroller__viewport {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+
+  .video-scroller__viewport .video-thumb,
+  .video-scroller__viewport .video-thumb-wrap {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  [data-portfolio-fit-all="true"] .video-scroller__viewport,
+  [data-portfolio-centered="true"] .video-scroller__viewport {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  main.project-page--hero-glow .project-portfolio-block .video-thumb,
+  main.project-page--hero-glow .project-portfolio-block .video-thumb-wrap {
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .marketing-main .marketing-showcase .video-thumb,
+  .marketing-main .marketing-showcase .video-thumb-wrap {
+    touch-action: pan-y pinch-zoom;
+  }
+}
+
 .video-scroller__strip {
   display: flex;
   flex-direction: row;
@@ -2750,7 +2777,6 @@ a.job-card.job-card--to-project:focus-visible {
     flex: 1 1 100%;
     width: 100%;
     order: -1;
-    touch-action: pan-x pinch-zoom;
   }
 
   .marketing-main .marketing-showcase .video-scroller__btn {
@@ -2958,7 +2984,6 @@ a.job-card.job-card--to-project:focus-visible {
     order: -1;
     margin-inline: auto;
     box-sizing: border-box;
-    touch-action: pan-x pinch-zoom;
   }
 
   .page-other-projects .other-projects-scroller .video-scroller__btn {

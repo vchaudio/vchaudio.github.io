@@ -905,6 +905,7 @@
         scrollPage(1);
       });
       function handleScrollerResize() {
+        if (root.closest(".is-tab-inactive")) return;
         if (root.closest(".home-portfolio-block") || root.closest(".project-portfolio-block")) {
           applyPortfolioGridLayout(root);
         }
@@ -912,6 +913,7 @@
       }
 
       view.addEventListener("scroll", updateScrollerState, { passive: true });
+      root.addEventListener("vch:scroller-refresh", updateScrollerState);
       window.addEventListener("resize", handleScrollerResize, { passive: true });
       updateScrollerState();
       requestAnimationFrame(function () {
@@ -1021,6 +1023,104 @@
     );
   }
 
+  function initProjectTablists() {
+    document.querySelectorAll("[data-project-tablist]").forEach(function (tablist) {
+      var tabs = [].slice.call(tablist.querySelectorAll("[data-project-tab]"));
+      if (!tabs.length) return;
+
+      var panels = {};
+      tabs.forEach(function (tab) {
+        var key = tab.getAttribute("data-project-tab");
+        var panelId = tab.getAttribute("aria-controls");
+        var panel = panelId ? document.getElementById(panelId) : null;
+        if (key && panel) panels[key] = panel;
+      });
+
+      var active =
+        tabs.find(function (t) {
+          return t.getAttribute("aria-selected") === "true";
+        }) || tabs[0];
+      var activeKey = active ? active.getAttribute("data-project-tab") : null;
+      var panelsWrap = tablist.parentElement
+        ? tablist.parentElement.querySelector(".project-portfolio-tab-panels")
+        : null;
+
+      function refreshPanelScrollers(panel) {
+        if (!panel) return;
+        panel.querySelectorAll("[data-video-scroller]").forEach(function (root) {
+          if (root.closest(".home-portfolio-block") || root.closest(".project-portfolio-block")) {
+            applyPortfolioGridLayout(root);
+          }
+          root.dispatchEvent(new CustomEvent("vch:scroller-refresh"));
+        });
+      }
+
+      function clampScrollAfterTabResize() {
+        var maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        if (window.scrollY > maxScroll) {
+          window.scrollTo(0, maxScroll);
+        }
+      }
+
+      function switchTab(next) {
+        if (!panels[next] || next === activeKey) return;
+        activeKey = next;
+        tabs.forEach(function (tab) {
+          var on = tab.getAttribute("data-project-tab") === next;
+          tab.setAttribute("aria-selected", on ? "true" : "false");
+          tab.tabIndex = on ? 0 : -1;
+        });
+        Object.keys(panels).forEach(function (key) {
+          var panel = panels[key];
+          if (!panel) return;
+          var on = key === next;
+          panel.classList.toggle("is-tab-inactive", !on);
+          panel.setAttribute("aria-hidden", on ? "false" : "true");
+        });
+        refreshPanelScrollers(panels[next]);
+        clampScrollAfterTabResize();
+        requestAnimationFrame(clampScrollAfterTabResize);
+      }
+
+      if (panelsWrap && activeKey && panels[activeKey]) {
+        refreshPanelScrollers(panels[activeKey]);
+        if (typeof ResizeObserver !== "undefined") {
+          var resizeRaf = 0;
+          var tabPanelObserver = new ResizeObserver(function () {
+            if (resizeRaf) return;
+            resizeRaf = requestAnimationFrame(function () {
+              resizeRaf = 0;
+              clampScrollAfterTabResize();
+            });
+          });
+          Object.keys(panels).forEach(function (key) {
+            if (panels[key]) tabPanelObserver.observe(panels[key]);
+          });
+        }
+      }
+
+      tablist.addEventListener("click", function (e) {
+        var tab = e.target.closest("[data-project-tab]");
+        if (!tab || !tablist.contains(tab)) return;
+        switchTab(tab.getAttribute("data-project-tab"));
+      });
+
+      tablist.addEventListener("keydown", function (e) {
+        var current = tabs.findIndex(function (t) {
+          return t.getAttribute("aria-selected") === "true";
+        });
+        if (current < 0) return;
+        var next = current;
+        if (e.key === "ArrowRight") next = (current + 1) % tabs.length;
+        else if (e.key === "ArrowLeft") next = (current - 1 + tabs.length) % tabs.length;
+        else return;
+        e.preventDefault();
+        tabs[next].focus();
+        switchTab(tabs[next].getAttribute("data-project-tab"));
+      });
+    });
+  }
+
   function initScrollToTop() {
     var btn = document.querySelector("[data-scroll-to-top]");
     if (!btn) return;
@@ -1060,6 +1160,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       initSpoilers();
       initReveal();
+      initProjectTablists();
       initVideoScrollers();
       initOtherProjectsSync();
       initVideoLightbox();
@@ -1070,6 +1171,7 @@
   } else {
     initSpoilers();
     initReveal();
+    initProjectTablists();
     initVideoScrollers();
     initOtherProjectsSync();
     initVideoLightbox();

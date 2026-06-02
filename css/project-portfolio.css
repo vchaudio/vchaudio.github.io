@@ -395,7 +395,6 @@ main.project-page--hero-glow .project-portfolio-block--embedded {
     flex: 1 1 100%;
     width: 100%;
     order: -1;
-    touch-action: pan-x pinch-zoom;
   }
 
   .project-portfolio-block .video-scroller__btn {
@@ -644,4 +643,116 @@ main.project-page--hero-glow .project-portfolio-block--embedded {
 .project-portfolio-block .video-thumb-caption--single {
   font-weight: 500;
   color: var(--text);
+}
+
+/* Portfolio tabs (resume-style; moonray-battle-lands-tab.html) */
+.project-portfolio-tabs-section .home-tabs {
+  display: flex;
+  flex-direction: row;
+  gap: 0.35rem;
+  margin: 0 0 1.25rem;
+  padding: 0.35rem;
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+}
+
+.project-portfolio-tabs-section .home-tab {
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.35rem;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius-lg) - 6px);
+  background: transparent;
+  box-shadow: none;
+  font-family: var(--font);
+  font-weight: 500;
+  font-size: clamp(0.72rem, 1.8vw, 0.88rem);
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.25s,
+    background 0.25s,
+    color 0.25s,
+    box-shadow 0.25s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.project-portfolio-tabs-section .home-tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 40%, rgba(228, 160, 74, 0.06) 50%, transparent 60%);
+  transform: translateX(-100%);
+  transition: transform 0.6s var(--ease-out);
+  pointer-events: none;
+}
+
+.project-portfolio-tabs-section .home-tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.project-portfolio-tabs-section .home-tab:hover::before {
+  transform: translateX(100%);
+}
+
+.project-portfolio-tabs-section .home-tab[aria-selected="true"] {
+  color: var(--text);
+  background: var(--surface);
+  border-color: rgba(228, 160, 74, 0.35);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(228, 160, 74, 0.1);
+}
+
+.project-portfolio-tabs-section .home-tab[aria-selected="true"]::before {
+  transform: translateX(100%);
+}
+
+.project-portfolio-tabs-section .home-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.project-portfolio-tabs-section .home-tab:active {
+  transform: scale(0.98);
+}
+
+/* Active panel sizes the block; inactive panels are lifted out of flow */
+.project-portfolio-tab-panels {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.project-portfolio-tab-panels > .home-tab-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+.project-portfolio-tab-panels > .home-tab-panel.is-tab-inactive {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+.project-portfolio-tab-panels > .home-tab-panel:not(.is-tab-inactive) {
+  position: relative;
+  z-index: 1;
+}
+
+.project-portfolio-tabs-section .home-tab-panel > .resume-section__heading:first-child {
+  margin-top: 0;
 }
