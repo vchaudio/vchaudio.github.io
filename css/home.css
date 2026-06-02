@@ -1648,6 +1648,40 @@ a.home-social-btn {
   margin-bottom: 0;
 }
 
+.home-panel--resume .experience-list .job-card--experience {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem;
+}
+
+.home-panel--resume a.job-card.job-card--experience {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.home-panel--resume .job-card--experience h3 {
+  color: var(--text);
+}
+
+.home-panel--resume .job-card--experience .job-meta {
+  color: var(--accent);
+}
+
+.home-panel--resume .job-card--experience p {
+  color: var(--text-muted);
+}
+
+.home-panel--resume .job-card--experience .job-card__project {
+  margin: 0 0 0.35rem;
+  font-size: 0.84rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
 .home-panel--resume .job-card--studio {
   background: linear-gradient(168deg, #201c18 0%, var(--bg-elevated) 42%, #1a1714 100%);
   border: 1px solid rgba(228, 160, 74, 0.2);
