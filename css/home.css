@@ -908,11 +908,6 @@ main.home-main {
   transition: max-height 2.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Noblemen close: JS sets inline duration; fallback matches home.js */
-.best-works__videos-extra.is-hiding.is-container-closing.is-close-sync {
-  transition: max-height 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
 .best-works__videos-extra-inner {
   overflow: hidden;
   min-height: 0;
