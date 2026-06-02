@@ -14,6 +14,16 @@ main.project-page--hero-glow {
   animation: project-banner-in 0.9s var(--ease-out) 0.06s both;
 }
 
+/* VM-XCtrl: composite hero (contain), same entrance as full-bleed banners */
+.page-overview-banner--vm-xctrl-hero .vm-xctrl-hero-banner {
+  opacity: 0;
+  transform: scale(1.08) translateY(8px);
+}
+
+.page-overview-banner--vm-xctrl-hero.project-enter .vm-xctrl-hero-banner {
+  animation: project-banner-in 0.9s var(--ease-out) 0.06s both;
+}
+
 @keyframes project-banner-in {
   from {
     opacity: 0;
@@ -37,6 +47,7 @@ main.project-page--hero-glow .reveal.project-enter {
 
 @media (prefers-reduced-motion: reduce) {
   .page-overview-banner .page-overview-banner__img,
+  .page-overview-banner--vm-xctrl-hero .vm-xctrl-hero-banner,
   main.project-page--hero-glow .reveal {
     opacity: 1;
     transform: none;
@@ -46,10 +57,36 @@ main.project-page--hero-glow .reveal.project-enter {
 
 main.project-page--hero-glow > .page-hero,
 main.project-page--hero-glow > .resume-section,
+main.project-page--hero-glow > .sub-content,
 main.project-page--hero-glow > .project-page-spoilers {
   max-width: min(1000px, 100%);
   margin-left: auto;
   margin-right: auto;
+}
+
+.page-overview-banner + main.project-page--hero-glow .page-hero-title-row h1 {
+  color: #f0d78c;
+}
+
+/* VM-XCtrl only: slightly narrower than default project column; respect header side inset */
+main.project-page--vm-xctrl {
+  max-width: min(1130px, calc(100% - 2 * var(--brand-header-inset) - 30px));
+}
+
+main.project-page--vm-xctrl > .page-hero,
+main.project-page--vm-xctrl > .sub-content,
+main.project-page--vm-xctrl > .project-page-spoilers {
+  max-width: min(950px, calc(100% - 2 * var(--brand-header-inset) - 30px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-overview-banner.page-overview-banner--vm-xctrl-hero {
+  max-width: min(1130px, calc(100% - 2 * var(--brand-header-inset) - 30px));
+}
+
+.page-overview-banner + main.project-page--vm-xctrl .page-hero h1 {
+  color: #f0d78c;
 }
 
 main.project-page--hero-glow .project-page-spoilers {

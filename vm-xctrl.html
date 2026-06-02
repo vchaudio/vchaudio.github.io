@@ -15,6 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/project-portfolio.css" />
     <script src="js/nav-arrival.js"></script>
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
@@ -29,7 +30,7 @@
       aria-label="Behringer X-Touch and Voicemeeter Potato"
     >
       <img
-        class="vm-xctrl-hero-banner"
+        class="page-overview-banner__img vm-xctrl-hero-banner"
         src="assets/vm-xctrl-hero-banner.webp"
         alt="Behringer X-Touch universal control surface and Voicemeeter Potato mixer"
         width="4096"
@@ -40,20 +41,9 @@
       />
     </div>
 
-    <main>
+    <main class="project-page--hero-glow project-page--vm-xctrl">
       <div class="page-hero reveal">
-        <div class="page-hero-title-row">
-          <nav class="page-back-inline" aria-label="Section navigation">
-            <a class="page-back" href="index.html" aria-label="Back to home">
-              <span class="page-back-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-            </a>
-          </nav>
-          <h1>VM-XCtrl</h1>
-        </div>
+        <h1>VM-XCtrl</h1>
         <p class="lead">Voicemeeter ↔ Behringer X-Touch bridge — tactile mixing, meters, and scribble feedback over UDP (XCtrl mode).</p>
       </div>
 
@@ -98,8 +88,109 @@
         </div>
       </div>
 
-      <div class="vm-xctrl-spoilers">
-        <details class="spoiler reveal">
+      <div class="project-page-spoilers vm-xctrl-spoilers">
+        <details class="spoiler reveal" open>
+          <summary>
+            <span class="spoiler-summary-label">Download</span>
+            <span class="spoiler-chevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </summary>
+          <div class="spoiler-body">
+            <div class="spoiler-inner">
+              <p class="vm-xctrl-download-lead">
+                Builds and release notes on
+                <a href="https://github.com/vchaudio/VM-Xctrl/releases" rel="noopener noreferrer" target="_blank">GitHub Releases</a>.
+              </p>
+              <div class="vm-xctrl-releases" role="list">
+                <article class="vm-xctrl-release" role="listitem">
+                  <h3 class="vm-xctrl-release__heading">
+                    <a href="https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.6/VM-Xctrl_v1.0.0.6.exe" download>v.1.0.0.6 — API handling rework</a>
+                    <span class="vm-xctrl-release__badge vm-xctrl-release__badge--latest">Latest</span>
+                  </h3>
+                  <p class="vm-xctrl-release__meta">17 Jan 2026</p>
+                  <ul class="detail-list">
+                    <li>Reworked startup flow for loading the Voicemeeter API.</li>
+                    <li>
+                      Scans the default Voicemeeter install folder (<code>C:\Program Files (x86)\VB\Voicemeeter</code>) and
+                      locates required DLLs automatically — independent of a specific Voicemeeter version; tested with 3.1.1.9,
+                      3.1.2.2, and intended for future releases.
+                    </li>
+                    <li>Older Voicemeeter versions may work but are untested; legacy API differences can limit some features.</li>
+                    <li>If DLLs are not found, you are prompted to pick the Voicemeeter installation folder manually.</li>
+                    <li>Voicemeeter folder can be changed anytime from the tray icon context menu.</li>
+                  </ul>
+                </article>
+
+                <details class="vm-xctrl-older-versions">
+                  <summary>Older Versions</summary>
+                  <div class="vm-xctrl-releases vm-xctrl-releases--nested" role="list">
+                <article class="vm-xctrl-release" role="listitem">
+                  <h3 class="vm-xctrl-release__heading">
+                    <a href="https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.5/VM-Xctrl_v1.0.0.5.exe" download>v.1.0.0.5 — Experimental</a>
+                    <span class="vm-xctrl-release__badge vm-xctrl-release__badge--prerelease">Pre-release</span>
+                  </h3>
+                  <p class="vm-xctrl-release__meta">25 Nov 2025</p>
+                  <ul class="detail-list">
+                    <li>Possible fix for fader resistance when you move a fader suddenly or very quickly.</li>
+                  </ul>
+                </article>
+
+                <article class="vm-xctrl-release" role="listitem">
+                  <h3 class="vm-xctrl-release__heading">
+                    <a href="https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.4/VM-Xctrl_v1.0.0.4.exe" download>v.1.0.0.4 — License system updated</a>
+                  </h3>
+                  <p class="vm-xctrl-release__meta">15 Oct 2025</p>
+                  <ul class="detail-list">
+                    <li>License system updated to accept keys purchased on Gumroad.</li>
+                    <li>Use this version or newer to activate a purchased key successfully.</li>
+                  </ul>
+                </article>
+
+                <article class="vm-xctrl-release" role="listitem">
+                  <h3 class="vm-xctrl-release__heading">
+                    <a href="https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.3/VM-Xctrl_v1.0.0.3.exe" download>v.1.0.0.3</a>
+                  </h3>
+                  <p class="vm-xctrl-release__meta">13 Oct 2025</p>
+                  <ul class="detail-list">
+                    <li><strong>Fixed:</strong> Possible crash when moving or touching faders on the BUSES layer.</li>
+                    <li><strong>Improved:</strong> Fader feedback on the BUSES layer (near-instant response).</li>
+                    <li><strong>Optimized:</strong> Scribble strip update performance on the BUSES layer.</li>
+                  </ul>
+                </article>
+
+                <article class="vm-xctrl-release" role="listitem">
+                  <h3 class="vm-xctrl-release__heading">
+                    <a href="https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.2/VM-Xctrl_v1.0.0.2.exe" download>v.1.0.0.2</a>
+                  </h3>
+                  <p class="vm-xctrl-release__meta">13 Oct 2025</p>
+                  <ul class="detail-list">
+                    <li>
+                      <strong>Fixed:</strong> Autostart path handling — with “Start on Login” enabled, you are prompted to
+                      specify the executable path added to system startup.
+                    </li>
+                  </ul>
+                </article>
+
+                <article class="vm-xctrl-release" role="listitem">
+                  <h3 class="vm-xctrl-release__heading">
+                    <a href="https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.1/VM-Xctrl_v1.0.exe" download>v.1.0.0.1</a>
+                  </h3>
+                  <p class="vm-xctrl-release__meta">13 Oct 2025</p>
+                  <ul class="detail-list">
+                    <li>Initial release.</li>
+                  </ul>
+                </article>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="spoiler reveal" open>
           <summary>
             <span class="spoiler-summary-label">Features</span>
             <span class="spoiler-chevron" aria-hidden="true">
@@ -137,7 +228,7 @@
           </div>
         </details>
 
-        <details class="spoiler reveal">
+        <details class="spoiler reveal" open>
           <summary>
             <span class="spoiler-summary-label">Requirements</span>
             <span class="spoiler-chevron" aria-hidden="true">
@@ -157,7 +248,7 @@
           </div>
         </details>
 
-        <details class="spoiler reveal">
+        <details class="spoiler reveal" open>
           <summary>
             <span class="spoiler-summary-label">Getting started</span>
             <span class="spoiler-chevron" aria-hidden="true">

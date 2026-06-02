@@ -2026,7 +2026,7 @@ a.job-card.job-card--to-project:focus-visible {
   max-width: min(100%, 1200px);
   margin-left: auto;
   margin-right: auto;
-  padding: 0 clamp(0.45rem, 1.6vw, 0.75rem) clamp(0.5rem, 1.8vw, 0.85rem);
+  padding: 0 clamp(0.59rem, 2.08vw, 0.98rem) clamp(0.65rem, 2.34vw, 1.1rem);
   background: var(--bg-elevated);
 }
 
@@ -2036,7 +2036,7 @@ a.job-card.job-card--to-project:focus-visible {
 
 /* Same height rule as former dual cells; single composite scales with width: auto */
 .page-overview-banner--vm-xctrl-hero .vm-xctrl-hero-banner {
-  height: clamp(115px, min(23.5vw, 29vh), 234px);
+  height: clamp(150px, min(30.55vw, 37.7vh), 304px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
@@ -2289,6 +2289,133 @@ a.job-card.job-card--to-project:focus-visible {
 }
 
 /* VM-XCtrl page: spoilers use full main width (not home tile 420px cap) */
+.vm-xctrl-download-lead {
+  margin: 0 0 1.1rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.vm-xctrl-releases {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.vm-xctrl-releases--nested {
+  margin-top: 0.85rem;
+}
+
+.vm-xctrl-older-versions {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.vm-xctrl-older-versions summary {
+  display: list-item;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+  list-style: none;
+}
+
+.vm-xctrl-older-versions summary::-webkit-details-marker {
+  display: none;
+}
+
+.vm-xctrl-older-versions summary::after {
+  content: " ›";
+  display: inline-block;
+  transition: transform 0.2s var(--ease-out);
+}
+
+.vm-xctrl-older-versions[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.vm-xctrl-older-versions summary:hover {
+  color: #f0be6e;
+}
+
+.vm-xctrl-release {
+  margin: 0;
+  padding: 0.95rem 1rem 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vm-xctrl-release__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.6rem;
+  margin: 0 0 0.25rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.vm-xctrl-release__heading a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.vm-xctrl-release__heading a:hover {
+  color: var(--accent);
+}
+
+.vm-xctrl-release__heading a[download]:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.14em;
+}
+
+.vm-xctrl-release__badge {
+  display: inline-block;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--radius-full);
+  line-height: 1.3;
+}
+
+.vm-xctrl-release__badge--latest {
+  color: #1a1408;
+  background: linear-gradient(145deg, #f0c878, var(--accent));
+}
+
+.vm-xctrl-release__badge--prerelease {
+  color: #f5efe8;
+  background: rgba(120, 100, 80, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.vm-xctrl-release__meta {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-dates);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.vm-xctrl-release .detail-list {
+  margin: 0;
+}
+
+.vm-xctrl-release .detail-list li + li {
+  margin-top: 0.35rem;
+}
+
+.vm-xctrl-release code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  color: #e8d4b8;
+}
+
 .vm-xctrl-spoilers {
   margin-top: 1.5rem;
 }
