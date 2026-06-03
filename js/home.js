@@ -482,6 +482,72 @@
     }
 
     var unifiedBlockSettling = false;
+    var videosCloseScrollY = null;
+    var videosCloseScrollLockY = null;
+    var videosCloseScrollLockRaf = 0;
+
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+
+    function blurShowMoreFocus() {
+      if (showMoreBtn && document.activeElement === showMoreBtn) {
+        showMoreBtn.blur();
+      }
+    }
+
+    function enableVideosCloseScrollLock() {
+      if (videosCloseScrollLockRaf) return;
+      function tick() {
+        if (videosCloseScrollLockY == null) {
+          videosCloseScrollLockRaf = 0;
+          return;
+        }
+        if (Math.abs(window.scrollY - videosCloseScrollLockY) > 0.5) {
+          var html = document.documentElement;
+          var prevScrollBehavior = html.style.scrollBehavior;
+          html.style.scrollBehavior = "auto";
+          var maxScroll = Math.max(
+            0,
+            document.documentElement.scrollHeight - window.innerHeight
+          );
+          window.scrollTo(0, Math.min(videosCloseScrollLockY, maxScroll));
+          html.style.scrollBehavior = prevScrollBehavior;
+        }
+        videosCloseScrollLockRaf = requestAnimationFrame(tick);
+      }
+      videosCloseScrollLockRaf = requestAnimationFrame(tick);
+    }
+
+    function disableVideosCloseScrollLock() {
+      videosCloseScrollLockY = null;
+      if (videosCloseScrollLockRaf) {
+        cancelAnimationFrame(videosCloseScrollLockRaf);
+        videosCloseScrollLockRaf = 0;
+      }
+    }
+
+    function captureVideosCloseScroll() {
+      videosCloseScrollY = window.scrollY;
+      videosCloseScrollLockY = videosCloseScrollY;
+      enableVideosCloseScrollLock();
+    }
+
+    function restoreVideosCloseScroll() {
+      if (videosCloseScrollY == null) return;
+      var y = videosCloseScrollY;
+      videosCloseScrollY = null;
+      disableVideosCloseScrollLock();
+      var html = document.documentElement;
+      var prevScrollBehavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = "auto";
+      var maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      window.scrollTo(0, Math.min(y, maxScroll));
+      requestAnimationFrame(function () {
+        window.scrollTo(0, Math.min(y, maxScroll));
+        html.style.scrollBehavior = prevScrollBehavior;
+      });
+    }
 
     function finishUnifiedBlockCollapse(onDone) {
       var block = unifiedVideosBlock();
@@ -776,19 +842,24 @@
     function lockPanelMainHeight(onLocked, opts) {
       opts = opts || {};
       if (!panelMain) return;
+
       panelMain.classList.remove("home-panel--flow");
       panelMain.classList.add("home-panel--instant-height");
       panelMain.style.maxHeight = measurePanel(panelMain, { live: true }) + "px";
-      if (opts.skipRemeasure) {
+
+      function finishLock() {
         panelMain.classList.remove("home-panel--instant-height");
         if (onLocked) onLocked();
+      }
+
+      if (opts.skipRemeasure) {
+        finishLock();
         return;
       }
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           panelMain.style.maxHeight = measurePanel(panelMain, { live: true }) + "px";
-          panelMain.classList.remove("home-panel--instant-height");
-          if (onLocked) onLocked();
+          finishLock();
         });
       });
     }
@@ -967,6 +1038,9 @@
       videosOpenPendingLock = false;
       videosCloseFinished = false;
       showMoreRevealedAfterClose = false;
+      videosCloseScrollY = null;
+      disableVideosCloseScrollLock();
+      root.classList.remove("is-videos-closing");
       unifiedBlockSettling = false;
       videosCloseTimers.forEach(function (id) {
         window.clearTimeout(id);
@@ -1042,9 +1116,16 @@
         }
         resetMobileAnchor(mobileGridAnchorWrap());
         setMobileAnchorLayoutHidden(false);
-        lockPanelMainHeight(null, { skipRemeasure: true });
         revealShowMoreAfterClose();
-        videosAnimating = false;
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            lockPanelMainHeight(function () {
+              restoreVideosCloseScroll();
+              root.classList.remove("is-videos-closing");
+              videosAnimating = false;
+            });
+          });
+        });
       }
 
       if (unifiedLayoutShrinking) {
@@ -1146,9 +1227,12 @@
       clearVideosAnimation();
       if (!videosExtra || !videosExtra.classList.contains("is-open")) return;
 
+      captureVideosCloseScroll();
+      blurShowMoreFocus();
+      root.classList.add("is-videos-closing");
+
       videosAnimating = true;
       videosExpanded = false;
-      unlockPanelMainFlow();
 
       if (showMoreBtn) {
         showMoreBtn.setAttribute("aria-expanded", "false");
@@ -1250,6 +1334,9 @@
     }
 
     if (showMoreBtn) {
+      showMoreBtn.addEventListener("pointerdown", function (e) {
+        if (e.pointerType === "mouse") e.preventDefault();
+      });
       showMoreBtn.addEventListener("click", toggleVideosMore);
     }
 

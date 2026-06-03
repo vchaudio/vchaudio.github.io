@@ -674,6 +674,20 @@ main.home-main {
 
 .best-works__videos-block {
   margin-bottom: 0;
+  overflow-anchor: none;
+}
+
+.best-works__videos-extra,
+#home-bottom {
+  overflow-anchor: none;
+}
+
+[data-home-root].is-videos-closing .home-panel--main,
+[data-home-root].is-videos-closing .home-panel__inner,
+[data-home-root].is-videos-closing .best-works__videos-block,
+[data-home-root].is-videos-closing .best-works__videos-extra,
+[data-home-root].is-videos-closing #home-bottom {
+  overflow-anchor: none;
 }
 
 .best-works__row {
