@@ -694,10 +694,13 @@
     if (!n) return false;
 
     var isProject = !!root.closest(".project-portfolio-block");
-    var viewWidth = view ? view.clientWidth : 960;
+    var mqMobile = window.matchMedia("(max-width: 720px)").matches;
+    var viewWidth = view ? view.clientWidth : 0;
+    if (!viewWidth && mqMobile) viewWidth = window.innerWidth;
+    if (!viewWidth) viewWidth = 960;
 
     var rows;
-    if (isProject && viewWidth < 720) {
+    if (isProject && (viewWidth < 720 || mqMobile)) {
       rows = 1;
     } else {
       rows = n <= 3 ? 1 : 2;
@@ -706,7 +709,7 @@
     var maxVisible = portfolioMaxVisibleCols(viewWidth, rows, {
       projectMobile: isProject,
     });
-    var fitAll = root.hasAttribute("data-video-scroller-no-nav") || totalCols <= maxVisible;
+    var fitAll = totalCols <= maxVisible;
     var centered = fitAll && (n === 2 || n === 4);
     var colsPerView = fitAll && !centered ? totalCols : centered ? maxVisible : maxVisible;
 
@@ -717,12 +720,35 @@
     root.classList.toggle("video-scroller--fit-all", fitAll);
     strip.style.setProperty("--portfolio-grid-rows", String(rows));
     strip.style.setProperty("--portfolio-total-cols", String(totalCols));
-    if (isProject && viewWidth < 960) {
+    root.removeAttribute("data-portfolio-scroll-step");
+    strip.style.removeProperty("--portfolio-col-count");
+    if (isProject && (viewWidth < 720 || mqMobile)) {
+      if (!fitAll) {
+        root.setAttribute("data-portfolio-scroll-step", "1");
+        strip.style.setProperty("--portfolio-cols-per-view", "2");
+        strip.style.setProperty("--portfolio-col-count", "2");
+      } else {
+        strip.style.removeProperty("--portfolio-cols-per-view");
+      }
+    } else if (isProject && viewWidth < 960) {
       strip.style.removeProperty("--portfolio-cols-per-view");
     } else {
       strip.style.setProperty("--portfolio-cols-per-view", String(colsPerView));
     }
     return true;
+  }
+
+  function portfolioItemStepWidth(items) {
+    if (!items || items.length < 2) return 0;
+    return items[1].offsetLeft - items[0].offsetLeft;
+  }
+
+  function portfolioItemStepIndex(view, items, colsPerPage) {
+    var stepW = portfolioItemStepWidth(items);
+    if (stepW <= 0) return 0;
+    var maxIdx = Math.max(0, items.length - colsPerPage);
+    var idx = Math.round(view.scrollLeft / stepW);
+    return Math.max(0, Math.min(maxIdx, idx));
   }
 
   function portfolioColsPerPageFromCss(thumbEl) {
@@ -744,7 +770,20 @@
     var totalCols = Math.ceil(items.length / rows);
     if (totalCols <= colsPerPage) return false;
 
-    var colW = items[rows] ? items[rows].offsetLeft - items[0].offsetLeft : 0;
+    if (root.getAttribute("data-portfolio-scroll-step") === "1") {
+      var maxIdx = Math.max(0, items.length - colsPerPage);
+      var curIdx = portfolioItemStepIndex(view, items, colsPerPage);
+      var nextIdx = Math.max(0, Math.min(maxIdx, curIdx + dir));
+      view.scrollTo({
+        left: items[nextIdx].offsetLeft,
+        behavior: reduceMotion ? "auto" : "smooth",
+      });
+      return true;
+    }
+
+    var stride = rows === 1 ? colsPerPage : rows;
+    if (stride >= items.length) stride = rows;
+    var colW = items[stride] ? items[stride].offsetLeft - items[0].offsetLeft : 0;
     if (colW <= 0) return false;
 
     var numPages = Math.ceil(totalCols / colsPerPage);
@@ -771,7 +810,17 @@
     var totalCols = Math.ceil(items.length / rows);
     if (totalCols <= colsPerPage) return false;
 
-    var colW = items[rows] ? items[rows].offsetLeft - items[0].offsetLeft : 0;
+    if (root.getAttribute("data-portfolio-scroll-step") === "1") {
+      var maxIdx = Math.max(0, items.length - colsPerPage);
+      var curIdx = portfolioItemStepIndex(view, items, colsPerPage);
+      prev.disabled = curIdx <= 0;
+      next.disabled = curIdx >= maxIdx;
+      return true;
+    }
+
+    var stride = rows === 1 ? colsPerPage : rows;
+    if (stride >= items.length) stride = rows;
+    var colW = items[stride] ? items[stride].offsetLeft - items[0].offsetLeft : 0;
     if (colW <= 0) return false;
 
     var numPages = Math.ceil(totalCols / colsPerPage);
@@ -782,16 +831,47 @@
     return true;
   }
 
-  /* Marketing page: horizontal video thumbnail strips, prev/next scroll */
+  /* Desktop: no side arrows when grid fits; mobile: paged swipe + bottom buttons when present */
   function initVideoScrollerNoNav(root, view) {
+    var prev = root.querySelector(".video-scroller__btn--prev");
+    var next = root.querySelector(".video-scroller__btn--next");
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function updateButtons() {
+      if (!prev || !next) return;
+      if (portfolioGridButtonState(root, view, prev, next)) return;
+      var eps = 8;
+      prev.disabled = view.scrollLeft <= eps;
+      next.disabled = view.scrollLeft + view.clientWidth >= view.scrollWidth - eps;
+    }
+
     function refreshLayout() {
       if (root.closest(".is-tab-inactive")) return;
       if (root.closest(".home-portfolio-block") || root.closest(".project-portfolio-block")) {
         applyPortfolioGridLayout(root);
       }
-      view.scrollLeft = 0;
-      view.removeAttribute("data-fade-left");
-      view.removeAttribute("data-fade-right");
+      if (root.getAttribute("data-portfolio-fit-all") === "true") {
+        view.scrollLeft = 0;
+        view.removeAttribute("data-fade-left");
+        view.removeAttribute("data-fade-right");
+      }
+      updateButtons();
+    }
+
+    function scrollPage(dir) {
+      if (portfolioGridScrollPage(root, view, dir, reduceMotion)) return;
+      var amount = Math.max(120, view.clientWidth * 0.72);
+      view.scrollBy({ left: dir * amount, behavior: reduceMotion ? "auto" : "smooth" });
+    }
+
+    if (prev && next) {
+      prev.addEventListener("click", function () {
+        scrollPage(-1);
+      });
+      next.addEventListener("click", function () {
+        scrollPage(1);
+      });
+      view.addEventListener("scroll", updateButtons, { passive: true });
     }
 
     root.querySelectorAll("img").forEach(function (im) {
