@@ -110,6 +110,8 @@
     var videosCloseFinished = false;
     var showMoreRevealedAfterClose = false;
     var videosOpenPendingLock = false;
+    var unifiedLayoutShrinking = false;
+    var unifiedShrinkStartedAt = 0;
     var VIDEOS_EXTRA_OPEN_MS = 550;
     var VIDEOS_EXTRA_THUMB_MS = 850;
     var VIDEOS_EXTRA_STAGGER_END_MS = 360;
@@ -119,6 +121,7 @@
     var HOME_BOTTOM_HIDE_MS = 550;
     var SHOW_MORE_AFTER_CLOSE_DELAY_MS = 40;
     var SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO = 0.5;
+    var VIDEOS_EXTRA_HIDE_LAST_DELAY_MS = 320;
     var UNIFIED_VIDEOS_GRID_MQ = window.matchMedia("(max-width: 1100px)");
     var MOBILE_ANCHOR_MS = 900;
     var NOBLEMEN_REVEAL_DELAY_MS = 100;
@@ -334,6 +337,208 @@
       return VIDEOS_EXTRA_CONTAINER_START_MS;
     }
 
+    function unifiedVideosGridCloseDelay() {
+      return VIDEOS_EXTRA_HIDE_LAST_DELAY_MS + VIDEOS_EXTRA_THUMB_MS;
+    }
+
+    function unifiedVideosBlock() {
+      return videosExtra ? videosExtra.closest(".best-works__videos-block") : null;
+    }
+
+    function measureUnifiedVideosBlockCollapsedHeight() {
+      var block = unifiedVideosBlock();
+      if (!block) return 0;
+      var row = block.querySelector(".best-works__row--videos");
+      if (row) {
+        var rowH = row.getBoundingClientRect().height;
+        if (rowH > 0) return Math.ceil(rowH);
+      }
+      var mainWraps = block.querySelectorAll(".best-works__row--videos .video-thumb-wrap");
+      if (!mainWraps.length) return block.getBoundingClientRect().height;
+      var blockTop = block.getBoundingClientRect().top;
+      var maxBottom = blockTop;
+      mainWraps.forEach(function (wrap) {
+        maxBottom = Math.max(maxBottom, wrap.getBoundingClientRect().bottom);
+      });
+      return Math.ceil(maxBottom - blockTop);
+    }
+
+    function clearUnifiedBlockTransitionEnd() {
+      var block = unifiedVideosBlock();
+      if (!block || !block._unifiedBlockOnEnd) return;
+      block.removeEventListener("transitionend", block._unifiedBlockOnEnd);
+      block._unifiedBlockOnEnd = null;
+    }
+
+    function watchUnifiedBlockTransitionEnd(onDone) {
+      var block = unifiedVideosBlock();
+      if (!block) {
+        if (onDone) onDone();
+        return;
+      }
+      clearUnifiedBlockTransitionEnd();
+      function onEnd(e) {
+        if (e.target !== block || e.propertyName !== "max-height") return;
+        clearUnifiedBlockTransitionEnd();
+        if (onDone) onDone();
+      }
+      block._unifiedBlockOnEnd = onEnd;
+      block.addEventListener("transitionend", onEnd);
+    }
+
+    function beginNoblemenUnifiedAnchorClose() {
+      if (!videosExtra || videosCloseFinished || videosExtra._noblemenCloseStarted) return;
+      if (!isMobileNoblemenAnchor() || reduceMotion) return;
+      videosExtra._noblemenCloseStarted = true;
+      holdMobileAnchorAtPairedSlot(mobileGridAnchorWrap());
+      pushVideosCloseTimer(
+        window.setTimeout(revealShowMoreAfterClose, NOBLEMEN_REVEAL_DELAY_MS)
+      );
+    }
+
+    function beginUnifiedGridCleanup() {
+      if (!videosExtra || videosCloseFinished || videosExtra._unifiedGridCleanedUp) return;
+      videosExtra._unifiedGridCleanedUp = true;
+
+      if (!isMobileNoblemenAnchor()) {
+        videosExtra.classList.remove("is-open");
+      } else if (!videosExtra._noblemenCloseStarted) {
+        beginNoblemenUnifiedAnchorClose();
+      }
+
+      videosExtra.classList.add("is-container-closing", "is-unified-handoff");
+      videosExtra.setAttribute("aria-hidden", "true");
+      videosExtra.classList.remove("is-hiding");
+      videosExtra.style.transition = "none";
+      videosExtra.style.maxHeight = "0px";
+      extraThumbWraps().forEach(function (wrap) {
+        wrap.style.animation = "none";
+      });
+    }
+
+    function onUnifiedBlockCollapsed() {
+      beginUnifiedGridCleanup();
+      scheduleUnifiedCloseFinish();
+    }
+
+    function scheduleUnifiedCloseFinish() {
+      if (videosCloseFinished || !videosExtra || videosExtra._unifiedFinishQueued) return;
+      videosExtra._unifiedFinishQueued = true;
+      finishVideosClose();
+    }
+
+    function prepareVideosExtraDomAfterClose() {
+      if (!videosExtra) return;
+      videosExtra.style.transition = "none";
+      videosExtra.classList.remove(
+        "is-open",
+        "is-hiding",
+        "is-container-closing",
+        "is-unified-handoff"
+      );
+      videosExtra.setAttribute("aria-hidden", "true");
+      void videosExtra.offsetWidth;
+      videosExtra.style.transition = "";
+      videosExtra.style.maxHeight = "";
+      extraThumbWraps().forEach(function (wrap) {
+        wrap.style.animation = "none";
+      });
+    }
+
+    function resetUnifiedVideosBlockCollapse() {
+      unifiedLayoutShrinking = false;
+      unifiedShrinkStartedAt = 0;
+      clearUnifiedBlockTransitionEnd();
+      var block = unifiedVideosBlock();
+      if (!block) return;
+      block.style.transition = "";
+      block.style.maxHeight = "";
+      block.style.overflow = "";
+    }
+
+    function settleUnifiedBlockBeforeLock(onDone) {
+      var block = unifiedVideosBlock();
+      if (!block) {
+        if (onDone) onDone();
+        return;
+      }
+
+      if (!videosExtra._unifiedGridCleanedUp) {
+        prepareVideosExtraDomAfterClose();
+      } else {
+        videosExtra.classList.remove("is-hiding");
+        extraThumbWraps().forEach(function (wrap) {
+          wrap.style.animation = "none";
+        });
+      }
+
+      unifiedLayoutShrinking = false;
+      unifiedShrinkStartedAt = 0;
+      clearUnifiedBlockTransitionEnd();
+      block.style.transition = "";
+      block.style.maxHeight = "";
+      block.style.overflow = "";
+      if (onDone) onDone();
+    }
+
+    var unifiedBlockSettling = false;
+
+    function finishUnifiedBlockCollapse(onDone) {
+      var block = unifiedVideosBlock();
+      if (!block || !unifiedLayoutShrinking) {
+        if (onDone) onDone();
+        return;
+      }
+      if (unifiedBlockSettling) return;
+
+      var settleFallbackId = null;
+
+      function afterBlockAnim() {
+        if (settleFallbackId) {
+          window.clearTimeout(settleFallbackId);
+          settleFallbackId = null;
+        }
+        if (unifiedBlockSettling || !unifiedLayoutShrinking) {
+          if (onDone) onDone();
+          return;
+        }
+        unifiedBlockSettling = true;
+        settleUnifiedBlockBeforeLock(function () {
+          unifiedBlockSettling = false;
+          if (onDone) onDone();
+        });
+      }
+
+      if (videosExtra && videosExtra._unifiedFinishQueued) {
+        afterBlockAnim();
+        return;
+      }
+
+      watchUnifiedBlockTransitionEnd(afterBlockAnim);
+      settleFallbackId = window.setTimeout(function () {
+        clearUnifiedBlockTransitionEnd();
+        afterBlockAnim();
+      }, 220);
+    }
+
+    function beginUnifiedLayoutShrink(closeMs) {
+      var block = unifiedVideosBlock();
+      if (!block) return;
+      unifiedLayoutShrinking = true;
+      unifiedShrinkStartedAt = Date.now();
+      if (videosExtra) videosExtra._unifiedFinishQueued = false;
+      var fromH = block.getBoundingClientRect().height;
+      var toH = measureUnifiedVideosBlockCollapsedHeight();
+      block.style.transition = "none";
+      block.style.overflow = "hidden";
+      block.style.maxHeight = fromH + "px";
+      void block.offsetHeight;
+      block.style.transition =
+        "max-height " + closeMs / 1000 + "s " + MOBILE_ANCHOR_EASE;
+      block.style.maxHeight = toH + "px";
+      watchUnifiedBlockTransitionEnd(onUnifiedBlockCollapsed);
+    }
+
     function holdMobileAnchorAtPairedSlot(wrap) {
       if (!wrap || !videosExtra || !isMobileNoblemenAnchor()) return;
       var pairedLeft = wrap.getBoundingClientRect().left;
@@ -354,7 +559,13 @@
       var fromTransform = wrap.style.transform;
       if (!fromTransform) return;
       setMobileAnchorActive(wrap, true);
-      startMobileAnchorTransition(wrap, fromTransform, "translate3d(0, 0, 0)", null, true);
+      startMobileAnchorTransition(
+        wrap,
+        fromTransform,
+        "translate3d(0, 0, 0)",
+        null,
+        true
+      );
     }
 
     function measureVideosExtraCloseHeight() {
@@ -562,11 +773,17 @@
       return h;
     }
 
-    function lockPanelMainHeight(onLocked) {
+    function lockPanelMainHeight(onLocked, opts) {
+      opts = opts || {};
       if (!panelMain) return;
       panelMain.classList.remove("home-panel--flow");
       panelMain.classList.add("home-panel--instant-height");
       panelMain.style.maxHeight = measurePanel(panelMain, { live: true }) + "px";
+      if (opts.skipRemeasure) {
+        panelMain.classList.remove("home-panel--instant-height");
+        if (onLocked) onLocked();
+        return;
+      }
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
           panelMain.style.maxHeight = measurePanel(panelMain, { live: true }) + "px";
@@ -750,6 +967,7 @@
       videosOpenPendingLock = false;
       videosCloseFinished = false;
       showMoreRevealedAfterClose = false;
+      unifiedBlockSettling = false;
       videosCloseTimers.forEach(function (id) {
         window.clearTimeout(id);
       });
@@ -768,11 +986,16 @@
           "is-container-closing",
           "is-hiding",
           "is-close-measure",
-          "is-mobile-anchor-layout"
+          "is-mobile-anchor-layout",
+          "is-unified-handoff"
         );
         videosExtra.style.transition = "";
         videosExtra.style.maxHeight = "";
+        videosExtra._unifiedFinishQueued = false;
+        videosExtra._unifiedGridCleanedUp = false;
+        videosExtra._noblemenCloseStarted = false;
       }
+      resetUnifiedVideosBlockCollapse();
       resetMobileAnchor(mobileGridAnchorWrap());
       setMobileAnchorLayoutHidden(false);
       var homeBottom = document.getElementById("home-bottom");
@@ -802,42 +1025,40 @@
 
     function finishVideosClose() {
       if (videosCloseFinished || !videosExtra) return;
-      videosCloseFinished = true;
-      videosCloseTimers.forEach(function (id) {
-        window.clearTimeout(id);
-      });
-      videosCloseTimers = [];
-      if (videosExtra._onGridTransitionEnd) {
-        videosExtra.removeEventListener("transitionend", videosExtra._onGridTransitionEnd);
-        videosExtra._onGridTransitionEnd = null;
+
+      function finalizeVideosClose() {
+        if (videosCloseFinished) return;
+        videosCloseFinished = true;
+        videosCloseTimers.forEach(function (id) {
+          window.clearTimeout(id);
+        });
+        videosCloseTimers = [];
+        if (videosExtra._onGridTransitionEnd) {
+          videosExtra.removeEventListener("transitionend", videosExtra._onGridTransitionEnd);
+          videosExtra._onGridTransitionEnd = null;
+        }
+        if (!unifiedLayoutShrinking) {
+          prepareVideosExtraDomAfterClose();
+        }
+        resetMobileAnchor(mobileGridAnchorWrap());
+        setMobileAnchorLayoutHidden(false);
+        lockPanelMainHeight(null, { skipRemeasure: true });
+        revealShowMoreAfterClose();
+        videosAnimating = false;
       }
-      videosExtra.style.transition = "none";
-      videosExtra.classList.remove(
-        "is-open",
-        "is-hiding",
-        "is-container-closing"
-      );
-      videosExtra.setAttribute("aria-hidden", "true");
-      void videosExtra.offsetWidth;
-      videosExtra.style.transition = "";
-      videosExtra.style.maxHeight = "";
-      extraThumbWraps().forEach(function (wrap) {
-        wrap.style.animation = "none";
-      });
-      resetMobileAnchor(mobileGridAnchorWrap());
-      setMobileAnchorLayoutHidden(false);
-      revealShowMoreAfterClose();
-      lockPanelMainHeight();
-      videosAnimating = false;
+
+      if (unifiedLayoutShrinking) {
+        finishUnifiedBlockCollapse(finalizeVideosClose);
+        return;
+      }
+
+      finalizeVideosClose();
     }
 
     function beginContainerClose() {
       if (!videosExtra || videosCloseFinished) return;
       var closeMs = videosExtraContainerCloseMs();
-      var closeFromH = measureVideosExtraCloseHeight();
-      videosExtra.classList.remove("is-close-measure");
-      videosExtra.style.transition = "none";
-      videosExtra.style.maxHeight = closeFromH + "px";
+      var layoutShrunk = unifiedLayoutShrinking;
 
       if (isMobileNoblemenAnchor()) {
         holdMobileAnchorAtPairedSlot(mobileGridAnchorWrap());
@@ -847,18 +1068,28 @@
 
       videosExtra.classList.add("is-container-closing");
       videosExtra.setAttribute("aria-hidden", "true");
-      void videosExtra.offsetHeight;
-      videosExtra.style.transition =
-        "max-height " + closeMs / 1000 + "s " + MOBILE_ANCHOR_EASE;
-      videosExtra.style.maxHeight = "0px";
 
-      function onTransitionEnd(e) {
-        if (e.target !== videosExtra || e.propertyName !== "max-height") return;
-        finishVideosClose();
+      if (layoutShrunk) {
+        return;
+      } else {
+        var closeFromH = measureVideosExtraCloseHeight();
+        videosExtra.classList.remove("is-close-measure");
+        videosExtra.style.transition = "none";
+        videosExtra.style.maxHeight = closeFromH + "px";
+        void videosExtra.offsetHeight;
+        videosExtra.style.transition =
+          "max-height " + closeMs / 1000 + "s " + MOBILE_ANCHOR_EASE;
+        videosExtra.style.maxHeight = "0px";
+
+        function onTransitionEnd(e) {
+          if (e.target !== videosExtra || e.propertyName !== "max-height") return;
+          finishVideosClose();
+        }
+
+        videosExtra._onGridTransitionEnd = onTransitionEnd;
+        videosExtra.addEventListener("transitionend", onTransitionEnd);
+        pushVideosCloseTimer(window.setTimeout(finishVideosClose, closeMs + 100));
       }
-
-      videosExtra._onGridTransitionEnd = onTransitionEnd;
-      videosExtra.addEventListener("transitionend", onTransitionEnd);
 
       if (isMobileNoblemenAnchor()) {
         pushVideosCloseTimer(
@@ -872,8 +1103,6 @@
           )
         );
       }
-
-      pushVideosCloseTimer(window.setTimeout(finishVideosClose, closeMs + 100));
     }
 
     function beginVideosOpenAfterAnchor() {
@@ -935,23 +1164,39 @@
       videosExtra.classList.add("is-hiding");
       restartExtraThumbAnimations();
 
-      var containerCloseDelay = videosExtraContainerCloseDelay();
-
-      pushVideosCloseTimer(
-        window.setTimeout(function () {
-          beginContainerClose();
-        }, containerCloseDelay)
-      );
-
       var closeMs = videosExtraContainerCloseMs();
-      var closeFinishMs = containerCloseDelay + closeMs + 100;
-      if (isMobileNoblemenAnchor() && !reduceMotion) {
+      var layoutCloseDelay = videosExtraContainerCloseDelay();
+
+      if (isUnifiedVideosGrid()) {
+        pushVideosCloseTimer(
+          window.setTimeout(function () {
+            beginUnifiedLayoutShrink(closeMs);
+          }, layoutCloseDelay)
+        );
+        if (isMobileNoblemenAnchor() && !reduceMotion) {
+          pushVideosCloseTimer(
+            window.setTimeout(
+              beginNoblemenUnifiedAnchorClose,
+              unifiedVideosGridCloseDelay()
+            )
+          );
+        }
+      } else {
+        pushVideosCloseTimer(
+          window.setTimeout(function () {
+            beginContainerClose();
+          }, layoutCloseDelay)
+        );
+      }
+
+      var closeFinishMs = layoutCloseDelay + closeMs + 100;
+      if (isUnifiedVideosGrid() && isMobileNoblemenAnchor() && !reduceMotion) {
         closeFinishMs = Math.max(
           closeFinishMs,
-          containerCloseDelay +
+          unifiedVideosGridCloseDelay() +
             NOBLEMEN_REVEAL_DELAY_MS +
             MOBILE_ANCHOR_MS +
-            100
+            120
         );
       }
 
