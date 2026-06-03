@@ -278,332 +278,444 @@
     });
   }
 
-  /* My studio: full-screen image lightbox with HQ URL + zoom / pan */
+  /* My studio: fullscreen gallery (dimmed backdrop like video lightbox) */
   function initImageLightbox() {
     var root = document.getElementById("image-lightbox");
     if (!root) return;
     var img = document.getElementById("image-lightbox-img");
+    var imgNext = document.getElementById("image-lightbox-img-next");
     var stage = document.getElementById("image-lightbox-stage");
-    var pan = document.getElementById("image-lightbox-pan");
-    var cap = document.getElementById("image-lightbox-caption");
-    var zoomPct = document.getElementById("image-lightbox-zoompct");
-    var fsBtn = root.querySelector("[data-lb-fullscreen]");
-    if (!img || !stage || !pan) return;
+    var track = document.getElementById("image-lightbox-track");
+    if (!img || !imgNext || !stage || !track) return;
 
-    var prevBodyOverflow = "";
-    var scale = 1;
-    var panX = 0;
-    var panY = 0;
-    var dragging = false;
-    var dragStartX = 0;
-    var dragStartY = 0;
-    var startPanX = 0;
-    var startPanY = 0;
-    var capturedPointerId = null;
-    var pinchActive = false;
-    var pinchDist0 = 0;
-    var pinchScale0 = 1;
-    var pinchMid0X = 0;
-    var pinchMid0Y = 0;
-    var pinchPanX0 = 0;
-    var pinchPanY0 = 0;
+    var prevBtn = root.querySelector("[data-lb-prev]");
+    var nextBtn = root.querySelector("[data-lb-next]");
+    var counterEl = document.getElementById("image-lightbox-counter");
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var slideMs = reduceMotion ? 0 : 420;
+    var slides = [];
+    var slideIndex = 0;
+    var swipeStartX = 0;
+    var swipeStartY = 0;
+    var prevBodyOverflow = "";
     var stageBound = false;
+    var slideBusy = false;
+    var preloadCache = Object.create(null);
 
-    function updateZoomLabel() {
-      if (zoomPct) zoomPct.textContent = Math.round(scale * 100) + "%";
+    var slideTransition = slideMs
+      ? "transform " + slideMs + "ms cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+      : "";
+
+    function setTrackPosition(percent, animate) {
+      var value = "translateX(" + percent + "%)";
+      track.style.transition = animate ? slideTransition : "none";
+      track.style.transform = value;
     }
 
-    function applyTransform() {
-      pan.style.transition = reduceMotion || dragging ? "none" : "transform 0.1s ease-out";
-      pan.style.transform = "translate(" + panX + "px," + panY + "px) scale(" + scale + ")";
-      updateZoomLabel();
+    function resetTracks() {
+      setTrackPosition(0, false);
     }
 
-    function resetView() {
-      scale = 1;
-      panX = 0;
-      panY = 0;
-      applyTransform();
+    function clearSecondFrame() {
+      imgNext.removeAttribute("src");
+      imgNext.removeAttribute("alt");
     }
 
-    function setScale(next) {
-      var s = Math.min(5, Math.max(1, next));
-      scale = s;
-      if (scale <= 1) {
-        scale = 1;
-        panX = 0;
-        panY = 0;
+    function hideIncoming() {
+      clearSecondFrame();
+    }
+
+    function preloadImage(url) {
+      if (!url) return Promise.resolve(false);
+      if (preloadCache[url]) return preloadCache[url];
+      preloadCache[url] = new Promise(function (resolve) {
+        var probe = new Image();
+        var settled = false;
+        function settle(ok) {
+          if (settled) return;
+          settled = true;
+          if (!ok) {
+            resolve(false);
+            return;
+          }
+          if (probe.decode) {
+            probe.decode().then(function () {
+              resolve(true);
+            }).catch(function () {
+              resolve(true);
+            });
+          } else {
+            resolve(true);
+          }
+        }
+        probe.onload = function () {
+          settle(true);
+        };
+        probe.onerror = function () {
+          settle(false);
+        };
+        probe.src = url;
+      });
+      return preloadCache[url];
+    }
+
+    function whenImageReady(el, url) {
+      if (!url) return Promise.resolve(false);
+      return preloadImage(url).then(function (ok) {
+        if (!ok) return false;
+        return new Promise(function (resolve) {
+          var settled = false;
+          function finish(success) {
+            if (settled) return;
+            settled = true;
+            resolve(!!success);
+          }
+          function afterLoad() {
+            if (!el.naturalWidth) {
+              finish(false);
+              return;
+            }
+            if (el.decode) {
+              el.decode().then(function () {
+                finish(true);
+              }).catch(function () {
+                finish(true);
+              });
+            } else {
+              finish(true);
+            }
+          }
+          el.onload = function () {
+            afterLoad();
+          };
+          el.onerror = function () {
+            finish(false);
+          };
+          if (el.src !== url) el.src = url;
+          else if (el.complete && el.naturalWidth) afterLoad();
+        });
+      });
+    }
+
+    function applyImageSources(url) {
+      if (url && img.src !== url) img.src = url;
+    }
+
+    function setImageSources(url) {
+      return whenImageReady(img, url);
+    }
+
+    function clearImageSources() {
+      img.removeAttribute("src");
+      img.removeAttribute("alt");
+    }
+
+    function playEnterAnim() {
+      if (reduceMotion) {
+        stage.classList.remove("image-lightbox__stage--loading");
+        return;
       }
-      applyTransform();
+      img.style.transition = "";
+      img.style.transform = "";
+      root.classList.add("image-lightbox--enter");
+      stage.classList.remove("image-lightbox__stage--loading");
+      window.clearTimeout(playEnterAnim._t);
+      playEnterAnim._t = window.setTimeout(function () {
+        root.classList.remove("image-lightbox--enter");
+        img.style.transform = "";
+      }, 380);
     }
 
-    function fullscreenElement() {
-      return (
-        document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        null
-      );
-    }
-
-    function isLightboxFullscreen() {
-      var el = fullscreenElement();
-      return el === img || el === root;
-    }
-
-    function exitLightboxFullscreen() {
-      if (!isLightboxFullscreen()) return;
-      var ex = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
-      if (ex) ex.call(document).catch(function () {});
-    }
-
-    function updateFullscreenButton() {
-      if (!fsBtn || fsBtn.hidden) return;
-      var on = fullscreenElement() === img;
-      fsBtn.textContent = on ? "Exit" : "Fullscreen";
-      fsBtn.setAttribute("aria-label", on ? "Exit fullscreen" : "Enter fullscreen");
-      fsBtn.setAttribute("aria-pressed", on ? "true" : "false");
-    }
-
-    function toggleLightboxFullscreen() {
-      if (!img.getAttribute("src")) return;
-      resetView();
-      var enter = img.requestFullscreen || img.webkitRequestFullscreen || img.mozRequestFullScreen;
-      var ex = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
-      if (fullscreenElement() === img) {
-        if (ex) ex.call(document).catch(function () {});
-      } else if (enter) {
-        enter.call(img).catch(function () {});
-      }
-    }
-
-    function releasePinchPointerCapture() {
-      dragging = false;
-      stage.classList.remove("is-grabbing");
-      if (capturedPointerId != null) {
-        try {
-          stage.releasePointerCapture(capturedPointerId);
-        } catch (errRel) {}
-        capturedPointerId = null;
-      }
-    }
-
-    function pinchMidFromTouches(e) {
-      var t0 = e.touches[0];
-      var t1 = e.touches[1];
-      var dx = t1.clientX - t0.clientX;
-      var dy = t1.clientY - t0.clientY;
+    function slidePayload(trig) {
+      var inner = trig.querySelector("img");
+      var hq = (trig.getAttribute("data-lightbox-hq") || "").trim();
       return {
-        x: (t0.clientX + t1.clientX) / 2,
-        y: (t0.clientY + t1.clientY) / 2,
-        dist: Math.hypot(dx, dy)
+        url: hq || trig.getAttribute("data-full-src") || "",
+        alt: inner ? inner.getAttribute("alt") || "" : "",
       };
     }
 
-    function onTouchStartPinch(e) {
-      if (root.hidden) return;
-      if (e.touches.length !== 2) return;
-      releasePinchPointerCapture();
-      var m = pinchMidFromTouches(e);
-      if (m.dist < 8) return;
-      pinchDist0 = Math.max(m.dist, 8);
-      pinchScale0 = scale;
-      pinchMid0X = m.x;
-      pinchMid0Y = m.y;
-      pinchPanX0 = panX;
-      pinchPanY0 = panY;
-      pinchActive = true;
+    function slidesForTrigger(trig) {
+      var gallery = trig.closest(".studio-gallery");
+      if (!gallery) return [trig];
+      return [].slice.call(gallery.querySelectorAll("[data-studio-lightbox]"));
     }
 
-    function onTouchMovePinch(e) {
-      if (root.hidden || !pinchActive || e.touches.length < 2) return;
-      e.preventDefault();
-      var m = pinchMidFromTouches(e);
-      var d = Math.max(m.dist, 1);
-      var next = pinchScale0 * (d / pinchDist0);
-      scale = Math.min(5, Math.max(1, next));
-      panX = pinchPanX0 + (m.x - pinchMid0X);
-      panY = pinchPanY0 + (m.y - pinchMid0Y);
-      if (scale <= 1) {
-        scale = 1;
-        panX = 0;
-        panY = 0;
+    function updateGalleryChrome() {
+      var multi = slides.length > 1;
+      if (prevBtn) prevBtn.hidden = !multi;
+      if (nextBtn) nextBtn.hidden = !multi;
+      if (counterEl) {
+        if (multi) {
+          counterEl.textContent = slideIndex + 1 + " / " + slides.length;
+          counterEl.hidden = false;
+        } else {
+          counterEl.textContent = "";
+          counterEl.hidden = true;
+        }
       }
-      pan.style.transition = "none";
-      pan.style.transform = "translate(" + panX + "px," + panY + "px) scale(" + scale + ")";
-      updateZoomLabel();
+      root.setAttribute(
+        "aria-label",
+        multi
+          ? "Enlarged photo " + (slideIndex + 1) + " of " + slides.length
+          : "Enlarged photo"
+      );
     }
 
-    function onTouchEndPinch(e) {
-      if (e.touches.length < 2) pinchActive = false;
+    function preloadAdjacent() {
+      if (slides.length < 2) return;
+      var i = slideIndex;
+      var len = slides.length;
+      preloadImage(slidePayload(slides[(i - 1 + len) % len]).url);
+      preloadImage(slidePayload(slides[(i + 1) % len]).url);
     }
 
-    function onWheel(e) {
+    function showSlideInstant(nextIndex, playEnter) {
+      if (!slides.length) return Promise.resolve();
+      slideIndex = ((nextIndex % slides.length) + slides.length) % slides.length;
+      var payload = slidePayload(slides[slideIndex]);
+      if (!payload.url) return Promise.resolve();
+      slideBusy = true;
+      stage.classList.add("image-lightbox__stage--loading");
+      preloadAdjacent();
+      hideIncoming();
+      resetTracks();
+      if (playEnter) {
+        img.style.transition = "";
+        img.style.transform = "";
+      }
+      img.alt = payload.alt;
+      updateGalleryChrome();
+      return setImageSources(payload.url)
+        .then(function () {
+          if (playEnter) {
+            requestAnimationFrame(function () {
+              playEnterAnim();
+            });
+          } else {
+            stage.classList.remove("image-lightbox__stage--loading");
+          }
+        })
+        .finally(function () {
+          slideBusy = false;
+        });
+    }
+
+    function finishSlide(nextIndex, payload) {
+      applyImageSources(payload.url);
+      img.alt = payload.alt;
+      resetTracks();
+      hideIncoming();
+      slideIndex = nextIndex;
+      updateGalleryChrome();
+      preloadAdjacent();
+      slideBusy = false;
+    }
+
+    function slideHorizontal(dir) {
+      if (!slides.length || slideBusy || slides.length < 2) return;
+      var len = slides.length;
+      var nextIndex = ((slideIndex + dir) % len + len) % len;
+      var payload = slidePayload(slides[nextIndex]);
+      if (!payload.url) return;
+      var currentSrc = img.getAttribute("src") || "";
+      if (currentSrc === payload.url) return;
+
+      slideBusy = true;
+      window.clearTimeout(slideHorizontal._fallback);
+      track.removeEventListener("transitionend", slideHorizontal._onEnd);
+
+      var ready =
+        dir > 0
+          ? whenImageReady(imgNext, payload.url).then(function (ok) {
+              if (!ok) return false;
+              imgNext.alt = payload.alt;
+              return true;
+            })
+          : Promise.all([
+              whenImageReady(img, payload.url),
+              whenImageReady(imgNext, currentSrc),
+            ]).then(function (results) {
+              if (!results[0] || !results[1]) return false;
+              img.alt = payload.alt;
+              return true;
+            });
+
+      ready.then(function (ok) {
+        if (!ok) {
+          slideBusy = false;
+          return;
+        }
+
+        if (!slideMs) {
+          finishSlide(nextIndex, payload);
+          return;
+        }
+
+        slideHorizontal._onEnd = function (e) {
+          if (e.target !== track || e.propertyName !== "transform") return;
+          track.removeEventListener("transitionend", slideHorizontal._onEnd);
+          window.clearTimeout(slideHorizontal._fallback);
+          finishSlide(nextIndex, payload);
+        };
+
+        slideHorizontal._fallback = window.setTimeout(function () {
+          track.removeEventListener("transitionend", slideHorizontal._onEnd);
+          finishSlide(nextIndex, payload);
+        }, slideMs + 100);
+
+        track.addEventListener("transitionend", slideHorizontal._onEnd);
+
+        if (dir > 0) {
+          setTrackPosition(0, false);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              setTrackPosition(-50, true);
+            });
+          });
+        } else {
+          setTrackPosition(-50, false);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              setTrackPosition(0, true);
+            });
+          });
+        }
+      });
+    }
+
+    function stepSlide(dir) {
+      slideHorizontal(dir);
+    }
+
+    function close() {
+      unbindStage();
+      slides = [];
+      slideIndex = 0;
+      slideBusy = false;
+      root.classList.remove("image-lightbox--enter");
+      hideIncoming();
+      resetTracks();
+      updateGalleryChrome();
+      clearImageSources();
+      root.hidden = true;
+      root.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = prevBodyOverflow;
+    }
+
+    function warmNeighborsFromTrigger(trig) {
+      var gallery = trig.closest(".studio-gallery");
+      if (!gallery) return;
+      var list = [].slice.call(gallery.querySelectorAll("[data-studio-lightbox]"));
+      var idx = list.indexOf(trig);
+      if (idx < 0 || list.length < 2) return;
+      var len = list.length;
+      preloadImage(slidePayload(list[(idx - 1 + len) % len]).url);
+      preloadImage(slidePayload(list[(idx + 1) % len]).url);
+    }
+
+    function openFromTrigger(trig) {
+      slides = slidesForTrigger(trig);
+      slideIndex = Math.max(0, slides.indexOf(trig));
+      if (!slidePayload(slides[slideIndex]).url) return;
+      preloadAdjacent();
+      bindStage();
+      prevBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      root.hidden = false;
+      root.setAttribute("aria-hidden", "false");
+      showSlideInstant(slideIndex, true).then(function () {
+        var closeBtn = root.querySelector(".image-lightbox__close");
+        if (closeBtn) closeBtn.focus();
+      });
+    }
+
+    function onStageClick(e) {
       if (root.hidden) return;
-      e.preventDefault();
-      var factor = e.deltaY < 0 ? 1.1 : 0.9;
-      setScale(scale * factor);
+      if (e.target.closest(".image-lightbox__close, [data-lb-prev], [data-lb-next]")) return;
+      if (e.target.closest(".image-lightbox__frame:first-child .image-lightbox__img")) return;
+      var x = e.clientX;
+      var w = window.innerWidth;
+      if (slides.length > 1 && x < w * 0.22) {
+        e.preventDefault();
+        e.stopPropagation();
+        stepSlide(-1);
+        return;
+      }
+      if (slides.length > 1 && x > w * 0.78) {
+        e.preventDefault();
+        e.stopPropagation();
+        stepSlide(1);
+        return;
+      }
+      close();
     }
 
-    function onPointerDown(e) {
-      if (root.hidden) return;
-      if (pinchActive) return;
-      if (e.button !== 0) return;
-      if (e.target.closest(".image-lightbox__toolbar") || e.target.closest(".image-lightbox__close")) return;
-      if (scale <= 1) return;
-      dragging = true;
-      dragStartX = e.clientX;
-      dragStartY = e.clientY;
-      startPanX = panX;
-      startPanY = panY;
-      try {
-        stage.setPointerCapture(e.pointerId);
-        capturedPointerId = e.pointerId;
-      } catch (err) {}
-      stage.classList.add("is-grabbing");
+    function onSwipeStart(e) {
+      if (root.hidden || slides.length < 2 || e.touches.length !== 1) return;
+      swipeStartX = e.touches[0].clientX;
+      swipeStartY = e.touches[0].clientY;
     }
 
-    function onPointerMove(e) {
-      if (pinchActive) return;
-      if (!dragging) return;
-      panX = startPanX + (e.clientX - dragStartX);
-      panY = startPanY + (e.clientY - dragStartY);
-      pan.style.transition = "none";
-      pan.style.transform = "translate(" + panX + "px," + panY + "px) scale(" + scale + ")";
-      updateZoomLabel();
-    }
-
-    function endDrag(e) {
-      if (!dragging) return;
-      dragging = false;
-      stage.classList.remove("is-grabbing");
-      try {
-        if (e && e.pointerId != null) stage.releasePointerCapture(e.pointerId);
-      } catch (err2) {}
-      if (e && e.pointerId != null && capturedPointerId === e.pointerId) capturedPointerId = null;
-      applyTransform();
-    }
-
-    function onDoubleClickStage(e) {
-      if (root.hidden) return;
-      if (e.target.closest("button")) return;
-      e.preventDefault();
-      resetView();
+    function onSwipeEnd(e) {
+      if (root.hidden || slides.length < 2 || e.changedTouches.length !== 1) return;
+      var t = e.changedTouches[0];
+      var dx = t.clientX - swipeStartX;
+      var dy = t.clientY - swipeStartY;
+      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+      if (dx < 0) stepSlide(1);
+      else stepSlide(-1);
     }
 
     function bindStage() {
       if (stageBound) return;
       stageBound = true;
-      stage.addEventListener("wheel", onWheel, { passive: false });
-      stage.addEventListener("pointerdown", onPointerDown);
-      stage.addEventListener("pointermove", onPointerMove);
-      stage.addEventListener("pointerup", endDrag);
-      stage.addEventListener("pointercancel", endDrag);
-      stage.addEventListener("dblclick", onDoubleClickStage);
-      stage.addEventListener("touchstart", onTouchStartPinch, { passive: true });
-      stage.addEventListener("touchmove", onTouchMovePinch, { passive: false });
-      stage.addEventListener("touchend", onTouchEndPinch);
-      stage.addEventListener("touchcancel", onTouchEndPinch);
+      stage.addEventListener("click", onStageClick);
+      stage.addEventListener("touchstart", onSwipeStart, { passive: true });
+      stage.addEventListener("touchend", onSwipeEnd);
+      stage.addEventListener("touchcancel", onSwipeEnd);
     }
 
     function unbindStage() {
       if (!stageBound) return;
       stageBound = false;
-      stage.removeEventListener("wheel", onWheel);
-      stage.removeEventListener("pointerdown", onPointerDown);
-      stage.removeEventListener("pointermove", onPointerMove);
-      stage.removeEventListener("pointerup", endDrag);
-      stage.removeEventListener("pointercancel", endDrag);
-      stage.removeEventListener("dblclick", onDoubleClickStage);
-      stage.removeEventListener("touchstart", onTouchStartPinch);
-      stage.removeEventListener("touchmove", onTouchMovePinch);
-      stage.removeEventListener("touchend", onTouchEndPinch);
-      stage.removeEventListener("touchcancel", onTouchEndPinch);
-    }
-
-    function close() {
-      exitLightboxFullscreen();
-      pinchActive = false;
-      releasePinchPointerCapture();
-      unbindStage();
-      img.removeAttribute("src");
-      img.removeAttribute("alt");
-      if (cap) {
-        cap.textContent = "";
-        cap.hidden = true;
-      }
-      root.hidden = true;
-      root.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = prevBodyOverflow;
-      resetView();
-    }
-
-    function open(url, alt, caption) {
-      if (!url) return;
-      bindStage();
-      resetView();
-      img.alt = alt || "";
-      if (cap) {
-        if (caption) {
-          cap.textContent = caption;
-          cap.hidden = false;
-        } else {
-          cap.textContent = "";
-          cap.hidden = true;
-        }
-      }
-      root.hidden = false;
-      root.setAttribute("aria-hidden", "false");
-      prevBodyOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-
-      function afterLoad() {
-        resetView();
-      }
-      img.addEventListener("load", afterLoad, { once: true });
-      img.src = url;
-
-      var closeBtn = root.querySelector(".image-lightbox__close");
-      if (closeBtn) closeBtn.focus();
-
-      if (fsBtn) {
-        var canFs =
-          typeof img.requestFullscreen === "function" ||
-          typeof img.webkitRequestFullscreen === "function" ||
-          typeof img.mozRequestFullScreen === "function";
-        fsBtn.hidden = !canFs;
-        updateFullscreenButton();
-      }
+      stage.removeEventListener("click", onStageClick);
+      stage.removeEventListener("touchstart", onSwipeStart);
+      stage.removeEventListener("touchend", onSwipeEnd);
+      stage.removeEventListener("touchcancel", onSwipeEnd);
     }
 
     root.addEventListener("click", function (e) {
-      var fs = e.target.closest("[data-lb-fullscreen]");
-      if (fs && root.contains(fs)) {
+      var navPrev = e.target.closest("[data-lb-prev]");
+      var navNext = e.target.closest("[data-lb-next]");
+      if (navPrev && root.contains(navPrev)) {
         e.preventDefault();
         e.stopPropagation();
-        toggleLightboxFullscreen();
+        stepSlide(-1);
         return;
       }
-      var zbtn = e.target.closest("[data-lb-zoom]");
-      if (!zbtn || !root.contains(zbtn)) return;
-      e.preventDefault();
-      e.stopPropagation();
-      var kind = zbtn.getAttribute("data-lb-zoom");
-      if (kind === "in") setScale(scale * 1.2);
-      else if (kind === "out") setScale(scale / 1.2);
-      else resetView();
+      if (navNext && root.contains(navNext)) {
+        e.preventDefault();
+        e.stopPropagation();
+        stepSlide(1);
+        return;
+      }
     });
+
+    document.addEventListener(
+      "pointerdown",
+      function (e) {
+        var trig = e.target.closest("[data-studio-lightbox]");
+        if (trig) warmNeighborsFromTrigger(trig);
+      },
+      { passive: true }
+    );
 
     document.addEventListener("click", function (e) {
       var trig = e.target.closest("[data-studio-lightbox]");
       if (trig) {
         e.preventDefault();
-        var inner = trig.querySelector("img");
-        var altText = inner ? inner.getAttribute("alt") || "" : "";
-        var hq = (trig.getAttribute("data-lightbox-hq") || "").trim();
-        var url = hq || trig.getAttribute("data-full-src");
-        open(url, altText, trig.getAttribute("data-lightbox-caption"));
+        openFromTrigger(trig);
         return;
       }
       if (root.hidden) return;
@@ -612,33 +724,25 @@
       }
     });
 
-    document.addEventListener("fullscreenchange", updateFullscreenButton);
-    document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
-    document.addEventListener("mozfullscreenchange", updateFullscreenButton);
-
     document.addEventListener("keydown", function (e) {
       if (root.hidden) return;
       if (e.key === "Escape") {
         e.preventDefault();
-        if (fullscreenElement() === img) {
-          exitLightboxFullscreen();
-        } else {
-          close();
-        }
+        close();
         return;
       }
-      if (e.key === "+" || e.key === "=") {
+      if (e.key === "ArrowLeft" || e.key === "Left") {
         e.preventDefault();
-        setScale(scale * 1.15);
-      } else if (e.key === "-" || e.key === "_") {
+        stepSlide(-1);
+        return;
+      }
+      if (e.key === "ArrowRight" || e.key === "Right") {
         e.preventDefault();
-        setScale(scale / 1.15);
-      } else if (e.key === "0") {
-        e.preventDefault();
-        resetView();
+        stepSlide(1);
       }
     });
   }
+
 
   function marketingThumbsPerPageFromCss(thumbEl) {
     if (!thumbEl) return 4;

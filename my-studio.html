@@ -197,35 +197,27 @@
       aria-modal="true"
       aria-label="Enlarged photo"
     >
-      <div class="image-lightbox__backdrop" data-image-lightbox-close tabindex="-1"></div>
-      <figure class="image-lightbox__figure">
-        <button type="button" class="image-lightbox__close" data-image-lightbox-close aria-label="Close photo">
-          <span aria-hidden="true">×</span>
-        </button>
-        <div class="image-lightbox__toolbar" role="toolbar" aria-label="Photo controls">
-          <button type="button" class="image-lightbox__tool" data-lb-zoom="out" aria-label="Zoom out">−</button>
-          <button type="button" class="image-lightbox__tool" data-lb-zoom="reset" aria-label="Reset zoom and position">
-            Fit
-          </button>
-          <button type="button" class="image-lightbox__tool" data-lb-zoom="in" aria-label="Zoom in">+</button>
-          <span id="image-lightbox-zoompct" class="image-lightbox__zoompct" aria-live="polite">100%</span>
-          <button
-            type="button"
-            class="image-lightbox__tool image-lightbox__tool--text"
-            data-lb-fullscreen
-            hidden
-            aria-label="Enter fullscreen"
-          >
-            Fullscreen
-          </button>
-        </div>
-        <div id="image-lightbox-stage" class="image-lightbox__stage">
-          <div id="image-lightbox-pan" class="image-lightbox__pan">
+      <div class="image-lightbox__backdrop" data-image-lightbox-close tabindex="-1" aria-hidden="true"></div>
+      <button type="button" class="image-lightbox__close" data-image-lightbox-close aria-label="Close photo">
+        <span aria-hidden="true">×</span>
+      </button>
+      <button type="button" class="image-lightbox__nav image-lightbox__nav--prev" data-lb-prev aria-label="Previous photo" hidden>
+        <span aria-hidden="true">‹</span>
+      </button>
+      <button type="button" class="image-lightbox__nav image-lightbox__nav--next" data-lb-next aria-label="Next photo" hidden>
+        <span aria-hidden="true">›</span>
+      </button>
+      <div id="image-lightbox-stage" class="image-lightbox__stage">
+        <div id="image-lightbox-track" class="image-lightbox__track">
+          <div class="image-lightbox__frame">
             <img id="image-lightbox-img" class="image-lightbox__img" src="" alt="" decoding="async" draggable="false" />
           </div>
+          <div class="image-lightbox__frame">
+            <img id="image-lightbox-img-next" class="image-lightbox__img" alt="" aria-hidden="true" decoding="async" draggable="false" />
+          </div>
         </div>
-        <figcaption id="image-lightbox-caption" class="image-lightbox__figcaption" hidden></figcaption>
-      </figure>
+      </div>
+      <p id="image-lightbox-counter" class="image-lightbox__counter" hidden aria-live="polite"></p>
     </div>
 
     <button type="button" class="scroll-to-top" data-scroll-to-top aria-label="Back to top">
