@@ -82,13 +82,6 @@ main.home-main {
 .best-works-wrap--puzzle .best-works__row--videos > *:nth-child(4) { animation-delay: 0.58s; }
 .best-works-wrap--puzzle .best-works__row--videos > *:nth-child(5) { animation-delay: 0.66s; }
 
-.best-works-wrap--puzzle .best-works__row--videos > .video-thumb-wrap.is-puzzle-settled {
-  animation: none !important;
-  opacity: 1 !important;
-  filter: none !important;
-  transform: none;
-}
-
 @keyframes best-works-puzzle-float {
   0% {
     opacity: 0;
@@ -139,21 +132,6 @@ main.home-main {
   }
 }
 
-/* Noblemen anchor (orphan row) — JS owns transform; disable puzzle keyframes on this tile */
-.best-works__row--videos > .video-thumb-wrap.is-mobile-anchor {
-  animation: none !important;
-  opacity: 1 !important;
-  filter: none !important;
-  will-change: transform;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-.best-works__videos-extra.is-mobile-anchor-layout .best-works__videos-extra-inner .video-thumb-wrap {
-  visibility: hidden;
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .best-works-wrap {
     left: auto;
@@ -189,10 +167,6 @@ main.home-main {
   .best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap,
   .best-works__videos-extra.is-hiding .video-thumb-wrap {
     animation: none;
-  }
-
-  .best-works__videos-extra.is-mobile-anchor-layout .best-works__videos-extra-inner .video-thumb-wrap {
-    visibility: visible;
   }
 
   .home-bottom.home-bottom--hiding {
@@ -1140,7 +1114,7 @@ main.home-main {
   padding-top: 0.75rem;
 }
 
-/* Show More: 1 → 8, one after another (animate wrap so card hover scale works) */
+/* Show More: stagger in — extra inner (overflow primaries first when present) */
 .best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap {
   animation: best-works-puzzle-float 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -1153,20 +1127,24 @@ main.home-main {
 .best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap:nth-child(6) { animation-delay: 0.24s; }
 .best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap:nth-child(7) { animation-delay: 0.28s; }
 .best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap:nth-child(8) { animation-delay: 0.32s; }
+.best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap:nth-child(9) { animation-delay: 0.36s; }
+.best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap:nth-child(10) { animation-delay: 0.40s; }
 
-/* Show Less: row 2 L→R (6–8), row 1 L→R (1–5) */
+/* Show Less: hide from first in extra inner (overflow primaries) outward */
 .best-works__videos-extra.is-hiding .video-thumb-wrap {
   animation: best-works-puzzle-float-out 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(6) { animation-delay: 0.04s; }
-.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(7) { animation-delay: 0.08s; }
-.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(8) { animation-delay: 0.12s; }
-.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(1) { animation-delay: 0.20s; }
-.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(2) { animation-delay: 0.24s; }
-.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(3) { animation-delay: 0.28s; }
-.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(4) { animation-delay: 0.32s; }
-.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(5) { animation-delay: 0.36s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(1) { animation-delay: 0.04s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(2) { animation-delay: 0.08s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(3) { animation-delay: 0.12s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(4) { animation-delay: 0.16s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(5) { animation-delay: 0.20s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(6) { animation-delay: 0.24s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(7) { animation-delay: 0.28s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(8) { animation-delay: 0.32s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(9) { animation-delay: 0.36s; }
+.best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(10) { animation-delay: 0.40s; }
 
 .best-works .video-thumb--ua-eva .video-thumb__media img {
   object-position: 24% 50%;
@@ -1202,6 +1180,14 @@ main.home-main {
   .best-works__row--projects {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* 3rd project alone on row 2 — same width as tiles above, centered */
+  .best-works__row--projects > .home-portfolio-project:last-child:nth-child(3) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc((100% - var(--bw-gap, 0.75rem)) / 2);
+    max-width: calc((100% - var(--bw-gap, 0.75rem)) / 2);
+  }
 }
 
 @media (max-width: 860px) {
@@ -1210,7 +1196,7 @@ main.home-main {
   }
 }
 
-/* Show More open: one grid — 5th thumb pairs with 1st extra when it wraps to its own row (~1100px) */
+/* Show More open: one unified flex grid (~1100px and below) */
 @media (max-width: 1100px) {
   .best-works__videos-block:has(.best-works__videos-extra.is-open:not(.is-container-closing)) {
     display: flex;
@@ -1258,19 +1244,6 @@ main.home-main {
     align-items: stretch;
   }
 
-  /*
-   * Show Less on flat grid: hide bottom → top (extra 8 → 1).
-   * Show More keeps the global 1 → 8 stagger — matches visual slots 6 → 13.
-   */
-  .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(8) { animation-delay: 0.04s; }
-  .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(7) { animation-delay: 0.08s; }
-  .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(6) { animation-delay: 0.12s; }
-  .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(5) { animation-delay: 0.16s; }
-  .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(4) { animation-delay: 0.20s; }
-  .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(3) { animation-delay: 0.24s; }
-  .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(2) { animation-delay: 0.28s; }
-  .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(1) { animation-delay: 0.32s; }
-
   .best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap,
   .best-works__videos-extra.is-hiding .video-thumb-wrap {
     will-change: transform, opacity;
@@ -1284,6 +1257,13 @@ main.home-main {
 
   .best-works__row--projects {
     grid-template-columns: 1fr;
+  }
+
+  .best-works__row--projects > .home-portfolio-project:last-child:nth-child(3) {
+    grid-column: auto;
+    justify-self: stretch;
+    width: auto;
+    max-width: none;
   }
 
   /* Equal-height video cards: fixed caption block + 2-line clamp */

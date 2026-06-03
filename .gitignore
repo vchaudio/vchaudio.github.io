@@ -1,3 +1,9 @@
 # CV source (regenerate PDF with scripts/build-cv-pdf.ps1; published PDF is tracked)
 cv-print.html
 scripts/build-cv-pdf.ps1
+
+# Email signature (local tool; regenerate with scripts/build_signature_asset.py)
+email-signature.html
+assets/vch-mark-signature.png
+assets/vch-mark-signature.b64.txt
+scripts/build_signature_asset.py

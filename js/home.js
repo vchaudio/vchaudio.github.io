@@ -109,7 +109,6 @@
     var videosCloseTimers = [];
     var videosCloseFinished = false;
     var showMoreRevealedAfterClose = false;
-    var videosOpenPendingLock = false;
     var unifiedLayoutShrinking = false;
     var unifiedShrinkStartedAt = 0;
     var VIDEOS_EXTRA_OPEN_MS = 550;
@@ -123,9 +122,73 @@
     var SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO = 0.5;
     var VIDEOS_EXTRA_HIDE_LAST_DELAY_MS = 320;
     var UNIFIED_VIDEOS_GRID_MQ = window.matchMedia("(max-width: 1100px)");
-    var MOBILE_ANCHOR_MS = 900;
-    var NOBLEMEN_REVEAL_DELAY_MS = 100;
-    var MOBILE_ANCHOR_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+    var VIDEOS_BLOCK_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+    var PRIMARY_VIDEO_COUNT = 5;
+    var primaryVideoWraps = [];
+    var extraVideoWraps = [];
+    var lastVideoLayoutCols = null;
+
+    function initVideosWrapLists() {
+      var row = panelMain ? panelMain.querySelector(".best-works__row--videos") : null;
+      var inner = videosExtra ? videosExtra.querySelector(".best-works__videos-extra-inner") : null;
+      if (!row || !inner) return;
+      if (!primaryVideoWraps.length) {
+        primaryVideoWraps = Array.prototype.slice.call(
+          row.querySelectorAll(".video-thumb-wrap"),
+          0,
+          PRIMARY_VIDEO_COUNT
+        );
+      }
+      if (!extraVideoWraps.length) {
+        extraVideoWraps = Array.prototype.slice.call(
+          inner.querySelectorAll(".video-thumb-wrap")
+        );
+      }
+    }
+
+    function primaryVisibleCount(cols) {
+      if (cols >= 5) return 5;
+      if (cols === 4) return 4;
+      if (cols === 3) return 3;
+      if (cols === 2) return 4;
+      return cols;
+    }
+
+    function moveWrapToIndex(parent, wrap, index) {
+      if (wrap.parentNode !== parent) {
+        parent.insertBefore(wrap, parent.children[index] || null);
+        return;
+      }
+      var currentIndex = Array.prototype.indexOf.call(parent.children, wrap);
+      if (currentIndex !== index) {
+        parent.insertBefore(wrap, parent.children[index] || null);
+      }
+    }
+
+    function syncVideosPrimaryLayout() {
+      if (!videosExtra) return;
+      initVideosWrapLists();
+      var row = panelMain ? panelMain.querySelector(".best-works__row--videos") : null;
+      var inner = videosExtra.querySelector(".best-works__videos-extra-inner");
+      if (!row || !inner) return;
+
+      if (videosExpanded) {
+        lastVideoLayoutCols = bestWorksVideoCols();
+        return;
+      }
+
+      var visible = primaryVisibleCount(bestWorksVideoCols());
+      var rowItems = primaryVideoWraps.slice(0, visible);
+      var innerItems = primaryVideoWraps.slice(visible).concat(extraVideoWraps);
+
+      rowItems.forEach(function (wrap, i) {
+        moveWrapToIndex(row, wrap, i);
+      });
+      innerItems.forEach(function (wrap, i) {
+        moveWrapToIndex(inner, wrap, i);
+      });
+      lastVideoLayoutCols = bestWorksVideoCols();
+    }
 
     function isUnifiedVideosGrid() {
       return UNIFIED_VIDEOS_GRID_MQ.matches;
@@ -136,197 +199,6 @@
       if (!bw) return 5;
       var cols = parseInt(getComputedStyle(bw).getPropertyValue("--bw-cols"), 10);
       return cols > 0 ? cols : 5;
-    }
-
-    /* Orphan row: 5th thumb alone (4+1 @ ~1080px, 2+2+1 @ ~720px) — same anchor flow as mobile */
-    function isMobileNoblemenAnchor() {
-      if (!isUnifiedVideosGrid()) return false;
-      var cols = bestWorksVideoCols();
-      var itemsInLastRow = 5 - Math.floor((5 - 1) / cols) * cols;
-      return itemsInLastRow === 1;
-    }
-
-    function mobileGridAnchorWrap() {
-      var row = panelMain ? panelMain.querySelector(".best-works__row--videos") : null;
-      if (!row) return null;
-      var wraps = row.querySelectorAll(".video-thumb-wrap");
-      return wraps.length >= 5 ? wraps[4] : null;
-    }
-
-    function mobileOpenShiftX(wrap) {
-      var block = wrap ? wrap.closest(".best-works__videos-block") : null;
-      if (!block || !wrap) return 0;
-      var bwRoot = block.closest(".best-works") || block;
-      var gapToken = getComputedStyle(bwRoot).getPropertyValue("--bw-gap").trim();
-      var gap = 12;
-      if (gapToken) {
-        gap = parseFloat(gapToken);
-        if (gapToken.indexOf("rem") !== -1) {
-          gap *= parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-        }
-      }
-      var blockRect = block.getBoundingClientRect();
-      var wrapRect = wrap.getBoundingClientRect();
-      var colW = (blockRect.width - gap) / 2;
-      var targetCenterX = blockRect.left + colW / 2;
-      var currentCenterX = wrapRect.left + wrapRect.width / 2;
-      return targetCenterX - currentCenterX;
-    }
-
-    function setMobileAnchorActive(wrap, active) {
-      if (!wrap) return;
-      if (active) wrap.classList.add("is-mobile-anchor");
-      else wrap.classList.remove("is-mobile-anchor");
-    }
-
-    function clearMobileAnchorMotion(wrap) {
-      if (!wrap) return;
-      if (wrap._mobileAnchorTimer) {
-        window.clearTimeout(wrap._mobileAnchorTimer);
-        wrap._mobileAnchorTimer = null;
-      }
-      if (wrap._mobileAnchorOnEnd) {
-        wrap.removeEventListener("transitionend", wrap._mobileAnchorOnEnd);
-        wrap._mobileAnchorOnEnd = null;
-      }
-      wrap.style.transition = "";
-      wrap.style.transform = "";
-      wrap.style.zIndex = "";
-    }
-
-    function settlePuzzleTile(wrap) {
-      if (!wrap) return;
-      wrap.classList.add("is-puzzle-settled");
-      wrap.style.animation = "";
-      wrap.style.opacity = "";
-      wrap.style.filter = "";
-    }
-
-    function freezePuzzleOnAnchor(wrap) {
-      if (!wrap || !wrap.closest(".best-works-wrap--puzzle")) return;
-      wrap.classList.remove("is-puzzle-settled");
-      wrap.style.animation = "none";
-      wrap.style.opacity = "1";
-      wrap.style.filter = "none";
-    }
-
-    function releaseMobileAnchor(wrap) {
-      if (!wrap) return;
-      var hadAnchor = wrap.classList.contains("is-mobile-anchor");
-      clearMobileAnchorMotion(wrap);
-      setMobileAnchorActive(wrap, false);
-      if (hadAnchor) settlePuzzleTile(wrap);
-    }
-
-    function prepareMobileAnchor(wrap) {
-      if (!wrap || !isMobileNoblemenAnchor()) return;
-      clearMobileAnchorMotion(wrap);
-      setMobileAnchorActive(wrap, true);
-      freezePuzzleOnAnchor(wrap);
-    }
-
-    function isMobileAnchorMotionActive() {
-      var wrap = mobileGridAnchorWrap();
-      return !!(wrap && wrap.classList.contains("is-mobile-anchor") && wrap._mobileAnchorTimer);
-    }
-
-    function completeMobileAnchorOpen() {
-      releaseMobileAnchor(mobileGridAnchorWrap());
-      if (videosOpenPendingLock) {
-        videosOpenPendingLock = false;
-        lockPanelMainHeight();
-      }
-    }
-
-    function startMobileAnchorTransition(wrap, fromTransform, toTransform, onDone, motionOnly) {
-      if (!wrap || !isMobileNoblemenAnchor()) {
-        if (onDone) onDone();
-        return;
-      }
-
-      function finish() {
-        if (motionOnly) clearMobileAnchorMotion(wrap);
-        else releaseMobileAnchor(wrap);
-        if (onDone) onDone();
-      }
-
-      wrap.style.zIndex = "2";
-      wrap.style.transition = "none";
-      wrap.style.transform = fromTransform;
-      void wrap.offsetWidth;
-      wrap.style.transition = "transform " + MOBILE_ANCHOR_MS / 1000 + "s " + MOBILE_ANCHOR_EASE;
-      wrap.style.transform = toTransform;
-
-      function onEnd(e) {
-        if (e.target !== wrap || e.propertyName !== "transform") return;
-        finish();
-      }
-
-      wrap._mobileAnchorOnEnd = onEnd;
-      wrap.addEventListener("transitionend", onEnd);
-      wrap._mobileAnchorTimer = window.setTimeout(finish, MOBILE_ANCHOR_MS + 80);
-    }
-
-    function runMobileAnchorOpen(wrap, applyLayout, onDone) {
-      if (!wrap || !isMobileNoblemenAnchor()) {
-        if (applyLayout) applyLayout();
-        if (onDone) onDone();
-        return;
-      }
-
-      prepareMobileAnchor(wrap);
-      var shiftXBefore = mobileOpenShiftX(wrap);
-      var first = wrap.getBoundingClientRect();
-      if (applyLayout) applyLayout();
-      prepareMobileAnchor(wrap);
-
-      var last = wrap.getBoundingClientRect();
-      var dx = first.left - last.left;
-      var dy = first.top - last.top;
-
-      if (Math.abs(dx) >= 0.5 || Math.abs(dy) >= 0.5) {
-        startMobileAnchorTransition(
-          wrap,
-          "translate3d(" + dx + "px," + dy + "px, 0)",
-          "translate3d(0, 0, 0)",
-          onDone,
-          true
-        );
-        return;
-      }
-
-      if (Math.abs(shiftXBefore) >= 0.5) {
-        startMobileAnchorTransition(
-          wrap,
-          "translate3d(0, 0, 0)",
-          "translate3d(" + shiftXBefore + "px, 0, 0)",
-          onDone,
-          true
-        );
-        return;
-      }
-
-      releaseMobileAnchor(wrap);
-      if (onDone) onDone();
-    }
-
-    function resetMobileAnchor(wrap) {
-      if (!wrap) return;
-      var hadAnchor =
-        wrap.classList.contains("is-mobile-anchor") || !!wrap._mobileAnchorTimer;
-      var hadStaleFreeze =
-        !hadAnchor &&
-        wrap.style.animation === "none" &&
-        !!wrap.closest(".best-works-wrap--puzzle");
-      clearMobileAnchorMotion(wrap);
-      setMobileAnchorActive(wrap, false);
-      if (hadAnchor || hadStaleFreeze) settlePuzzleTile(wrap);
-    }
-
-    function setMobileAnchorLayoutHidden(hidden) {
-      if (!videosExtra) return;
-      if (hidden) videosExtra.classList.add("is-mobile-anchor-layout");
-      else videosExtra.classList.remove("is-mobile-anchor-layout");
     }
 
     function videosExtraContainerCloseMs() {
@@ -386,26 +258,10 @@
       block.addEventListener("transitionend", onEnd);
     }
 
-    function beginNoblemenUnifiedAnchorClose() {
-      if (!videosExtra || videosCloseFinished || videosExtra._noblemenCloseStarted) return;
-      if (!isMobileNoblemenAnchor() || reduceMotion) return;
-      videosExtra._noblemenCloseStarted = true;
-      holdMobileAnchorAtPairedSlot(mobileGridAnchorWrap());
-      pushVideosCloseTimer(
-        window.setTimeout(revealShowMoreAfterClose, NOBLEMEN_REVEAL_DELAY_MS)
-      );
-    }
-
     function beginUnifiedGridCleanup() {
       if (!videosExtra || videosCloseFinished || videosExtra._unifiedGridCleanedUp) return;
       videosExtra._unifiedGridCleanedUp = true;
-
-      if (!isMobileNoblemenAnchor()) {
-        videosExtra.classList.remove("is-open");
-      } else if (!videosExtra._noblemenCloseStarted) {
-        beginNoblemenUnifiedAnchorClose();
-      }
-
+      videosExtra.classList.remove("is-open");
       videosExtra.classList.add("is-container-closing", "is-unified-handoff");
       videosExtra.setAttribute("aria-hidden", "true");
       videosExtra.classList.remove("is-hiding");
@@ -443,6 +299,7 @@
       extraThumbWraps().forEach(function (wrap) {
         wrap.style.animation = "none";
       });
+      syncVideosPrimaryLayout();
     }
 
     function resetUnifiedVideosBlockCollapse() {
@@ -470,6 +327,7 @@
         extraThumbWraps().forEach(function (wrap) {
           wrap.style.animation = "none";
         });
+        syncVideosPrimaryLayout();
       }
 
       unifiedLayoutShrinking = false;
@@ -482,9 +340,6 @@
     }
 
     var unifiedBlockSettling = false;
-    var videosCloseScrollY = null;
-    var videosCloseScrollLockY = null;
-    var videosCloseScrollLockRaf = 0;
 
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
@@ -494,59 +349,6 @@
       if (showMoreBtn && document.activeElement === showMoreBtn) {
         showMoreBtn.blur();
       }
-    }
-
-    function enableVideosCloseScrollLock() {
-      if (videosCloseScrollLockRaf) return;
-      function tick() {
-        if (videosCloseScrollLockY == null) {
-          videosCloseScrollLockRaf = 0;
-          return;
-        }
-        if (Math.abs(window.scrollY - videosCloseScrollLockY) > 0.5) {
-          var html = document.documentElement;
-          var prevScrollBehavior = html.style.scrollBehavior;
-          html.style.scrollBehavior = "auto";
-          var maxScroll = Math.max(
-            0,
-            document.documentElement.scrollHeight - window.innerHeight
-          );
-          window.scrollTo(0, Math.min(videosCloseScrollLockY, maxScroll));
-          html.style.scrollBehavior = prevScrollBehavior;
-        }
-        videosCloseScrollLockRaf = requestAnimationFrame(tick);
-      }
-      videosCloseScrollLockRaf = requestAnimationFrame(tick);
-    }
-
-    function disableVideosCloseScrollLock() {
-      videosCloseScrollLockY = null;
-      if (videosCloseScrollLockRaf) {
-        cancelAnimationFrame(videosCloseScrollLockRaf);
-        videosCloseScrollLockRaf = 0;
-      }
-    }
-
-    function captureVideosCloseScroll() {
-      videosCloseScrollY = window.scrollY;
-      videosCloseScrollLockY = videosCloseScrollY;
-      enableVideosCloseScrollLock();
-    }
-
-    function restoreVideosCloseScroll() {
-      if (videosCloseScrollY == null) return;
-      var y = videosCloseScrollY;
-      videosCloseScrollY = null;
-      disableVideosCloseScrollLock();
-      var html = document.documentElement;
-      var prevScrollBehavior = html.style.scrollBehavior;
-      html.style.scrollBehavior = "auto";
-      var maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      window.scrollTo(0, Math.min(y, maxScroll));
-      requestAnimationFrame(function () {
-        window.scrollTo(0, Math.min(y, maxScroll));
-        html.style.scrollBehavior = prevScrollBehavior;
-      });
     }
 
     function finishUnifiedBlockCollapse(onDone) {
@@ -600,38 +402,9 @@
       block.style.maxHeight = fromH + "px";
       void block.offsetHeight;
       block.style.transition =
-        "max-height " + closeMs / 1000 + "s " + MOBILE_ANCHOR_EASE;
+        "max-height " + closeMs / 1000 + "s " + VIDEOS_BLOCK_EASE;
       block.style.maxHeight = toH + "px";
       watchUnifiedBlockTransitionEnd(onUnifiedBlockCollapsed);
-    }
-
-    function holdMobileAnchorAtPairedSlot(wrap) {
-      if (!wrap || !videosExtra || !isMobileNoblemenAnchor()) return;
-      var pairedLeft = wrap.getBoundingClientRect().left;
-      var pairedTop = wrap.getBoundingClientRect().top;
-      videosExtra.classList.remove("is-open");
-      void videosExtra.offsetHeight;
-      var dx = pairedLeft - wrap.getBoundingClientRect().left;
-      var dy = pairedTop - wrap.getBoundingClientRect().top;
-      if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
-      setMobileAnchorActive(wrap, true);
-      wrap.style.zIndex = "2";
-      wrap.style.transition = "none";
-      wrap.style.transform = "translate(" + dx + "px," + dy + "px)";
-    }
-
-    function animateMobileAnchorToCenter(wrap) {
-      if (!wrap || !isMobileNoblemenAnchor()) return;
-      var fromTransform = wrap.style.transform;
-      if (!fromTransform) return;
-      setMobileAnchorActive(wrap, true);
-      startMobileAnchorTransition(
-        wrap,
-        fromTransform,
-        "translate3d(0, 0, 0)",
-        null,
-        true
-      );
     }
 
     function measureVideosExtraCloseHeight() {
@@ -796,19 +569,11 @@
     }
 
     function revealShowMoreAfterClose() {
-      if (showMoreRevealedAfterClose || videosCloseFinished) return;
+      if (showMoreRevealedAfterClose) return;
       showMoreRevealedAfterClose = true;
       if (showMoreBtn) {
         showMoreBtn.textContent = "Show More";
         showMoreBtn.setAttribute("aria-expanded", "false");
-      }
-      if (
-        isMobileNoblemenAnchor() &&
-        !reduceMotion &&
-        videosExtra &&
-        videosExtra.classList.contains("is-hiding")
-      ) {
-        animateMobileAnchorToCenter(mobileGridAnchorWrap());
       }
       replayShowMoreButtonReveal();
     }
@@ -1015,6 +780,7 @@
       var rollOnOpen = animate && !reduceMotion;
 
       if (next === VIEW_MAIN) {
+        if (!videosExpanded) syncVideosPrimaryLayout();
         prepareBestWorksPuzzle();
         if (enteringMain) unlockPanelMainFlow();
       }
@@ -1102,11 +868,8 @@
     }
 
     function clearVideosAnimation() {
-      videosOpenPendingLock = false;
       videosCloseFinished = false;
       showMoreRevealedAfterClose = false;
-      videosCloseScrollY = null;
-      disableVideosCloseScrollLock();
       root.classList.remove("is-videos-closing");
       unifiedBlockSettling = false;
       videosCloseTimers.forEach(function (id) {
@@ -1127,18 +890,15 @@
           "is-container-closing",
           "is-hiding",
           "is-close-measure",
-          "is-mobile-anchor-layout",
           "is-unified-handoff"
         );
         videosExtra.style.transition = "";
         videosExtra.style.maxHeight = "";
         videosExtra._unifiedFinishQueued = false;
         videosExtra._unifiedGridCleanedUp = false;
-        videosExtra._noblemenCloseStarted = false;
       }
       resetUnifiedVideosBlockCollapse();
-      resetMobileAnchor(mobileGridAnchorWrap());
-      setMobileAnchorLayoutHidden(false);
+      syncVideosPrimaryLayout();
       var homeBottom = document.getElementById("home-bottom");
       if (homeBottom) {
         homeBottom.classList.remove("home-bottom--hiding", "home-bottom--puzzle-after-close");
@@ -1157,10 +917,6 @@
         videosExtra._onGridTransitionEnd = null;
       }
       videosAnimating = false;
-      if (isMobileAnchorMotionActive()) {
-        videosOpenPendingLock = true;
-        return;
-      }
       lockPanelMainHeight();
     }
 
@@ -1178,16 +934,15 @@
           videosExtra.removeEventListener("transitionend", videosExtra._onGridTransitionEnd);
           videosExtra._onGridTransitionEnd = null;
         }
+        revealShowMoreAfterClose();
         if (!unifiedLayoutShrinking) {
           prepareVideosExtraDomAfterClose();
+        } else {
+          syncVideosPrimaryLayout();
         }
-        resetMobileAnchor(mobileGridAnchorWrap());
-        setMobileAnchorLayoutHidden(false);
-        revealShowMoreAfterClose();
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             lockPanelMainHeight(function () {
-              restoreVideosCloseScroll();
               root.classList.remove("is-videos-closing");
               videosAnimating = false;
             });
@@ -1208,11 +963,7 @@
       var closeMs = videosExtraContainerCloseMs();
       var layoutShrunk = unifiedLayoutShrinking;
 
-      if (isMobileNoblemenAnchor()) {
-        holdMobileAnchorAtPairedSlot(mobileGridAnchorWrap());
-      } else {
-        videosExtra.classList.remove("is-open");
-      }
+      videosExtra.classList.remove("is-open");
 
       videosExtra.classList.add("is-container-closing");
       videosExtra.setAttribute("aria-hidden", "true");
@@ -1226,7 +977,7 @@
         videosExtra.style.maxHeight = closeFromH + "px";
         void videosExtra.offsetHeight;
         videosExtra.style.transition =
-          "max-height " + closeMs / 1000 + "s " + MOBILE_ANCHOR_EASE;
+          "max-height " + closeMs / 1000 + "s " + VIDEOS_BLOCK_EASE;
         videosExtra.style.maxHeight = "0px";
 
         function onTransitionEnd(e) {
@@ -1237,19 +988,6 @@
         videosExtra._onGridTransitionEnd = onTransitionEnd;
         videosExtra.addEventListener("transitionend", onTransitionEnd);
         pushVideosCloseTimer(window.setTimeout(finishVideosClose, closeMs + 100));
-      }
-
-      if (isMobileNoblemenAnchor()) {
-        pushVideosCloseTimer(
-          window.setTimeout(revealShowMoreAfterClose, NOBLEMEN_REVEAL_DELAY_MS)
-        );
-      } else {
-        pushVideosCloseTimer(
-          window.setTimeout(
-            revealShowMoreAfterClose,
-            Math.round(closeMs * SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO)
-          )
-        );
       }
     }
 
@@ -1272,20 +1010,6 @@
       unlockPanelMainFlow();
       videosExtra.classList.remove("is-hiding", "is-container-closing", "is-closing");
       videosExtra.setAttribute("aria-hidden", "false");
-
-      var anchor = mobileGridAnchorWrap();
-      if (isMobileNoblemenAnchor() && anchor && !reduceMotion) {
-        runMobileAnchorOpen(
-          anchor,
-          function () {
-            videosExtra.classList.add("is-open");
-            beginVideosOpenAfterAnchor();
-          },
-          completeMobileAnchorOpen
-        );
-        return;
-      }
-
       videosExtra.classList.add("is-open");
       beginVideosOpenAfterAnchor();
     }
@@ -1294,7 +1018,6 @@
       clearVideosAnimation();
       if (!videosExtra || !videosExtra.classList.contains("is-open")) return;
 
-      captureVideosCloseScroll();
       blurShowMoreFocus();
       root.classList.add("is-videos-closing");
 
@@ -1324,14 +1047,6 @@
             beginUnifiedLayoutShrink(closeMs);
           }, layoutCloseDelay)
         );
-        if (isMobileNoblemenAnchor() && !reduceMotion) {
-          pushVideosCloseTimer(
-            window.setTimeout(
-              beginNoblemenUnifiedAnchorClose,
-              unifiedVideosGridCloseDelay()
-            )
-          );
-        }
       } else {
         pushVideosCloseTimer(
           window.setTimeout(function () {
@@ -1341,16 +1056,13 @@
       }
 
       var closeFinishMs = layoutCloseDelay + closeMs + 100;
-      if (isUnifiedVideosGrid() && isMobileNoblemenAnchor() && !reduceMotion) {
-        closeFinishMs = Math.max(
-          closeFinishMs,
-          unifiedVideosGridCloseDelay() +
-            NOBLEMEN_REVEAL_DELAY_MS +
-            MOBILE_ANCHOR_MS +
-            120
-        );
-      }
 
+      pushVideosCloseTimer(
+        window.setTimeout(
+          revealShowMoreAfterClose,
+          layoutCloseDelay + Math.round(closeMs * SHOW_MORE_REVEAL_CONTAINER_CLOSE_RATIO)
+        )
+      );
       pushVideosCloseTimer(window.setTimeout(finishVideosClose, closeFinishMs));
     }
 
@@ -1374,6 +1086,7 @@
         } else {
           videosExtra.classList.remove("is-open", "is-hiding");
           videosExtra.setAttribute("aria-hidden", "true");
+          syncVideosPrimaryLayout();
           if (showMoreBtn) {
             showMoreBtn.textContent = "Show More";
             showMoreBtn.setAttribute("aria-expanded", "false");
@@ -1484,8 +1197,13 @@
       "resize",
       function () {
         if (videosAnimating) return;
-        if (view === VIEW_MAIN) setPanelOpen(panelMain, true);
-        else if (view === VIEW_RESUME) setPanelOpen(panelResume, true);
+        var cols = bestWorksVideoCols();
+        var layoutChanged = cols !== lastVideoLayoutCols;
+        if (layoutChanged) syncVideosPrimaryLayout();
+        if (view === VIEW_MAIN) {
+          setPanelOpen(panelMain, true);
+          if (layoutChanged) remeasurePanelInstant(panelMain);
+        } else if (view === VIEW_RESUME) setPanelOpen(panelResume, true);
         else if (view === VIEW_CONTACT) setPanelOpen(panelContact, true);
       },
       { passive: true }

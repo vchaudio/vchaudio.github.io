@@ -68,23 +68,6 @@ main.project-page--hero-glow > .project-page-spoilers {
   color: #f0d78c;
 }
 
-/* VM-XCtrl only: slightly narrower than default project column; respect header side inset */
-main.project-page--vm-xctrl {
-  max-width: min(1130px, calc(100% - 2 * var(--brand-header-inset) - 30px));
-}
-
-main.project-page--vm-xctrl > .page-hero,
-main.project-page--vm-xctrl > .sub-content,
-main.project-page--vm-xctrl > .project-page-spoilers {
-  max-width: min(950px, calc(100% - 2 * var(--brand-header-inset) - 30px));
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.page-overview-banner.page-overview-banner--vm-xctrl-hero {
-  max-width: min(1130px, calc(100% - 2 * var(--brand-header-inset) - 30px));
-}
-
 .page-overview-banner + main.project-page--vm-xctrl .page-hero h1 {
   color: #f0d78c;
 }
