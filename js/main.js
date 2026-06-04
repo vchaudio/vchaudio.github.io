@@ -288,6 +288,18 @@
     var track = document.getElementById("image-lightbox-track");
     if (!img || !imgNext || !stage || !track) return;
 
+    if (!stage.querySelector(".image-lightbox__loader")) {
+      var loaderEl = document.createElement("div");
+      loaderEl.className = "image-lightbox__loader";
+      loaderEl.setAttribute("role", "status");
+      loaderEl.setAttribute("aria-label", "Loading photo");
+      loaderEl.innerHTML =
+        '<svg class="image-lightbox__loader-svg" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true">' +
+        '<circle class="image-lightbox__loader-ring" cx="20" cy="20" r="16" pathLength="100" />' +
+        "</svg>";
+      stage.insertBefore(loaderEl, track);
+    }
+
     var prevBtn = root.querySelector("[data-lb-prev]");
     var nextBtn = root.querySelector("[data-lb-next]");
     var counterEl = document.getElementById("image-lightbox-counter");
@@ -593,6 +605,7 @@
       slides = [];
       slideIndex = 0;
       slideBusy = false;
+      stage.classList.remove("image-lightbox__stage--loading");
       root.classList.remove("image-lightbox--enter");
       hideIncoming();
       resetTracks();
