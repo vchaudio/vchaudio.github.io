@@ -754,11 +754,14 @@ main.project-page--hero-glow .project-portfolio-block--embedded {
 
 .project-portfolio-block--showreel .project-showreel-feature {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: clamp(1rem, 3vw, 1.5rem);
 }
 
 .project-portfolio-block--showreel .video-thumb-wrap {
-  width: min(100%, 520px);
+  width: min(100%, 420px);
+  flex: 0 1 420px;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
