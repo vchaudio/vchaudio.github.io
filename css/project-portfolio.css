@@ -284,6 +284,47 @@ main.project-page--hero-glow .project-about strong {
   font-weight: 600;
 }
 
+.project-content-wip-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 1.35rem;
+}
+
+.project-content-wip {
+  display: inline-block;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  width: fit-content;
+  max-width: min(100%, 36rem);
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  background: rgba(228, 160, 74, 0.06);
+  border: 1px solid rgba(228, 160, 74, 0.18);
+  border-radius: var(--radius-md);
+}
+
+.project-content-wip__icon {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-right: 0.35em;
+  vertical-align: -0.12em;
+  color: rgba(228, 160, 74, 0.72);
+  opacity: 0.85;
+}
+
+.project-content-wip__text {
+  display: inline;
+}
+
+.project-content-wip time {
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 main.project-page--hero-glow .resume-section__heading + .project-section__date {
   margin-top: -0.35rem;
 }
@@ -709,6 +750,31 @@ main.project-page--hero-glow .project-portfolio-block--embedded {
 .project-portfolio-block .video-thumb-caption--single {
   font-weight: 500;
   color: var(--text);
+}
+
+.project-portfolio-block--showreel .project-showreel-feature {
+  display: flex;
+  justify-content: center;
+}
+
+.project-portfolio-block--showreel .video-thumb-wrap {
+  width: min(100%, 520px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.project-portfolio-block--showreel .video-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.project-portfolio-block--showreel .video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 16 / 9;
 }
 
 /* Portfolio tabs (resume-style; moonray-battle-lands-tab.html) */

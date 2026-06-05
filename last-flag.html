@@ -51,6 +51,19 @@
         </div>
       </div>
 
+      <!-- content-wip-notice: bump data-content-wip-date when editing until removed -->
+      <div class="project-content-wip-wrap reveal">
+        <p class="project-content-wip" role="status" data-content-wip-notice>
+          <span class="project-content-wip__text">
+            <svg class="project-content-wip__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+              <path d="M12 3c4.97 0 9 4.03 9 9s-4.03 9-9 9-9-4.03-9-9 4.03-9 9-9z" stroke="currentColor" stroke-width="1.75" />
+            </svg>This page isn’t fully complete yet — some sections and media are still being added. Please keep this in mind.
+            Last updated <time datetime="2026-06-05" data-content-wip-date>5 Jun 2026</time>.
+          </span>
+        </p>
+      </div>
+
       <section class="resume-section reveal" aria-labelledby="last-flag-about-heading">
         <h2 id="last-flag-about-heading" class="resume-section__heading">About</h2>
         <p class="project-about">
@@ -74,30 +87,90 @@
           <div class="spoiler-body">
             <div class="spoiler-inner">
               <ul class="detail-list">
-                <li>Lead audio design for Night Street Games: creative direction, priorities, and quality bar across marketing and in-game milestones.</li>
-                <li>Senior sound design for heroes, abilities, weapons, UI, and match-critical feedback in a fast 5v5 capture-the-flag format.</li>
-                <li>Technical sound design: implementation, systems, optimization, and stem delivery for cinematics, trailers, and gameplay.</li>
-                <li>Trailer and marketing sound-to-picture: sound design, music, and loudness passes for beats shared with the public.</li>
-                <li>Close collaboration with directors, design, and engineering on readability, iteration, and ship schedules.</li>
+                <li>
+                  <strong>Sound design for gameplay, characters, and systems:</strong>
+                  Created and implemented sound effects for character abilities, weapons, gunshots, impacts, finishers, executions, and various gameplay interactions across multiple playable heroes.
+                </li>
+                <li>
+                  <strong>Character audio and gameplay feedback:</strong>
+                  Designed and polished critical gameplay feedback systems, including hit ticks, damage reactions, healing feedback, heartbeat mechanics, and friendly/hostile ability variations to improve gameplay readability and player awareness.
+                </li>
+                <li>
+                  <strong>MVP and presentation audio:</strong>
+                  Composed music, created audio branding elements, and designed sound effects for MVP screens and character presentation sequences for 11 heroes.
+                </li>
+                <li>
+                  <strong>UI and frontend audio design:</strong>
+                  Created and implemented audio for menus, lobby systems, level progression, timers, panel transitions, frontend interactions, and other user interface elements.
+                </li>
+                <li>
+                  <strong>Voice-over editing and integration:</strong>
+                  Processed, edited, and integrated voice-over assets, ensuring consistency, clarity, and proper implementation within gameplay systems.
+                </li>
+                <li>
+                  <strong>Dynamic mixing and HDR audio implementation:</strong>
+                  Contributed to the game's dynamic mixing pipeline, including HDR-based mixing solutions to maintain clarity and impact during intense gameplay scenarios.
+                </li>
+                <li>
+                  <strong>Technical audio design and implementation:</strong>
+                  Developed and implemented audio logic, playback systems, and technical solutions using Wwise and Unreal Engine to support gameplay-driven audio behavior and improve maintainability.
+                </li>
+                <li>
+                  <strong>Foley recording and asset creation:</strong>
+                  Recorded and designed custom foley assets, including rollerblade movement across various surfaces, jumps, landings, and character movement details.
+                </li>
+                <li>
+                  <strong>Audio polish and iteration:</strong>
+                  Created a wide variety of supporting audio assets, environmental interactions, utility sounds, alarms, launch pads, character-specific variations, and continuous polish passes across multiple gameplay systems.
+                </li>
               </ul>
             </div>
           </div>
         </details>
       </div>
 
-      <section class="resume-section reveal" aria-labelledby="last-flag-videos-heading">
-        <h2 id="last-flag-videos-heading" class="resume-section__heading">Videos</h2>
+      <section class="resume-section reveal" aria-labelledby="last-flag-showreels-heading">
+        <h2 id="last-flag-showreels-heading" class="resume-section__heading">ShowReels</h2>
+        <div class="project-portfolio-block project-portfolio-block--showreel">
+          <div class="project-showreel-feature">
+            <div class="video-thumb-wrap">
+              <button
+                type="button"
+                class="video-thumb"
+                data-youtube-id="I95yWirEu60"
+                data-lightbox-heading="MVPs"
+                data-lightbox-sub="Music Composing and Sound Design"
+                aria-label="Play Last Flag MVPs showreel"
+              ><img src="https://img.youtube.com/vi/I95yWirEu60/maxresdefault.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async" /></button>
+              <p class="video-thumb-caption"><strong>MVPs</strong>Music Composing and Sound Design</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="resume-section reveal" aria-labelledby="last-flag-marketing-heading">
+        <h2 id="last-flag-marketing-heading" class="resume-section__heading">Marketing</h2>
         <div class="project-portfolio-block">
-            <div class="video-scroller video-scroller--no-nav" data-video-scroller data-video-scroller-rows="2" data-video-scroller-no-nav aria-label="Last Flag videos">
+            <div class="video-scroller video-scroller--no-nav" data-video-scroller data-video-scroller-rows="2" data-video-scroller-no-nav aria-label="Last Flag marketing videos">
               <button type="button" class="video-scroller__btn video-scroller__btn--prev" aria-label="Scroll videos left"><span aria-hidden="true">‹</span></button>
               <div class="video-scroller__viewport">
                 <div class="video-scroller__strip video-scroller__strip--grid-2">
-                  <button type="button" class="video-thumb" data-youtube-id="wIaNNtoBeb4" aria-label="Play Last Flag video"><img src="https://img.youtube.com/vi/wIaNNtoBeb4/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" /></button>
-                  <button type="button" class="video-thumb" data-youtube-id="o8IXuDiGLF8" aria-label="Play Last Flag video"><img src="https://img.youtube.com/vi/o8IXuDiGLF8/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" /></button>
-                  <button type="button" class="video-thumb" data-youtube-id="cvWccGynzYo" aria-label="Play Last Flag video"><img src="https://img.youtube.com/vi/cvWccGynzYo/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" /></button>
-                  <button type="button" class="video-thumb" data-youtube-id="jhy3jus8FpM" aria-label="Play Last Flag video"><img src="https://img.youtube.com/vi/jhy3jus8FpM/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" /></button>
-                  <button type="button" class="video-thumb" data-youtube-id="9giWh-QEThA" aria-label="Play Last Flag launch trailer"><img src="https://img.youtube.com/vi/9giWh-QEThA/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" /></button>
-                  <button type="button" class="video-thumb" data-youtube-id="v4YiTj82Hb8" aria-label="Play Last Flag announcement trailer"><img src="https://img.youtube.com/vi/v4YiTj82Hb8/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" /></button>
+                  <div class="video-thumb-wrap">
+                    <button type="button" class="video-thumb" data-youtube-id="wIaNNtoBeb4" data-lightbox-heading="A Brilliantly Devised Plan" data-lightbox-sub="Sound Design, Foley, Mixing" aria-label="Play A Brilliantly Devised Plan"><img src="https://img.youtube.com/vi/wIaNNtoBeb4/maxresdefault.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async" /></button>
+                    <p class="video-thumb-caption"><strong>A Brilliantly Devised Plan</strong>Sound Design, Foley, Mixing</p>
+                  </div>
+                  <div class="video-thumb-wrap">
+                    <button type="button" class="video-thumb" data-youtube-id="o8IXuDiGLF8" data-lightbox-heading="The Showdown" data-lightbox-sub="Sound Design, Foley, Mixing" aria-label="Play The Showdown"><img src="https://img.youtube.com/vi/o8IXuDiGLF8/maxresdefault.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async" /></button>
+                    <p class="video-thumb-caption"><strong>The Showdown</strong>Sound Design, Foley, Mixing</p>
+                  </div>
+                  <div class="video-thumb-wrap">
+                    <button type="button" class="video-thumb" data-youtube-id="cvWccGynzYo" data-lightbox-heading="Blood of My Blood" data-lightbox-sub="Sound Design, Foley, Mixing" aria-label="Play Blood of My Blood"><img src="https://img.youtube.com/vi/cvWccGynzYo/maxresdefault.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async" /></button>
+                    <p class="video-thumb-caption"><strong>Blood of My Blood</strong>Sound Design, Foley, Mixing</p>
+                  </div>
+                  <div class="video-thumb-wrap">
+                    <button type="button" class="video-thumb" data-youtube-id="jhy3jus8FpM" data-lightbox-heading="Cashbot's First Day" data-lightbox-sub="Sound Design, Foley, Mixing" aria-label="Play Cashbot's First Day"><img src="https://img.youtube.com/vi/jhy3jus8FpM/maxresdefault.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async" /></button>
+                    <p class="video-thumb-caption"><strong>Cashbot's First Day</strong>Sound Design, Foley, Mixing</p>
+                  </div>
                 </div>
               </div>
               <button type="button" class="video-scroller__btn video-scroller__btn--next" aria-label="Scroll videos right"><span aria-hidden="true">›</span></button>
@@ -129,6 +202,15 @@
     </div>
 
     <footer class="site-footer">© VCHAudio · Valentyn Chumachenko</footer>
+    <script>
+      (function () {
+        var time = document.querySelector("[data-content-wip-date]");
+        if (!time || !time.dateTime) return;
+        var d = new Date(time.dateTime + "T12:00:00");
+        if (isNaN(d.getTime())) return;
+        time.textContent = d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+      })();
+    </script>
     <script src="js/main.js" defer></script>
   </body>
 </html>

@@ -2536,6 +2536,21 @@ a.job-card.job-card--to-project:focus-visible {
   border: 0;
 }
 
+.ratio-embed > .video-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: inherit;
+}
+
+.ratio-embed > .video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .project-card[data-i="0"] {
   animation: fade-up 0.65s var(--ease-out) 0.15s both;
 }
