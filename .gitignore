@@ -4,6 +4,11 @@ scripts/build-cv-pdf.ps1
 
 # Email signature (local tool; regenerate with scripts/build_signature_asset.py)
 email-signature.html
-assets/vch-mark-signature.png
-assets/vch-mark-signature.b64.txt
+assets/vch-mark-signature-transparent.png
+assets/vch-mark-signature-dark-transparent.png
+assets/vch-mark-signature-transparent-upload.png
+assets/vch-mark-signature-dark-transparent-upload.png
+assets/vch-mark-signature-bitmap.png
+assets/vch-mark-signature-bitmap-upload.png
+assets/vch-mark-signature*.jpg
 scripts/build_signature_asset.py
