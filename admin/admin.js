@@ -308,8 +308,8 @@
     state.config = null;
     state.authenticated = false;
     state.dirty = {};
-    /* Keep state.files so the user can still browse/edit; saving requires sign-in. */
-    enterApp(false);
+    /* The panel requires authorization — after logout, go back to login. */
+    goLogin();
   }
 
   /* ============================== collection nav ============================== */
@@ -1596,35 +1596,21 @@
 
     var cfg = loadConfig();
 
-    /* Try to show site data immediately (no auth needed). */
-    loadLocalData()
-      .then(function () {
-        if (cfg && cfg.token && cfg.owner && cfg.repo) {
-          state.config = cfg;
-          api("/repos/" + cfg.owner + "/" + cfg.repo)
-            .then(function (info) {
-              if (!info || !info.ok) { state.config = null; enterApp(false); return; }
-              fetchShasOnly().then(function () { enterApp(true); });
-            })
-            .catch(function () { state.config = null; enterApp(false); });
-        } else {
-          enterApp(false);
-        }
+    /* The admin panel requires authorization. No saved session → go to login
+       (the panel never opens unauthenticated). */
+    if (!cfg || !cfg.token || !cfg.owner || !cfg.repo) { goLogin(); return; }
+
+    state.config = cfg;
+    api("/repos/" + cfg.owner + "/" + cfg.repo)
+      .then(function (info) {
+        if (!info || !info.ok) { state.config = null; goLogin(); return; }
+        /* Authenticated: load site data (local files first for speed, then
+           shas from the API) and enter the app. */
+        loadLocalData()
+          .then(function () { fetchShasOnly().then(function () { enterApp(true); }); })
+          .catch(function () { startApp(info); });
       })
-      .catch(function () {
-        /* No local data (e.g. opened via file:// or offline). */
-        if (cfg && cfg.token && cfg.owner && cfg.repo) {
-          state.config = cfg;
-          api("/repos/" + cfg.owner + "/" + cfg.repo)
-            .then(function (info) {
-              if (!info || !info.ok) { state.config = null; goLogin(); return; }
-              startApp(info);
-            })
-            .catch(function () { state.config = null; goLogin(); });
-        } else {
-          goLogin();
-        }
-      });
+      .catch(function () { state.config = null; goLogin(); });
   }
 
   if (document.readyState === "loading") {
