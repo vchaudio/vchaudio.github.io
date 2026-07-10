@@ -31,27 +31,11 @@
           repository via the GitHub Contents API — changes go live on GitHub Pages after the next build.
         </p>
         <label class="admin-field">
-          <span>GitHub owner (user or org)</span>
-          <input type="text" id="login-owner" required placeholder="vchaudio" autocomplete="username" />
-        </label>
-        <label class="admin-field">
-          <span>Repository</span>
-          <input type="text" id="login-repo" required placeholder="vchaudio.github.io" autocomplete="off" />
-        </label>
-        <label class="admin-field">
-          <span>Branch</span>
-          <input type="text" id="login-branch" required placeholder="main" autocomplete="off" />
-        </label>
-        <label class="admin-field">
           <span>Personal Access Token</span>
-          <input type="password" id="login-token" required placeholder="github_pat_…" autocomplete="off" />
-        </label>
-        <label class="admin-check">
-          <input type="checkbox" id="login-remember" checked />
-          <span>Remember session in this browser</span>
+          <input type="password" id="login-token" required placeholder="github_pat_…" autocomplete="off" autofocus />
         </label>
         <p class="admin-login__sec">
-          The token is stored only in your browser (localStorage if remembered) and sent directly to GitHub.
+          The token is stored only in your browser and sent directly to GitHub.
           Use a fine-grained PAT scoped to this repository with <strong>Contents: Read &amp; Write</strong>.
         </p>
         <button type="submit" class="admin-btn admin-btn--primary" id="admin-login-submit">Sign in</button>

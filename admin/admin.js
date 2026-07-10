@@ -187,16 +187,22 @@
     try { localStorage.removeItem(STORAGE_KEY); sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
   }
 
+  /* The repository is fixed for this site — derive owner/repo/branch from
+     the hostname (vchaudio.github.io → owner vchaudio, repo vchaudio.github.io),
+     falling back to the known values for local dev. */
+  function detectRepo() {
+    var host = (window.location.hostname || "").toLowerCase();
+    var m = host.match(/^([a-z0-9-]+)\.github\.io$/);
+    if (m) return { owner: m[1], repo: host, branch: "main" };
+    return { owner: "vchaudio", repo: "vchaudio.github.io", branch: "main" };
+  }
+
   function loginSubmit(e) {
     e.preventDefault();
     var status = $("admin-login-status");
     var btn = $("admin-login-submit");
-    var cfg = {
-      owner: $("login-owner").value.trim(),
-      repo: $("login-repo").value.trim(),
-      branch: $("login-branch").value.trim() || "main",
-      token: $("login-token").value.trim()
-    };
+    var cfg = detectRepo();
+    cfg.token = $("login-token").value.trim();
     status.textContent = "Checking access…";
     status.setAttribute("data-kind", "");
     btn.disabled = true;
@@ -204,7 +210,7 @@
     api("/repos/" + cfg.owner + "/" + cfg.repo)
       .then(function (info) {
         if (!info || !info.ok) throw new Error("Repository not found or token lacks read access.");
-        saveConfig(cfg, $("login-remember").checked);
+        saveConfig(cfg, true);
         if (isLoginPage()) {
           /* Dedicated login page: go to the app, which restores the session. */
           window.location.href = "index.html";
@@ -1576,12 +1582,6 @@
   function initLoginPage() {
     var form = $("admin-login-form");
     if (form) form.addEventListener("submit", loginSubmit);
-    var cfg = loadConfig();
-    if (cfg && cfg.owner) {
-      var o = $("login-owner"); if (o) o.value = cfg.owner;
-      var r = $("login-repo"); if (r) r.value = cfg.repo || "";
-      var b = $("login-branch"); if (b) b.value = cfg.branch || "main";
-    }
   }
 
   function initAppPage() {
