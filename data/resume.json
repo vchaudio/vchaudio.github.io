@@ -21,8 +21,16 @@
       "meta": "2017 — nowadays · Remote, contracts, freelance",
       "description": "Music composer and sound designer from my own studio",
       "awards": [
-        { "title": "Winner International Motorfilm Awards", "year": "2018", "kind": "winner" },
-        { "title": "Nominated KISFF and Toyota", "year": "2019", "kind": "nominee" }
+        {
+          "title": "Winner International Motorfilm Awards",
+          "year": "2018",
+          "kind": "winner"
+        },
+        {
+          "title": "Nominated KISFF and Toyota",
+          "year": "2019",
+          "kind": "nominee"
+        }
       ]
     },
     {
@@ -66,26 +74,54 @@
     {
       "id": "technical",
       "groupClass": "skills-group--technical",
-      "heading": "Software Skills",
+      "heading": "Technical Skills",
       "headingClass": "skills-heading--featured",
-      "items": ["REAPER", "Unreal Engine", "Blueprint", "Wwise", "Perforce", "Jira", "FMOD", "Git", "Unity"]
+      "items": [
+        "REAPER",
+        "Unreal Engine",
+        "Blueprint",
+        "Wwise",
+        "Perforce",
+        "Jira",
+        "FMOD",
+        "Git",
+        "Unity"
+      ]
     },
     {
       "id": "core",
       "groupClass": "skills-group--core",
       "heading": "Core skills",
       "headingClass": "skills-heading--featured",
-      "items": ["Sound design", "Foley Rec/Edit", "Music composing", "Mixing & mastering", "Audio implementation", "VO editing & directing"]
+      "items": [
+        "Sound design",
+        "Foley Rec/Edit",
+        "Music composing",
+        "Mixing & mastering",
+        "Audio implementation",
+        "VO editing & directing"
+      ]
     },
     {
       "id": "soft",
       "groupClass": "skills-group--soft",
       "heading": "Soft skills",
       "headingClass": "skills-heading--featured",
-      "items": ["Creative thinking", "Team collaboration", "Detail-oriented", "Adaptability", "Communication", "Time management"]
+      "items": [
+        "Creative thinking",
+        "Team collaboration",
+        "Detail-oriented",
+        "Adaptability",
+        "Communication",
+        "Time management"
+      ]
     }
   ],
   "courses": [
-    { "title": "Interactive audio & middleware", "provider": "XSSR Academy", "year": "2021" }
+    {
+      "title": "Interactive audio & middleware",
+      "provider": "XSSR Academy",
+      "year": "2021"
+    }
   ]
 }
