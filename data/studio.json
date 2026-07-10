@@ -1,0 +1,45 @@
+{
+  "lead": "A treated room with DIY acoustic work, measured and calibrated so monitoring stays honest for everyday recording and mixing.",
+  "photos": [
+    { "preview": "assets/studio-photo-1-preview.webp", "hq": "assets/studio-photo-1.png", "orientation": "portrait", "w": 562, "h": 1000, "alt": "" },
+    { "preview": "assets/studio-photo-2-preview.webp", "hq": "assets/studio-photo-2.png", "orientation": "landscape", "w": 1000, "h": 563, "alt": "" },
+    { "preview": "assets/studio-photo-3-preview.webp", "hq": "assets/studio-photo-3.png", "orientation": "portrait", "w": 562, "h": 1000, "alt": "" },
+    { "preview": "assets/studio-photo-4-preview.webp", "hq": "assets/studio-photo-4.png", "orientation": "landscape", "w": 1000, "h": 563, "alt": "" },
+    { "preview": "assets/studio-photo-5-preview.webp", "hq": "assets/studio-photo-5.png", "orientation": "landscape", "w": 1000, "h": 563, "alt": "" }
+  ],
+  "gear": [
+    {
+      "title": "Studio equipment",
+      "wide": false,
+      "type": "deflist",
+      "items": [
+        { "dt": "Audio interface", "dd": "Universal Audio Apollo&nbsp;X4" },
+        { "dt": "Monitors", "dd": "Neumann KH&nbsp;310 — Sonarworks ID calibrated" },
+        { "dt": "Headphones", "dd": "Sennheiser HD&nbsp;660S · Beyerdynamic DT&nbsp;770 Pro · Corsair HS80" },
+        { "dt": "Multichannel test", "dd": "Samsung HW-Q990D · 11.1.4" },
+        { "dt": "Microphones", "dd": "Røde NT1 · Sennheiser MKE&nbsp;600" },
+        { "dt": "Field recording", "dd": "Zoom H6 + Rycote windshield" },
+        { "dt": "MIDI controllers", "dd": "Novation Impulse 61 · Studiologic SL88 · Behringer X-Touch" }
+      ]
+    },
+    {
+      "title": "PC & power",
+      "wide": false,
+      "type": "deflist",
+      "items": [
+        { "dt": "Motherboard", "dd": "Asus ProArt X870E" },
+        { "dt": "Processor", "dd": "AMD Ryzen 7 9800X3D" },
+        { "dt": "Graphics", "dd": "MSI GeForce RTX&nbsp;5080 16&nbsp;GB" },
+        { "dt": "RAM", "dd": "Kingston Fury DDR5 96&nbsp;GB @ 6000&nbsp;MT/s" },
+        { "dt": "Storage", "dd": "10&nbsp;TB total" },
+        { "dt": "Battery backup", "dd": "Ecoflow Delta Pro + extra batteries (~12&nbsp;kW)" }
+      ]
+    },
+    {
+      "title": "Music instruments",
+      "wide": true,
+      "type": "text",
+      "text": "Fender Stratocaster Floyd Rose (1995) · Fender JB-62 Jazz Bass reissue (MIJ) · Yamaha W7 · bongos, shaker, tambourine, darbuka"
+    }
+  ]
+}

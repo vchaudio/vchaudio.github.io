@@ -1,0 +1,91 @@
+{
+  "general": {
+    "firstName": "Valentyn",
+    "lastName": "Chumachenko",
+    "location": "Odesa, Ukraine",
+    "phone": "+380 93 485 2263",
+    "phoneHref": "+380934852263",
+    "email": "vchaudio@gmail.com",
+    "linkedinLabel": "linkedin.com/in/vchaudio",
+    "linkedinHref": "https://www.linkedin.com/in/vchaudio/"
+  },
+  "languages": [
+    "English (B2+)",
+    "Ukrainian (native)",
+    "Russian (native)"
+  ],
+  "experience": [
+    {
+      "type": "studio",
+      "title": "VCHAudio — Individual Entrepreneur",
+      "meta": "2017 — nowadays · Remote, contracts, freelance",
+      "description": "Music composer and sound designer from my own studio",
+      "awards": [
+        { "title": "Winner International Motorfilm Awards", "year": "2018", "kind": "winner" },
+        { "title": "Nominated KISFF and Toyota", "year": "2019", "kind": "nominee" }
+      ]
+    },
+    {
+      "type": "project",
+      "title": "Argentics / Night Street Games",
+      "project": "Last Flag",
+      "meta": "2025 — 2026 · USA, remote",
+      "description": "Senior Sound Designer, Technical Sound Designer, Lead Audio Designer",
+      "link": "project.html?slug=last-flag",
+      "aria": "Argentics / Night Street Games — Last Flag — open project overview"
+    },
+    {
+      "type": "project",
+      "title": "Moonray PBC",
+      "project": "Moonray: Battle Lands",
+      "meta": "2021 — 2025 · USA, remote",
+      "description": "Audio Producer, Principal Sound Designer, Technical Sound Designer, Audio Developer, Music Composer",
+      "link": "moonray-battle-lands.html",
+      "aria": "Moonray PBC — Moonray: Battle Lands — open project overview"
+    },
+    {
+      "type": "plain",
+      "title": "Broadcast TV channel",
+      "meta": "2020 — 2021 · Odesa, part-time",
+      "description": "Live sound director"
+    },
+    {
+      "type": "plain",
+      "title": "NLO TV",
+      "meta": "2019 — 2021 · Kyiv, remote",
+      "description": "Cartoon series sound director, sound designer, foley artist, mix engineer"
+    },
+    {
+      "type": "plain",
+      "title": "Fiverr",
+      "meta": "2019 — 2021 · Freelance",
+      "description": "Music composer and sound designer"
+    }
+  ],
+  "skills": [
+    {
+      "id": "technical",
+      "groupClass": "skills-group--technical",
+      "heading": "Software Skills",
+      "headingClass": "skills-heading--featured",
+      "items": ["REAPER", "Unreal Engine", "Blueprint", "Wwise", "Perforce", "Jira", "FMOD", "Git", "Unity"]
+    },
+    {
+      "id": "core",
+      "groupClass": "skills-group--core",
+      "heading": "Core skills",
+      "headingClass": "skills-heading--featured",
+      "items": ["Sound design", "Foley Rec/Edit", "Music composing", "Mixing & mastering", "Audio implementation", "VO editing & directing"]
+    },
+    {
+      "id": "soft",
+      "groupClass": "skills-group--soft",
+      "heading": "Soft skills",
+      "headingClass": "skills-heading--featured",
+      "items": ["Creative thinking", "Team collaboration", "Detail-oriented", "Adaptability", "Communication", "Time management"]
+    }
+  ],
+  "courses": [
+    { "title": "Interactive audio & middleware", "provider": "XSSR Academy", "year": "2021" }
+  ]
+}

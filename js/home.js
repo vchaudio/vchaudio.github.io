@@ -93,6 +93,9 @@
     var toggleBtn = document.getElementById("home-toggle-btn");
     var showMoreBtn = document.getElementById("home-show-more-btn");
     var mailBtn = document.getElementById("home-mail-btn");
+    var resumeLabel = (window.__VCH_DATA__ && window.__VCH_DATA__.site && window.__VCH_DATA__.site.sections && window.__VCH_DATA__.site.sections.resumeButtonLabel) || "Resume";
+    var showMoreLabel = (window.__VCH_DATA__ && window.__VCH_DATA__.site && window.__VCH_DATA__.site.sections && window.__VCH_DATA__.site.sections.showMoreLabel) || "Show More";
+    var showLessLabel = (window.__VCH_DATA__ && window.__VCH_DATA__.site && window.__VCH_DATA__.site.sections && window.__VCH_DATA__.site.sections.showLessLabel) || "Show Less";
     var panelMain = document.getElementById("home-panel-main");
     var panelResume = document.getElementById("home-panel-resume");
     var panelContact = document.getElementById("home-panel-contact");
@@ -572,7 +575,7 @@
       if (showMoreRevealedAfterClose) return;
       showMoreRevealedAfterClose = true;
       if (showMoreBtn) {
-        showMoreBtn.textContent = "Show More";
+        showMoreBtn.textContent = showMoreLabel;
         showMoreBtn.setAttribute("aria-expanded", "false");
       }
       replayShowMoreButtonReveal();
@@ -750,7 +753,7 @@
 
     function syncToggleButton() {
       if (view === VIEW_MAIN) {
-        toggleBtn.textContent = "Resume";
+        toggleBtn.textContent = resumeLabel;
         toggleBtn.removeAttribute("data-back");
         toggleBtn.setAttribute("aria-label", "Show resume");
       } else {
@@ -1080,7 +1083,7 @@
           videosExtra.setAttribute("aria-hidden", "false");
           videosExtra.classList.add("is-open");
           if (showMoreBtn) {
-            showMoreBtn.textContent = "Show Less";
+            showMoreBtn.textContent = showLessLabel;
             showMoreBtn.setAttribute("aria-expanded", "true");
           }
         } else {
@@ -1088,7 +1091,7 @@
           videosExtra.setAttribute("aria-hidden", "true");
           syncVideosPrimaryLayout();
           if (showMoreBtn) {
-            showMoreBtn.textContent = "Show More";
+            showMoreBtn.textContent = showMoreLabel;
             showMoreBtn.setAttribute("aria-expanded", "false");
           }
           replayShowMoreButtonReveal();
@@ -1099,7 +1102,7 @@
 
       if (open) {
         if (showMoreBtn) {
-          showMoreBtn.textContent = "Show Less";
+          showMoreBtn.textContent = showLessLabel;
           showMoreBtn.setAttribute("aria-expanded", "true");
         }
         beginVideosOpen();
@@ -1325,8 +1328,8 @@
       }
 
       // GitHub Pages is static: to send email "from the site" we need a form backend.
-      // Create one (e.g. Formspree) and paste the endpoint here.
-      var FORM_ENDPOINT = "https://formspree.io/f/xpqnkwvb";
+      // The endpoint is stored on the form as data-endpoint (managed via the admin panel).
+      var FORM_ENDPOINT = form.getAttribute("data-endpoint") || "";
 
       if (!FORM_ENDPOINT) {
         setStatus("Contact form is not configured yet.", "error");

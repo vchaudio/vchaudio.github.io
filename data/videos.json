@@ -1,0 +1,160 @@
+{
+  "videos": [
+    {
+      "id": "wIaNNtoBeb4",
+      "title": "Last Flag Trailer",
+      "role": "Sound Design, Foley, Mixing",
+      "year": "2025",
+      "primary": true,
+      "poster": false,
+      "thumb": null,
+      "thumbClass": "",
+      "thumbW": 480,
+      "thumbH": 360
+    },
+    {
+      "id": "NCCqMP0Tqys",
+      "title": "Core Punk",
+      "role": "Game Sound-re-Design",
+      "year": "2020",
+      "primary": true,
+      "poster": true,
+      "thumb": "assets/corepunk-preview.png",
+      "thumbClass": "",
+      "thumbW": 1024,
+      "thumbH": 576
+    },
+    {
+      "id": "QnoHjkcYLyA",
+      "title": "Delusion Out Of Space - Trailer",
+      "role": "Music Composing",
+      "year": "2022",
+      "primary": true,
+      "poster": false,
+      "thumb": "https://indiecup.net/ukraine/wp-content/uploads/sites/5/2024/10/1280-720-620x350.jpg",
+      "thumbClass": "",
+      "thumbW": 620,
+      "thumbH": 350
+    },
+    {
+      "id": "8fV54kCsNfw",
+      "title": "Moonray - Raktur Reveal",
+      "role": "Sound Design",
+      "year": "2024",
+      "primary": true,
+      "poster": false,
+      "thumb": null,
+      "thumbClass": "",
+      "thumbW": 480,
+      "thumbH": 360
+    },
+    {
+      "id": "5CFfUO6qpnU",
+      "title": "The Noblemen",
+      "role": "Music Composing and Sound Design",
+      "year": "2021",
+      "primary": true,
+      "poster": true,
+      "thumb": "assets/noblemen-preview.png",
+      "thumbClass": "",
+      "thumbW": 1024,
+      "thumbH": 576
+    },
+    {
+      "id": "JNaXiFeHTo8",
+      "title": "Doove Care Groep",
+      "role": "Foley, Sound Design",
+      "year": "2021",
+      "primary": false,
+      "poster": true,
+      "thumb": "assets/ukrainian-ads-doove.png",
+      "thumbClass": "video-thumb--ua-doove",
+      "thumbW": 1024,
+      "thumbH": 576
+    },
+    {
+      "id": "_Q3TJ1-nyLQ",
+      "title": "Tajikistan Stadium Show - Navruz",
+      "role": "Music Composing",
+      "year": "2024",
+      "primary": false,
+      "poster": false,
+      "thumb": null,
+      "thumbClass": "",
+      "thumbW": 480,
+      "thumbH": 360
+    },
+    {
+      "id": "FYxAnroxF5w",
+      "title": "Youtube Channel Jingles",
+      "role": "Music Composing",
+      "year": "2021",
+      "primary": false,
+      "poster": false,
+      "thumb": null,
+      "thumbClass": "",
+      "thumbW": 480,
+      "thumbH": 360
+    },
+    {
+      "id": "-xcReWlo2L4",
+      "title": "Kyivsky Darunok Ad",
+      "role": "Music Composing",
+      "year": "2021",
+      "primary": false,
+      "poster": true,
+      "thumb": "assets/ukrainian-ads-bbk.png",
+      "thumbClass": "video-thumb--ua-bbk",
+      "thumbW": 1024,
+      "thumbH": 576
+    },
+    {
+      "id": "MLxF1BjOEYo",
+      "title": "BoxingJungle Ad",
+      "role": "Music Composing and Sound Design",
+      "year": "2021",
+      "primary": false,
+      "poster": true,
+      "thumb": "assets/ukrainian-ads-boxing-jungle-2.png",
+      "thumbClass": "video-thumb--ua-boxing",
+      "thumbW": 1024,
+      "thumbH": 576
+    },
+    {
+      "id": "h_3z2kD1c8Q",
+      "title": "The Vikings - part 1",
+      "role": "FMOD Implementation Presentation",
+      "year": "2020",
+      "primary": false,
+      "poster": false,
+      "thumb": null,
+      "thumbClass": "",
+      "thumbW": 480,
+      "thumbH": 360
+    },
+    {
+      "id": "vs_Wp5LOf7E",
+      "title": "The Vikings - part 2",
+      "role": "FMOD Implementation Presentation",
+      "year": "2020",
+      "primary": false,
+      "poster": false,
+      "thumb": null,
+      "thumbClass": "",
+      "thumbW": 480,
+      "thumbH": 360
+    },
+    {
+      "id": "dK0Z-Dq3xBw",
+      "title": "The Vikings - part 3",
+      "role": "FMOD Implementation Presentation",
+      "year": "2020",
+      "primary": false,
+      "poster": false,
+      "thumb": null,
+      "thumbClass": "",
+      "thumbW": 480,
+      "thumbH": 360
+    }
+  ]
+}

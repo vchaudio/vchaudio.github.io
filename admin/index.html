@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>VCHAudio · Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="admin.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png" />
+  </head>
+  <body class="admin-body admin-body--app">
+    <header class="admin-topbar">
+      <a class="admin-brand" href="../index.html" target="_blank" rel="noopener">VCHAudio <span>Admin</span></a>
+      <div class="admin-topbar__repo" id="admin-repo-label" hidden></div>
+      <div class="admin-topbar__actions">
+        <button type="button" class="admin-btn admin-btn--primary" id="admin-signin-btn" hidden>Sign in to save</button>
+        <button type="button" class="admin-btn admin-btn--ghost" id="admin-preview-btn" hidden>Preview site</button>
+        <button type="button" class="admin-btn admin-btn--ghost" id="admin-logout-btn" hidden>Log out</button>
+      </div>
+    </header>
+
+    <!-- App screen (login lives on login.html) -->
+    <section class="admin-app" id="admin-app" hidden>
+      <nav class="admin-collections" id="admin-collections"></nav>
+      <main class="admin-editor" id="admin-editor"></main>
+    </section>
+
+    <div class="admin-toast" id="admin-toast" role="status" aria-live="polite" hidden></div>
+    <script src="admin.js" defer></script>
+  </body>
+</html>

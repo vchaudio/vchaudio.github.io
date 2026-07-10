@@ -1,0 +1,590 @@
+{
+  "projects": [
+    {
+      "slug": "last-flag",
+      "section": "projects",
+      "cardType": "project",
+      "title": "Last Flag",
+      "category": "Video Game",
+      "description": "Senior Sound and Tech Designer / Lead Audio Designer",
+      "banner": "assets/banner-last-flag.png",
+      "bannerW": 1200,
+      "bannerH": 514,
+      "detailUrl": "project.html?slug=last-flag",
+      "blocks": [
+        {
+          "type": "banner",
+          "src": "assets/banner-last-flag-hq.png",
+          "w": 1024,
+          "h": 576
+        },
+        {
+          "type": "hero",
+          "title": "Last Flag",
+          "platform": "PC (Steam and UGS)",
+          "company": "Argentics / Night Street Games",
+          "lead": "Senior Sound and Tech Designer / Lead Audio Designer · Jul 2025 — Jul 2026",
+          "steam": {
+            "label": "View on Steam",
+            "href": "https://store.steampowered.com/app/2721340/Last_Flag/"
+          }
+        },
+        {
+          "type": "about",
+          "heading": "About",
+          "html": "<strong>Last Flag</strong> is a fast-paced 5v5 third-person hero shooter from Night Street Games—a studio co-founded by Imagine Dragons lead vocalist Dan Reynolds and his brother Mac Reynolds. Teams hide their flag, hunt the enemy's, and defend a capture to win matches framed as a wild 1970s televised game show. Built in Unreal Engine for PC (Steam and Epic Games Store)."
+        },
+        {
+          "type": "responsibilities",
+          "heading": "Responsibilities & Contributions",
+          "items": [
+            {
+              "strong": "Sound design for gameplay, characters, and systems:",
+              "text": "Created and implemented sound effects for character abilities, weapons, gunshots, impacts, finishers, executions, and various gameplay interactions across multiple playable heroes."
+            },
+            {
+              "strong": "Character audio and gameplay feedback:",
+              "text": "Designed and polished critical gameplay feedback systems, including hit ticks, damage reactions, healing feedback, heartbeat mechanics, and friendly/hostile ability variations to improve gameplay readability and player awareness."
+            },
+            {
+              "strong": "MVP presentation audio:",
+              "text": "Composed music and designed sound effects for MVP screens for 11 heroes."
+            },
+            {
+              "strong": "UI and frontend audio design:",
+              "text": "Created and implemented audio for menus, lobby systems, level progression, timers, panel transitions, frontend interactions, and other user interface elements."
+            },
+            {
+              "strong": "Voice-over editing and integration:",
+              "text": "Processed, edited, and integrated voice-over assets, ensuring consistency, clarity, and proper implementation within gameplay systems."
+            },
+            {
+              "strong": "Dynamic mixing and HDR audio implementation:",
+              "text": "Contributed to the game's dynamic mixing pipeline, including HDR-based mixing solutions to maintain clarity and impact during intense gameplay scenarios."
+            },
+            {
+              "strong": "Technical audio design and implementation:",
+              "text": "Developed and implemented audio logic, playback systems, and technical solutions using Wwise and Unreal Engine to support gameplay-driven audio behavior and improve maintainability."
+            },
+            {
+              "strong": "Foley recording and asset creation:",
+              "text": "Recorded and designed custom foley assets, including rollerblade movement across various surfaces, jumps, landings, and character movement details."
+            },
+            {
+              "strong": "Audio polish and iteration:",
+              "text": "Created a wide variety of supporting audio assets, environmental interactions, utility sounds, alarms, launch pads, character-specific variations, and continuous polish passes across multiple gameplay systems."
+            }
+          ]
+        },
+        {
+          "type": "video-single",
+          "heading": "Presentation",
+          "intro": "A quick overview of my sound design work on <strong>Last Flag</strong> — abilities, weapons, UI, feedback, game objects, a brief look at different sound logics, and more.",
+          "video": {
+            "id": "LQEMSj-PHvs",
+            "heading": "Sound Design Presentation",
+            "sub": "Abilities, weapons, UI, feedback, game objects, a brief look at different sound logics, and more — with notes."
+          },
+          "captionTitle": "Sound Design Presentation"
+        },
+        {
+          "type": "video-showreel",
+          "heading": "ShowReels",
+          "videos": [
+            {
+              "id": "I95yWirEu60",
+              "heading": "MVP Presentations",
+              "sub": "Music Composing and Sound Design",
+              "captionTitle": "MVP Presentations",
+              "captionSub": "Music Composing and Sound Design"
+            },
+            {
+              "id": "xpconPqgWXs",
+              "heading": "Executions - Finishers",
+              "sub": "Sound Design",
+              "captionTitle": "Executions",
+              "captionSub": "Sound Design"
+            }
+          ]
+        },
+        {
+          "type": "video-grid",
+          "heading": "Marketing",
+          "rows": 2,
+          "noNav": true,
+          "videos": [
+            {
+              "id": "wIaNNtoBeb4",
+              "heading": "A Brilliantly Devised Plan",
+              "sub": "Sound Design, Foley, Mixing",
+              "captionTitle": "A Brilliantly Devised Plan",
+              "captionSub": "Sound Design, Foley, Mixing"
+            },
+            {
+              "id": "o8IXuDiGLF8",
+              "heading": "The Showdown",
+              "sub": "Sound Design, Foley, Mixing",
+              "captionTitle": "The Showdown",
+              "captionSub": "Sound Design, Foley, Mixing"
+            },
+            {
+              "id": "cvWccGynzYo",
+              "heading": "Blood of My Blood",
+              "sub": "Sound Design, Foley, Mixing",
+              "captionTitle": "Blood of My Blood",
+              "captionSub": "Sound Design, Foley, Mixing"
+            },
+            {
+              "id": "jhy3jus8FpM",
+              "heading": "Cashbot's First Day",
+              "sub": "Sound Design, Foley, Mixing",
+              "captionTitle": "Cashbot's First Day",
+              "captionSub": "Sound Design, Foley, Mixing"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "moonray-battle-lands",
+      "section": "projects",
+      "cardType": "project",
+      "title": "Moonray: Battle Lands",
+      "category": "Video Game",
+      "description": "Audio Producer, Principal Sound Designer, Technical Sound Designer, Audio Developer, Music Composer",
+      "banner": "assets/banner-moonray-battle-lands.png",
+      "bannerW": 1200,
+      "bannerH": 514,
+      "detailUrl": "project.html?slug=moonray-battle-lands",
+      "blocks": [
+        {
+          "type": "banner",
+          "src": "assets/banner-moonray-battle-lands-hq.png",
+          "w": 1024,
+          "h": 576
+        },
+        {
+          "type": "hero",
+          "title": "Moonray: Battle Lands",
+          "platform": [
+            "PC",
+            "Android",
+            "PS5"
+          ],
+          "company": "Moonray PBC",
+          "lead": "Audio Producer, Principal Sound Designer, Technical Sound Designer, Audio Developer, Music Composer · Nov 2021 — Sep 2025",
+          "steam": {
+            "label": "View on Steam",
+            "href": "https://store.steampowered.com/app/2933510/Moonray_Battle_Lands/"
+          }
+        },
+        {
+          "type": "about",
+          "heading": "About",
+          "html": "<strong>Moonray: Battle Lands</strong> is a free-to-play third-person PvP battle arena from Moonray PBC, set in a\n          science-fantasy world of floating islands and stylized combat. Players duel and team-fight with distinct heroes,\n          movement, and weapons across PC, Android, and PlayStation 5."
+        },
+        {
+          "type": "responsibilities",
+          "heading": "Responsibilities & Contributions",
+          "items": [
+            {
+              "strong": "Full-cycle sound design for all in-game elements:",
+              "text": "Created every sound from scratch. Performed and recorded custom foley, processed layers, and designed audio tailored\n                  to the game’s sci-fi aesthetic."
+            },
+            {
+              "strong": "Implementation using Wwise and Unreal Engine 5:",
+              "text": "Integrated sound assets through Wwise, UE5 Blueprint (and Niagara), ensuring responsive and performant playback\n                  in-game."
+            },
+            {
+              "strong": "Blueprint-based audio system design:",
+              "text": "Designed, developed, and maintained complex audio systems in Blueprints."
+            },
+            {
+              "strong": "Voiceover coordination:",
+              "text": "Collaborated with voice actors; handled announcer editing, processing, and in-engine implementation to maintain tone\n                  and clarity."
+            },
+            {
+              "strong": "Interactive mixing:",
+              "text": "Balanced dynamic real-time mixes, ensuring clear separation of layers and emotional pacing through intelligent use of\n                  volume automation, filters, and ducking."
+            },
+            {
+              "strong": "Music composition:",
+              "text": "Composed original interactive combat tracks, menu theme, and musical emotes."
+            },
+            {
+              "strong": "Marketing:",
+              "text": "Music composition and sound design for character reveal videos and comic-book video stories (excluding trailers)."
+            },
+            {
+              "strong": "Platform-specific optimization:",
+              "text": "Tuned audio assets and systems for PC, Android, and PlayStation 5, focusing on memory usage, CPU load, and perceived\n                  quality under hardware constraints."
+            }
+          ]
+        },
+        {
+          "type": "video-grid",
+          "heading": "Gameplay",
+          "videos": [
+            {
+              "id": "zxbPVzbwdJE",
+              "heading": "Duel Mode",
+              "captionTitle": "Duel Mode"
+            },
+            {
+              "id": "4O83X2Me-4Y",
+              "heading": "TDM - SkyHand",
+              "captionTitle": "TDM - SkyHand"
+            },
+            {
+              "id": "Sdw9CyR7T1s",
+              "heading": "TDM - Pit",
+              "captionTitle": "TDM - Pit"
+            }
+          ],
+          "intro": "In-game footage across different modes and maps — sound design, music, and audio systems as they run in the build.\n          I was the <strong>solo</strong> audio designer on the project, handling everything from recording and composition through\n          in-engine implementation.",
+          "rows": 1,
+          "noNav": false
+        },
+        {
+          "type": "video-grid",
+          "heading": "Marketing: Character Reveals",
+          "videos": [
+            {
+              "id": "V5AYElJdjyY",
+              "heading": "Adam",
+              "sub": "Music composing",
+              "captionTitle": "Adam",
+              "captionSub": "Music composing"
+            },
+            {
+              "id": "t5NukixFtWA",
+              "heading": "GetzelNok",
+              "sub": "Music composing",
+              "captionTitle": "GetzelNok",
+              "captionSub": "Music composing"
+            },
+            {
+              "id": "EkZVm_d2cNw",
+              "heading": "JadeAdam",
+              "sub": "Sound design",
+              "captionTitle": "JadeAdam",
+              "captionSub": "Sound design"
+            },
+            {
+              "id": "slFXMdogEDg",
+              "heading": "Kan",
+              "sub": "Music composing",
+              "captionTitle": "Kan",
+              "captionSub": "Music composing"
+            },
+            {
+              "id": "8fV54kCsNfw",
+              "heading": "Raktur",
+              "sub": "Sound design",
+              "captionTitle": "Raktur",
+              "captionSub": "Sound design"
+            },
+            {
+              "id": "FFx0L7YxNhk",
+              "heading": "Tenok",
+              "sub": "Music composing",
+              "captionTitle": "Tenok",
+              "captionSub": "Music composing"
+            }
+          ],
+          "date": "2024",
+          "rows": 2,
+          "noNav": true
+        },
+        {
+          "type": "raw-flat",
+          "html": "<section class=\"resume-section reveal\" aria-labelledby=\"moonray-music-heading\">\n        <h2 id=\"moonray-music-heading\" class=\"resume-section__heading\">Music</h2>\n        <p class=\"project-section__date\">2022 — 2025</p>\n        <div class=\"project-portfolio-block project-portfolio-block--music\" id=\"moonray-soundtrack\">\n              <div class=\"vch-player\" data-vch-audio-player=\"\" data-artist=\"Valentyn Chumachenko\" data-playlist=\"Moonray Soundtrack\" aria-label=\"Moonray Soundtrack player\">\n                <div class=\"vch-player__now\">\n                  <div class=\"vch-player__now-top\">\n                    <div class=\"vch-player__art vch-player__art--album\">\n                      <img src=\"assets/moonray-logo-white.png\" alt=\"\" width=\"120\" height=\"120\" loading=\"lazy\" decoding=\"async\">\n                    </div>\n                    <div class=\"vch-player__now-body\">\n                      <div class=\"vch-player__controls-row\">\n                        <button type=\"button\" class=\"vch-player__play-btn\" aria-label=\"Play\">\n                          <svg class=\"vch-player__icon-play\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 5v14l11-7z\"></path></svg>\n                          <svg class=\"vch-player__icon-pause\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6 5h4v14H6V5zm8 0h4v14h-4V5z\"></path></svg>\n                        </button>\n                        <div class=\"vch-player__meta\">\n                          <span class=\"vch-player__artist\">Valentyn Chumachenko</span>\n                          <span class=\"vch-player__title\">Moonray Soundtrack</span>\n                          <div class=\"vch-player__track-detail\">\n                            <p class=\"vch-player__track-desc\"></p>\n                          </div>\n                        </div>\n                      </div>\n                    </div>\n                    <div class=\"vch-player__seek-wrap\">\n                      <div class=\"vch-player__seek-row\">\n                        <span class=\"vch-player__time-cur\">0:00</span>\n                        <button type=\"button\" class=\"vch-player__seek\" aria-label=\"Seek\">\n                          <span class=\"vch-player__seek-rail\" aria-hidden=\"true\">\n                            <span class=\"vch-player__seek-fill\">\n                              <span class=\"vch-player__seek-shine\"></span>\n                            </span>\n                          </span>\n                          <span class=\"vch-player__seek-hover\" aria-hidden=\"true\"></span>\n                          <span class=\"vch-player__seek-thumb\" aria-hidden=\"true\"></span>\n                        </button>\n                        <span class=\"vch-player__time-dur\">0:00</span>\n                      </div>\n                    </div>\n                    <div class=\"vch-player__timelines-slot\">\n                      <button type=\"button\" class=\"vch-player__timelines-toggle\" aria-expanded=\"false\" aria-controls=\"moonray-timelines-viewport\" hidden=\"\">\n                        <span class=\"vch-player__timelines-toggle-label\">Timelines</span>\n                      </button>\n                      <div class=\"vch-player__timelines-panel\" id=\"moonray-timelines-panel\" aria-hidden=\"true\">\n                        <div class=\"vch-player__timelines-viewport\" id=\"moonray-timelines-viewport\"></div>\n                      </div>\n                    </div>\n                  </div>\n                </div>\n                <ol class=\"vch-player__tracks\" role=\"listbox\" aria-label=\"Tracks\">\n                  <li>\n                    <button type=\"button\" class=\"vch-player__track is-active\" data-audio-src=\"assets/audio/moonray/01-intro.mp3\" data-track-label=\"Intro\" data-track-desc=\"Original Intro\" aria-selected=\"true\">\n                      <span class=\"vch-player__track-num\">1</span>\n                      <span class=\"vch-player__track-art vch-player__track-art--logo\"><img src=\"assets/moonray-logo-black.png\" alt=\"\" width=\"38\" height=\"38\" loading=\"lazy\"></span>\n                      <span class=\"vch-player__track-title\">Moonray — Intro</span>\n                      <span class=\"vch-player__track-dur\">—:——</span>\n                    </button>\n                  </li>\n                  <li>\n                    <button type=\"button\" class=\"vch-player__track\" data-audio-src=\"assets/audio/moonray/02-throne-breakers.mp3\" data-track-label=\"Throne Breakers\" data-track-desc=\"Assembled interactive music track that plays during TDM/DM Mode\" aria-selected=\"false\">\n                      <span class=\"vch-player__track-num\">2</span>\n                      <span class=\"vch-player__track-art vch-player__track-art--logo\"><img src=\"assets/moonray-logo-black.png\" alt=\"\" width=\"38\" height=\"38\" loading=\"lazy\"></span>\n                      <span class=\"vch-player__track-title\">Moonray — Throne Breakers</span>\n                      <span class=\"vch-player__track-dur\">—:——</span>\n                    </button>\n                    <div class=\"vch-player__track-timeline-source\" hidden=\"\">TIMINGS\n0:00-0:25 — Suspense + Suspense with enemy near you\n0:25-3:12 — Combat SLOW segments (12 parts + transition)\n3:12-3:47 — Combat Critical Health segments (+ transitions in/out)\n3:47-4:12 — Death; Respawn Screen\n4:12-5:16 — Combat SPEEDUP (Intro, WarmUp; 3 main parts) + transition in\n5:16-6:01 — Pre-Combat segments (no hit registration for a certain amount of time, but combat could start at any moment) + transitions in/out\n6:01-6:52 — DOUBLE DAMAGE segment; plays during the buff (+ transitions)\n6:52-7:52 — Combat SPEEDUP (3 climax segments + 1 reload)\n7:56-8:38 — Win Screen</div>\n                  </li>\n                  <li>\n                    <button type=\"button\" class=\"vch-player__track\" data-audio-src=\"assets/audio/moonray/03-echo-blade.mp3\" data-track-label=\"Echo Blade\" data-track-desc=\"Assembled interactive music track that plays during Duel Mode\" aria-selected=\"false\">\n                      <span class=\"vch-player__track-num\">3</span>\n                      <span class=\"vch-player__track-art vch-player__track-art--logo\"><img src=\"assets/moonray-logo-black.png\" alt=\"\" width=\"38\" height=\"38\" loading=\"lazy\"></span>\n                      <span class=\"vch-player__track-title\">Moonray — Echo Blade</span>\n                      <span class=\"vch-player__track-dur\">—:——</span>\n                    </button>\n                    <div class=\"vch-player__track-timeline-source\" hidden=\"\">TIMINGS\n0:00-0:07 — Opening Part (Weapon Selector shown first time)\n0:07-0:13 — Waiting for Opponent state\n0:13-0:28 — Accolades Flow (VS, Round, Fight) — plays once for the match\n0:28-2:50 — COMBAT loops (12 parts). They will play by specific rules in the playlist (N Round).\n2:50-3:00 — COMBAT LowHP (for player)\n3:00-3:07 — ROUND END\n3:07-3:18 — General Waiting State\n3:19-3:27 — Transition to the Last Round theme\n3:28-4:14 — Last Round COMBAT loops (4 parts)\n4:15-4:36 — Climax for Last Round (when someone has critically low HP)\n4:36-4:42 — MATCH END / SCOREBOARD</div>\n                  </li>\n                  <li>\n                    <button type=\"button\" class=\"vch-player__track\" data-audio-src=\"assets/audio/moonray/04-deadly-rumors.mp3\" data-track-label=\"Deadly Rumors\" data-track-desc=\"Assembled interactive music track that plays during TDM/DM Mode\" aria-selected=\"false\">\n                      <span class=\"vch-player__track-num\">4</span>\n                      <span class=\"vch-player__track-art vch-player__track-art--logo\"><img src=\"assets/moonray-logo-black.png\" alt=\"\" width=\"38\" height=\"38\" loading=\"lazy\"></span>\n                      <span class=\"vch-player__track-title\">Moonray — Deadly Rumors</span>\n                      <span class=\"vch-player__track-dur\">—:——</span>\n                    </button>\n                    <div class=\"vch-player__track-timeline-source\" hidden=\"\">SUSPENSE — Enemy Close: 0:00 - 0:16\nTransition Suspense to Combat: 0:16 - 0:18\nCOMBAT PARTS (1-6) (6 different loops): 0:18 - 1:51\nTransition Combat to LOWHP: 1:51 - 1:53\nCOMBAT — LowHP (Loop): 1:53 - 2:09\nTransition LowHP to Combat: 2:09 - 2:11\nCOMBAT PARTS (7-10) (4 different loops): 2:11 - 3:13\nTransition Combat to Pre-Combat: 3:13 - 3:21\nPRE-COMBAT (2 loops): 3:21 - 3:53\nTransition PreCombat to Combat/LowHP: 3:53 - 3:55\nDEATH: 3:55 - 4:02\nWEAPON SELECTOR (Loop): 4:02 - 4:10\nPowerUp DoubleDamage: 4:21 - 4:29\nPowerUp MegaHealth / EnemyKill: 4:21 - 4:29</div>\n                  </li>\n                  <li>\n                    <button type=\"button\" class=\"vch-player__track\" data-audio-src=\"assets/audio/moonray/05-warrior.mp3\" data-track-label=\"Warrior\" data-track-desc=\"Assembled interactive music track that plays during TDM/DM Mode\" aria-selected=\"false\">\n                      <span class=\"vch-player__track-num\">5</span>\n                      <span class=\"vch-player__track-art vch-player__track-art--logo\"><img src=\"assets/moonray-logo-black.png\" alt=\"\" width=\"38\" height=\"38\" loading=\"lazy\"></span>\n                      <span class=\"vch-player__track-title\">Moonray — Warrior</span>\n                      <span class=\"vch-player__track-dur\">—:——</span>\n                    </button>\n                    <div class=\"vch-player__track-timeline-source\" hidden=\"\">SUSPENSE — Enemy Far: 0:00 - 0:15\nSUSPENSE — Enemy Close: 0:15 - 0:31\nCOMBAT PARTS (Different Loops): 0:31 - 2:46\nPRE-COMBAT (Loop): 2:46 - 3:02\nCOMBAT REPEAT: 3:02 - 3:18\nTransition COM to LOWHP: 3:18 - 3:20\nCOMBAT — LOWHP (Loop): 3:20 - 3:36\nTransition LOWHP to COM: 3:36 - 3:38\nCOMBAT REPEAT: 3:38 - 3:54\nDEATH: 3:54 - 4:01\nWEAPON SELECTOR (Loop): 4:01 - 4:24</div>\n                  </li>\n                  <li>\n                    <button type=\"button\" class=\"vch-player__track\" data-audio-src=\"assets/audio/moonray/06-menu-theme.mp3\" data-track-label=\"Menu Theme\" data-track-desc=\"Original looped music from main menu\" aria-selected=\"false\">\n                      <span class=\"vch-player__track-num\">6</span>\n                      <span class=\"vch-player__track-art vch-player__track-art--logo\"><img src=\"assets/moonray-logo-black.png\" alt=\"\" width=\"38\" height=\"38\" loading=\"lazy\"></span>\n                      <span class=\"vch-player__track-title\">Moonray — Menu Theme</span>\n                      <span class=\"vch-player__track-dur\">—:——</span>\n                    </button>\n                  </li>\n                </ol>\n                <p class=\"vch-player__footer\">\n                  Also on\n                  <a href=\"https://soundcloud.com/valentyn-chumachenko/sets/moonray-soundtrack/s-JiCMxK7Ur3m\" rel=\"noopener noreferrer\" target=\"_blank\">SoundCloud</a>\n                </p>\n                <audio class=\"vch-player__audio\" preload=\"none\"></audio>\n              </div>\n        </div>\n      </section>"
+        },
+        {
+          "type": "raw-flat",
+          "html": "<section class=\"resume-section reveal\" aria-labelledby=\"moonray-comic-heading\">\n        <h2 id=\"moonray-comic-heading\" class=\"resume-section__heading\">Comic Book Videos</h2>\n        <p class=\"project-section__date\">2022</p>\n        <div class=\"project-portfolio-block project-portfolio-block--comic\">\n          <div class=\"project-comic-layout\">\n            <div class=\"project-comic-trailers\" aria-label=\"Trailers\">\n              <div class=\"video-thumb-wrap\">\n                <button type=\"button\" class=\"video-thumb\" data-youtube-id=\"l3ZO2U1EyqU\" data-lightbox-heading=\"Moonray Comic Book\" data-lightbox-sub=\"Trailer · 2022\" aria-label=\"Play Moonray comic book trailer — part 1\">\n                  <img src=\"https://img.youtube.com/vi/l3ZO2U1EyqU/maxresdefault.jpg\" alt=\"\" width=\"1280\" height=\"720\" loading=\"lazy\" decoding=\"async\">\n                </button>\n                <p class=\"video-thumb-caption\"><strong>Trailer 1</strong>Comic Book</p>\n              </div>\n              <div class=\"video-thumb-wrap\">\n                <button type=\"button\" class=\"video-thumb\" data-youtube-id=\"MkKj27QFHEk\" data-lightbox-heading=\"Moonray Comic Book\" data-lightbox-sub=\"Trailer · 2022\" aria-label=\"Play Moonray comic book trailer — part 2\">\n                  <img src=\"https://img.youtube.com/vi/MkKj27QFHEk/maxresdefault.jpg\" alt=\"\" width=\"1280\" height=\"720\" loading=\"lazy\" decoding=\"async\">\n                </button>\n                <p class=\"video-thumb-caption\"><strong>Trailer 2</strong>Comic Book</p>\n              </div>\n            </div>\n            <div class=\"project-comic-previews\" aria-label=\"Chapters\">\n              <div class=\"video-thumb-wrap video-thumb-wrap--comic\">\n                <div class=\"comic-poster-reflect\">\n                  <button type=\"button\" class=\"video-thumb video-thumb--poster video-thumb--poster-portrait\" data-youtube-id=\"bRNzj4DhoEg\" data-lightbox-heading=\"Chapter I\" data-lightbox-sub=\"Music composing and Sound Design\" aria-label=\"Play Moonray Chapter I comic book video\">\n                    <img src=\"assets/moonray-comic-poster-1.png\" alt=\"Moonray — comic book video poster\" width=\"600\" height=\"900\" loading=\"lazy\" decoding=\"async\">\n                  </button>\n                  <div class=\"comic-poster-reflect__shine\" style=\"--comic-reflect: url('assets/moonray-comic-poster-1.png')\" aria-hidden=\"true\"></div>\n                </div>\n                <p class=\"video-thumb-caption\"><strong>Chapter I</strong>Music composing and Sound Design</p>\n              </div>\n              <div class=\"video-thumb-wrap video-thumb-wrap--comic\">\n                <div class=\"comic-poster-reflect\">\n                  <button type=\"button\" class=\"video-thumb video-thumb--poster video-thumb--poster-portrait\" data-youtube-id=\"RVx5XIvdomQ\" data-lightbox-heading=\"Chapter II\" data-lightbox-sub=\"Music Composing and Sound Design\" aria-label=\"Play Moonray Chapter II comic book video\">\n                    <img src=\"assets/moonray-comic-poster-2.png\" alt=\"Moonray 2 — comic book video poster\" width=\"600\" height=\"900\" loading=\"lazy\" decoding=\"async\">\n                  </button>\n                  <div class=\"comic-poster-reflect__shine\" style=\"--comic-reflect: url('assets/moonray-comic-poster-2.png')\" aria-hidden=\"true\"></div>\n                </div>\n                <p class=\"video-thumb-caption\"><strong>Chapter II</strong>Music Composing and Sound Design</p>\n              </div>\n            </div>\n          </div>\n        </div>\n      </section>"
+        }
+      ]
+    },
+    {
+      "slug": "tajikistan",
+      "section": "projects",
+      "cardType": "project",
+      "title": "Tajikistan",
+      "category": "Live Shows",
+      "description": "Music for short “History” show openers · national celebrations",
+      "banner": "assets/banner-tajikistan-hq.png",
+      "bannerW": 1536,
+      "bannerH": 1024,
+      "detailUrl": "project.html?slug=tajikistan",
+      "blocks": [
+        {
+          "type": "banner",
+          "src": "assets/banner-tajikistan-hq.png",
+          "w": 1536,
+          "h": 1024
+        },
+        {
+          "type": "hero",
+          "title": "Tajikistan",
+          "companyHtml": "<a href=\"https://www.marinartstudio.com/\" rel=\"noopener noreferrer\" target=\"_blank\">MARIN ART's</a>\n            · Entertainment show production",
+          "lead": "Music composing · “History” opening acts · Live national celebrations · May — Sep 2021 · Nov 2023 — Mar 2024"
+        },
+        {
+          "type": "about",
+          "heading": "About",
+          "html": "Large-scale live celebration shows produced by <strong>MARIN ART's</strong> for national events in Tajikistan.\n          The opening act <strong>“History”</strong> tells the country’s story through staged scenes, choreography, and\n          spectacle—composed and produced end-to-end for arena-scale playback, including Navruz (2024) and the 30th\n          Independence Anniversary show (2021)."
+        },
+        {
+          "type": "responsibilities",
+          "heading": "Responsibilities & Contributions",
+          "items": [
+            {
+              "strong": "",
+              "text": "Composed and produced original music for the “History” opening segment in both large-scale live shows."
+            },
+            {
+              "strong": "",
+              "text": "Developed the full musical vision and dramatic structure of the opening act from initial concept to final master."
+            },
+            {
+              "strong": "",
+              "text": "Created music entirely from scratch, including thematic development, composition, arrangement, sound design, mixing, and mastering."
+            },
+            {
+              "strong": "",
+              "text": "Worked closely with the stage director, show director, and musicians from Tajikistan throughout the production process."
+            },
+            {
+              "strong": "",
+              "text": "Maintained close communication with the stage and show directors to align musical direction, structure, pacing, and emotional impact of the opening segment."
+            },
+            {
+              "strong": "",
+              "text": "Composed and structured music to match required scene timings, animatics, staging, and overall show flow, with ongoing synchronization adjustments during production."
+            },
+            {
+              "strong": "",
+              "text": "Led the complete end-to-end music production workflow, ensuring artistic consistency and technical delivery for live performance environments."
+            },
+            {
+              "strong": "",
+              "text": "Delivered final production-ready masters optimized for large venue playback and live show integration."
+            }
+          ]
+        },
+        {
+          "type": "video-single",
+          "heading": "Navruz Show",
+          "video": {
+            "id": "_Q3TJ1-nyLQ",
+            "heading": "Navruz Show",
+            "sub": "Music Composing for opening block · 2024"
+          },
+          "captionHtml": "Tajikistan (2024)<br>\n              Premiere – 24th Match 2024<br>\n              Music Composing for opening block<br>\n              (6 minutes)"
+        },
+        {
+          "type": "video-single",
+          "heading": "30yrs Independence Anniversary Show",
+          "video": {
+            "id": "xz7yLsHD1m4",
+            "heading": "30yrs Independence Anniversary Show",
+            "sub": "Music Composing for opening block “History” · 2021"
+          },
+          "captionHtml": "Tajikistan (2021)<br>\n              Premiere – 9th September 2021<br>\n              Music Composing for opening block “History”<br>\n              (12 minutes)"
+        }
+      ]
+    },
+    {
+      "slug": "vm-xctrl",
+      "section": "tools",
+      "cardType": "text-only",
+      "title": "VM-Xctrl",
+      "category": "Application",
+      "description": "Developer",
+      "banner": "",
+      "bannerW": 0,
+      "bannerH": 0,
+      "detailUrl": "project.html?slug=vm-xctrl",
+      "blocks": [
+        {
+          "type": "raw-banner",
+          "class": "page-overview-banner--vm-xctrl page-overview-banner--vm-xctrl-hero",
+          "html": "<img class=\"page-overview-banner__img vm-xctrl-hero-banner\" src=\"assets/vm-xctrl-hero-banner.webp\" alt=\"Behringer X-Touch universal control surface and Voicemeeter Potato mixer\" width=\"4096\" height=\"1104\" loading=\"eager\" decoding=\"async\" draggable=\"false\">"
+        },
+        {
+          "type": "hero",
+          "title": "VM-XCtrl",
+          "lead": "Voicemeeter ↔ Behringer X-Touch bridge — tactile mixing, meters, and scribble feedback over UDP (XCtrl mode)."
+        },
+        {
+          "type": "raw-flat",
+          "html": "<div class=\"sub-content reveal\">\n        <p>\n          <strong>VM-XCtrl</strong> maps the X-Touch’s faders, encoders, buttons, and scribble strips to\n          <strong>VB-Audio Voicemeeter</strong> through the Voicemeeter API, with a UDP handshake in XCtrl mode. Run the\n          surface in <strong>XCtrl / MCU</strong> mode and keep Voicemeeter on one layer while your DAW or other tools\n          live on another — switch with the <strong>SMPTE</strong> button when you need to.\n        </p>\n        <div class=\"vm-xctrl-video reveal\">\n          <figure class=\"video-item\">\n            <div class=\"ratio-embed\">\n              <iframe title=\"VM-XCtrl — preview video\" src=\"https://www.youtube.com/embed/OcrzrS9EKOE\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" allowfullscreen=\"\" loading=\"lazy\"></iframe>\n            </div>\n          </figure>\n        </div>\n        <div class=\"project-actions vm-xctrl-cta\">\n          <a class=\"project-link\" href=\"https://github.com/vchaudio/VM-XCtrl\" rel=\"noopener noreferrer\" target=\"_blank\">GitHub — source &amp; releases</a>\n          <a class=\"project-link project-link--secondary\" href=\"https://vchaudio.gumroad.com/l/VM-XCtrl\" rel=\"noopener noreferrer\" target=\"_blank\">Get a license (Gumroad)</a>\n          <a class=\"project-link project-link--secondary\" href=\"https://discord.gg/DzCBwq2e\" rel=\"noopener noreferrer\" target=\"_blank\">Discord — feedback &amp; support</a>\n        </div>\n      </div>"
+        },
+        {
+          "type": "releases",
+          "heading": "Download",
+          "open": true,
+          "wrapClass": "vm-xctrl-spoilers",
+          "lead": "Builds and release notes on <a href=\"https://github.com/vchaudio/VM-Xctrl/releases\" rel=\"noopener noreferrer\" target=\"_blank\">GitHub Releases</a>.",
+          "items": [
+            {
+              "version": "v.1.0.0.6 — API handling rework",
+              "date": "17 Jan 2026",
+              "badge": "latest",
+              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.6/VM-Xctrl_v1.0.0.6.exe",
+              "changes": [
+                "Reworked startup flow for loading the Voicemeeter API.",
+                "Scans the default Voicemeeter install folder (<code>C:\\Program Files (x86)\\VB\\Voicemeeter</code>) and locates required DLLs automatically — independent of a specific Voicemeeter version; tested with 3.1.1.9, 3.1.2.2, and intended for future releases.",
+                "Older Voicemeeter versions may work but are untested; legacy API differences can limit some features.",
+                "If DLLs are not found, you are prompted to pick the Voicemeeter installation folder manually.",
+                "Voicemeeter folder can be changed anytime from the tray icon context menu."
+              ]
+            },
+            {
+              "version": "v.1.0.0.5 — Experimental",
+              "date": "25 Nov 2025",
+              "badge": "prerelease",
+              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.5/VM-Xctrl_v1.0.0.5.exe",
+              "changes": [
+                "Possible fix for fader resistance when you move a fader suddenly or very quickly."
+              ]
+            },
+            {
+              "version": "v.1.0.0.4 — License system updated",
+              "date": "15 Oct 2025",
+              "badge": "",
+              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.4/VM-Xctrl_v1.0.0.4.exe",
+              "changes": [
+                "License system updated to accept keys purchased on Gumroad.",
+                "Use this version or newer to activate a purchased key successfully."
+              ]
+            },
+            {
+              "version": "v.1.0.0.3",
+              "date": "13 Oct 2025",
+              "badge": "",
+              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.3/VM-Xctrl_v1.0.0.3.exe",
+              "changes": [
+                "<strong>Fixed:</strong> Possible crash when moving or touching faders on the BUSES layer.",
+                "<strong>Improved:</strong> Fader feedback on the BUSES layer (near-instant response).",
+                "<strong>Optimized:</strong> Scribble strip update performance on the BUSES layer."
+              ]
+            },
+            {
+              "version": "v.1.0.0.2",
+              "date": "13 Oct 2025",
+              "badge": "",
+              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.2/VM-Xctrl_v1.0.0.2.exe",
+              "changes": [
+                "<strong>Fixed:</strong> Autostart path handling — with “Start on Login” enabled, you are prompted to specify the executable path added to system startup."
+              ]
+            },
+            {
+              "version": "v.1.0.0.1",
+              "date": "13 Oct 2025",
+              "badge": "",
+              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.1/VM-Xctrl_v1.0.0.1.exe",
+              "changes": [
+                "Initial release."
+              ]
+            }
+          ]
+        },
+        {
+          "type": "accordion",
+          "wrapClass": "vm-xctrl-spoilers",
+          "items": [
+            {
+              "label": "Features",
+              "open": true,
+              "ordered": false,
+              "items": [
+                {
+                  "strong": "Two main layers",
+                  "text": " — Input (strips / channels) and Output (buses); switch without losing context."
+                },
+                {
+                  "strong": "Nine faders on Input",
+                  "text": " — eight channel faders plus one master."
+                },
+                {
+                  "strong": "Channel metering",
+                  "text": " — LED-style meters track Voicemeeter levels in real time."
+                },
+                {
+                  "strong": "Scribble strips",
+                  "text": " — line 1 for channel names; line 2 for labels or live gain in dB while you ride a fader; colour palettes differ for Input, Output, and AUX layers."
+                },
+                {
+                  "strong": "Mute, Solo, Mono, M.C.",
+                  "text": " — LED feedback mirrors Voicemeeter."
+                },
+                {
+                  "strong": "AUX (send) layer",
+                  "text": " — pick a channel, then adjust sends to A1–A5 and B1–B3; RECORD buttons toggle sends; meters show the selected channel and relative send levels."
+                },
+                {
+                  "strong": "Preset recall",
+                  "text": " — F1–F8 recall Voicemeeter snapshots with LED state."
+                },
+                {
+                  "strong": "Media transport",
+                  "text": " — play / pause / next / previous send OS-level media keys; LEDs follow playback."
+                },
+                {
+                  "strong": "Connection robustness",
+                  "text": " — UDP keep-alive, loss detection, and recovery; a “DISCONNECTED API” layer when Voicemeeter is offline, then automatic return when it’s back."
+                },
+                {
+                  "strong": "FLIP",
+                  "text": " — toggles absolute vs relative fader mode."
+                },
+                {
+                  "strong": "Solo behaviour",
+                  "text": " — when a channel is soloed, other mute LEDs blink like in Voicemeeter."
+                },
+                {
+                  "strong": "Layer readout",
+                  "text": " — in single XCtrl mode, the timecode fields show the active layer name."
+                }
+              ]
+            },
+            {
+              "label": "Requirements",
+              "open": true,
+              "ordered": false,
+              "items": [
+                {
+                  "strong": "VB-Audio Voicemeeter",
+                  "text": " — Potato 3.1.1.9, Banana 2.1.1.9, or newer."
+                },
+                {
+                  "strong": "Behringer X-Touch",
+                  "text": " — XCtrl, XCtrl-MCU, or XCtrl-HUI mode."
+                },
+                {
+                  "strong": "Network",
+                  "text": " — PC and X-Touch on the same LAN with UDP allowed between them."
+                }
+              ]
+            },
+            {
+              "label": "Getting started",
+              "open": true,
+              "ordered": true,
+              "items": [
+                "Put the X-Touch in <strong>XCtrl</strong> mode.",
+                "Open Voicemeeter and enable the <strong>API</strong>.",
+                "Launch <strong>VM-XCtrl</strong>; it discovers the surface and connects.",
+                "Set the <strong>X-Touch IP</strong> in VM-XCtrl.",
+                "On the X-Touch, set the <strong>PC IP</strong> (hover the tray icon in Windows — it shows your machine’s address).",
+                "Mix Voicemeeter from the surface; use Gumroad for a license when you’re ready to go beyond evaluation limits described in the repo."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

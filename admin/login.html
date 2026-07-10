@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>VCHAudio · Admin · Sign in</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="admin.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png" />
+  </head>
+  <body class="admin-body admin-body--login">
+    <header class="admin-topbar">
+      <a class="admin-brand" href="../index.html" target="_blank" rel="noopener">VCHAudio <span>Admin</span></a>
+      <div class="admin-topbar__actions">
+        <a class="admin-btn admin-btn--ghost" href="index.html">Back to admin</a>
+      </div>
+    </header>
+
+    <section class="admin-login" id="admin-login">
+      <form class="admin-login__card" id="admin-login-form">
+        <h1>Sign in</h1>
+        <p class="admin-login__hint">
+          Authenticate with a GitHub Personal Access Token. Content is read from and written to your
+          repository via the GitHub Contents API — changes go live on GitHub Pages after the next build.
+        </p>
+        <label class="admin-field">
+          <span>GitHub owner (user or org)</span>
+          <input type="text" id="login-owner" required placeholder="vchaudio" autocomplete="username" />
+        </label>
+        <label class="admin-field">
+          <span>Repository</span>
+          <input type="text" id="login-repo" required placeholder="vchaudio.github.io" autocomplete="off" />
+        </label>
+        <label class="admin-field">
+          <span>Branch</span>
+          <input type="text" id="login-branch" required placeholder="main" autocomplete="off" />
+        </label>
+        <label class="admin-field">
+          <span>Personal Access Token</span>
+          <input type="password" id="login-token" required placeholder="github_pat_…" autocomplete="off" />
+        </label>
+        <label class="admin-check">
+          <input type="checkbox" id="login-remember" checked />
+          <span>Remember session in this browser</span>
+        </label>
+        <p class="admin-login__sec">
+          The token is stored only in your browser (localStorage if remembered) and sent directly to GitHub.
+          Use a fine-grained PAT scoped to this repository with <strong>Contents: Read &amp; Write</strong>.
+        </p>
+        <button type="submit" class="admin-btn admin-btn--primary" id="admin-login-submit">Sign in</button>
+        <p class="admin-login__status" id="admin-login-status" role="status"></p>
+        <details class="admin-login__help">
+          <summary>How to create a token</summary>
+          <ol>
+            <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.</li>
+            <li>Name it “VCHAudio admin”, set an expiration.</li>
+            <li>Repository access → Only select repositories → choose this repo.</li>
+            <li>Permissions → Repository permissions → Contents → <strong>Read and write</strong>.</li>
+            <li>Generate and paste the token above.</li>
+          </ol>
+        </details>
+      </form>
+    </section>
+
+    <div class="admin-toast" id="admin-toast" role="status" aria-live="polite" hidden></div>
+    <script src="admin.js" defer></script>
+  </body>
+</html>

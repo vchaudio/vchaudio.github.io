@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <title>Project · VCHAudio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/project-portfolio.css" />
+    <link rel="stylesheet" href="css/audio-player.css" />
+    <script src="js/nav-arrival.js"></script>
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  </head>
+  <body>
+    <header class="site-header site-header--center-brand">
+      <a class="brand brand--with-vch-mark" href="index.html" aria-label="VCH Audio"><img class="brand-vch-mark" src="assets/vch-mark-transparent.png" width="762" height="330" alt="" decoding="sync" fetchpriority="high" loading="eager" /><span>Audio</span></a>
+    </header>
+
+    <main id="project-main" class="project-page--hero-glow"></main>
+
+    <button type="button" class="scroll-to-top scroll-to-top--dual is-visible" data-scroll-to-top data-home-href="index.html" aria-label="Home">
+      <svg class="scroll-to-top__icon scroll-to-top__icon--home" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 11.5L12 5l7 6.5M8 10.5V18h3v-5h2v5h3v-7.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <svg class="scroll-to-top__icon scroll-to-top__icon--up" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 7v10M12 7l-5 5M12 7l5 5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+
+    <div id="video-lightbox" class="video-lightbox" hidden role="dialog" aria-modal="true" aria-label="Video player">
+      <div class="video-lightbox__backdrop" data-lightbox-close tabindex="-1"></div>
+      <div class="video-lightbox__panel">
+        <button type="button" class="video-lightbox__close" data-lightbox-close aria-label="Close video">
+          <span aria-hidden="true">×</span>
+        </button>
+        <div class="video-lightbox__frame">
+          <iframe id="video-lightbox-iframe" title="YouTube video" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" loading="lazy"></iframe>
+        </div>
+        <div id="video-lightbox-caption" class="video-lightbox__caption" hidden></div>
+      </div>
+    </div>
+
+    <footer class="site-footer">© VCHAudio · Valentyn Chumachenko</footer>
+    <noscript>
+      <p style="padding:2rem;text-align:center">This site requires JavaScript to display content.</p>
+    </noscript>
+    <script src="js/render.js" defer></script>
+  </body>
+</html>

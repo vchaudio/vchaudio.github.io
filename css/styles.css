@@ -402,6 +402,14 @@ main.page-other-projects {
   animation: fade-up 0.75s var(--ease-out) both;
 }
 
+/* When the admin hides the hero logo, the wrapper must collapse (removing the
+   logo AND its spacing). Without this, `.brand-logo-wrap { display: flex }`
+   above would override the UA `[hidden] { display: none }` rule (same
+   specificity, author beats UA) and the logo/space would stay. */
+.brand-logo-wrap[hidden] {
+  display: none;
+}
+
 .brand-logo {
   display: block;
   width: min(100%, 720px);
