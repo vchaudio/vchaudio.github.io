@@ -131,15 +131,28 @@
     if (nameEl) nameEl.textContent = site.hero.name;
     var roleEl = document.querySelector(".intro-role");
     if (roleEl) roleEl.textContent = site.hero.role;
+    /* Configurable role block width (overrides the CSS max-width on
+       .intro-role when set). Empty/absent keeps the stylesheet default. */
+    if (roleEl) {
+      var rw = site.hero && site.hero.roleMaxWidth;
+      if (rw && String(rw).trim()) roleEl.style.maxWidth = rw.trim();
+      else roleEl.style.maxWidth = "";
+    }
     var bioEl = document.querySelector(".intro-bio");
     if (bioEl) bioEl.textContent = site.hero.bio;
-    /* Configurable bio block width (overrides the CSS max-width on
-       .intro-block when set). Empty/absent keeps the stylesheet default. */
+    /* Configurable bio block width. Applied to .intro-block, and the whole
+       .home-main column is widened to accommodate it (capped at 100% so
+       mobile never overflows). Empty/absent keeps the stylesheet default
+       (home-main 960px / intro-block 42rem). */
     var introBlock = document.querySelector(".intro-block");
-    if (introBlock) {
-      var bw = site.hero && site.hero.bioMaxWidth;
-      if (bw && String(bw).trim()) introBlock.style.maxWidth = bw.trim();
-      else introBlock.style.maxWidth = "";
+    var homeMain = document.querySelector(".home-main");
+    var bw = site.hero && site.hero.bioMaxWidth;
+    var bwVal = bw && String(bw).trim();
+    if (introBlock) introBlock.style.maxWidth = bwVal || "";
+    if (homeMain && bwVal && !/%\s*$/.test(bwVal)) {
+      homeMain.style.maxWidth = "min(max(960px, " + bwVal + "), 100%)";
+    } else if (homeMain) {
+      homeMain.style.maxWidth = "";
     }
 
     /* action buttons */

@@ -504,21 +504,25 @@
 
   /* Friendly width control: a slider + number input + unit selector (rem/px/%)
      plus a "Default" button. The stored value is a CSS length string such as
-     "42rem" / "640px" / "100%", or "" for the stylesheet default. */
-  function fieldBioWidth(label, value, onInput) {
+     "42rem" / "640px" / "100%", or "" for the stylesheet default. opts can
+     override the default value/unit and the per-unit slider ranges. */
+  function fieldWidth(label, value, onInput, opts) {
+    opts = opts || {};
+    var defaultNum = opts.defaultNum != null ? opts.defaultNum : 42;
+    var defaultUnit = opts.defaultUnit || "rem";
+    var ranges = opts.ranges || { rem: [16, 100, 0.5], px: [320, 1600, 8], "%": [50, 100, 1] };
     var raw = (value == null ? "" : String(value)).trim();
     var m = raw.match(/^([\d.]+)\s*(rem|px|%)$/i);
-    var num = m ? parseFloat(m[1]) : 42;
-    var unit = m ? m[2].toLowerCase() : "rem";
+    var num = m ? parseFloat(m[1]) : defaultNum;
+    var unit = m ? m[2].toLowerCase() : defaultUnit;
     var isDefault = !m;
-    var ranges = { rem: [16, 80, 0.5], px: [320, 1280, 8], "%": [50, 100, 1] };
     function clamp(n, u) { var r = ranges[u]; return Math.max(r[0], Math.min(r[1], n)); }
 
     var box = el("label", { class: "admin-field admin-field--full admin-width" }, [el("span", { text: label })]);
     var slider = el("input", { type: "range", class: "admin-width__slider" });
     var numInput = el("input", { type: "number", class: "admin-width__num" });
     var unitSel = el("select", { class: "admin-width__unit" });
-    ["rem", "px", "%"].forEach(function (u) {
+    Object.keys(ranges).forEach(function (u) {
       var o = el("option", { value: u, text: u });
       if (u === unit) o.selected = true;
       unitSel.appendChild(o);
@@ -540,7 +544,7 @@
     slider.addEventListener("input", function () { num = parseFloat(slider.value) || 0; numInput.value = num; isDefault = false; emit(); refresh(); });
     numInput.addEventListener("input", function () { num = clamp(parseFloat(numInput.value) || 0, unit); isDefault = false; emit(); refresh(); });
     unitSel.addEventListener("change", function () { unit = unitSel.value; num = clamp(num, unit); isDefault = false; emit(); refresh(); });
-    resetBtn.addEventListener("click", function () { isDefault = true; num = 42; unit = "rem"; unitSel.value = "rem"; emit(); refresh(); });
+    resetBtn.addEventListener("click", function () { isDefault = true; num = defaultNum; unit = defaultUnit; unitSel.value = defaultUnit; emit(); refresh(); });
 
     refresh();
     box.appendChild(slider);
@@ -687,8 +691,9 @@
       fieldImage("Avatar", s.hero && s.hero.avatar, function (v) { ensure(s, "hero").avatar = v; onDirty(); }),
       fieldText("Name", s.hero && s.hero.name, function (v) { ensure(s, "hero").name = v; onDirty(); }, { full: true }),
       fieldText("Role", s.hero && s.hero.role, function (v) { ensure(s, "hero").role = v; onDirty(); }, { full: true }),
+      fieldWidth("Role block width", s.hero && s.hero.roleMaxWidth, function (v) { ensure(s, "hero").roleMaxWidth = v; onDirty(); }, { defaultNum: 20, ranges: { rem: [8, 100, 0.5], px: [160, 1600, 8], "%": [50, 100, 1] } }),
       fieldTextarea("Bio", s.hero && s.hero.bio, function (v) { ensure(s, "hero").bio = v; onDirty(); }),
-      fieldBioWidth("Bio block width", s.hero && s.hero.bioMaxWidth, function (v) { ensure(s, "hero").bioMaxWidth = v; onDirty(); })
+      fieldWidth("Bio block width", s.hero && s.hero.bioMaxWidth, function (v) { ensure(s, "hero").bioMaxWidth = v; onDirty(); })
     ]));
 
     root.appendChild(section("Section headings & buttons", [
