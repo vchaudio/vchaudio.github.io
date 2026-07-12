@@ -1391,20 +1391,16 @@
   }
 
   /* Generate / publish the resume PDF.
-     - "Print View (Resume>PDF)" opens the data-driven cv-print HTML (styled)
-       and lets the browser save it as a text-based PDF via the print dialog.
-     - "Generate PDF" triggers a GitHub Actions workflow (repository_dispatch)
-       that runs the same headless print-to-PDF as scripts/build-cv-pdf on the
-       buildCvPrintHtml output and commits Valentyn-Chumachenko-CV.pdf back to
-       the repo (overwriting if it exists). The real PDF is generated server-side
-       so fonts/sizes match the print view exactly; it commits asynchronously. */
+     - "Print View (Resume>PDF)" opens the data-driven cv-print HTML (landscape).
+     - "Generate file — portrait / landscape" triggers GitHub Actions to build
+       and commit Valentyn-Chumachenko-CV.pdf with the chosen orientation. */
   function generatePdfSection(r) {
     var siteObj = (state.files.site && state.files.site.obj) || {};
 
     var printBtn = el("button", { type: "button", class: "admin-btn admin-btn--primary admin-btn--small", text: "Print View (Resume>PDF)" });
     printBtn.addEventListener("click", function () {
       var base = (window.location.href || "").replace(/\/admin\/.*$/, "/");
-      var html = buildCvPrintHtml(r, siteObj, base);
+      var html = buildCvPrintHtml(r, siteObj, base, { orientation: "landscape" });
       var w = window.open("", "_blank");
       if (!w) { toast("Allow pop-ups to open the print view.", "error"); return; }
       w.document.open();
@@ -1412,28 +1408,39 @@
       w.document.close();
     });
 
-    var genBtn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: "Generate PDF" });
-    genBtn.addEventListener("click", function () {
-      if (!state.authenticated || !state.config) { toast("Sign in to generate the PDF.", "error"); showLogin(); return; }
-      if (state.dirty && state.dirty["resume"]) { toast("Save the resume first — the PDF is built from the committed data.", "error"); return; }
-      genBtn.disabled = true; genBtn.textContent = "Triggering…";
-      triggerCvPdfRebuild().then(function () {
-        toast("PDF rebuild started on GitHub — it commits to the repo in ~1 min. Refresh the site after.", "success");
-      }).catch(function (err) { toast("Could not start PDF rebuild: " + (err.message || err), "error"); })
-        .finally(function () { genBtn.disabled = false; genBtn.textContent = "Generate PDF"; });
-    });
+    var genBtns = [];
+    function makeGenBtn(label, orientation) {
+      var btn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: label });
+      btn.__label = label;
+      btn.addEventListener("click", function () {
+        if (!state.authenticated || !state.config) { toast("Sign in to generate the PDF.", "error"); showLogin(); return; }
+        if (state.dirty && state.dirty["resume"]) { toast("Save the resume first — the PDF is built from the committed data.", "error"); return; }
+        genBtns.forEach(function (b) { b.disabled = true; if (b !== btn) b.textContent = b.__label; });
+        btn.textContent = "Triggering…";
+        triggerCvPdfRebuild(orientation).then(function () {
+          toast("PDF rebuild started (" + orientation + ") — commits in ~1 min.", "success");
+        }).catch(function (err) { toast("Could not start PDF rebuild: " + (err.message || err), "error"); })
+          .finally(function () {
+            genBtns.forEach(function (b) { b.disabled = false; b.textContent = b.__label; });
+          });
+      });
+      genBtns.push(btn);
+      return btn;
+    }
 
-    return wrapSection("Generate PDF file", el("div", { style: "display:flex;gap:0.5rem;flex-wrap:wrap" }, [printBtn, genBtn]));
+    var genPortrait = makeGenBtn("Generate file — portrait", "portrait");
+    var genLandscape = makeGenBtn("Generate file — landscape", "landscape");
+
+    return wrapSection("Generate PDF file", el("div", { style: "display:flex;gap:0.5rem;flex-wrap:wrap" }, [printBtn, genPortrait, genLandscape]));
   }
 
   /* Trigger the CV PDF rebuild workflow on GitHub via a repository_dispatch
-     event. The workflow (.github/workflows/build-cv-pdf.yml) regenerates the PDF
-     from the committed resume data and commits it back. */
-  function triggerCvPdfRebuild() {
+     event. orientation: "portrait" | "landscape". */
+  function triggerCvPdfRebuild(orientation) {
     var c = state.config;
     return api("/repos/" + c.owner + "/" + c.repo + "/dispatches", "POST", {
       event_type: "cv-pdf-rebuild",
-      client_payload: { branch: c.branch, sender: "admin" }
+      client_payload: { branch: c.branch, sender: "admin", orientation: orientation || "landscape" }
     });
   }
 

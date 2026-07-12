@@ -8,7 +8,14 @@
   if (typeof module === "object" && module.exports) module.exports = factory();
   else root.buildCvPrintHtml = factory();
 })(typeof self !== "undefined" ? self : this, function () {
-function buildCvPrintHtml(r, site, assetBase = "") {
+function buildCvPrintHtml(r, site, assetBase, opts) {
+    /* opts.orientation: "portrait" | "landscape" (default landscape). */
+    if (typeof assetBase === "object" && assetBase !== null && opts === undefined) {
+      opts = assetBase;
+      assetBase = "";
+    }
+    opts = opts || {};
+    var orientation = opts.orientation === "portrait" ? "portrait" : "landscape";
     var g = (r && r.general) || {};
     var hero = (site && site.hero) || {};
     function esc(s) {
@@ -60,15 +67,17 @@ function buildCvPrintHtml(r, site, assetBase = "") {
                  (job.meta ? '<span class="job-meta">' + esc(job.meta) + "</span>" : "") + "</div>";
       var body = "";
       if (job.type === "project" && job.project) body += '<p class="job-sub"><span class="job-sub-label">Project:</span> ' + esc(job.project) + "</p>";
-      if (job.description) body += '<p class="job-role">' + esc(job.description) + "</p>";
+      var hv = job.highlightsVisibility || "cv";
+      var showHl = job.highlights && job.highlights.length && (hv === "cv" || hv === "both");
+      /* Role line duplicates highlight content — omit when bullets are shown. */
+      if (job.description && !showHl) body += '<p class="job-role">' + esc(job.description) + "</p>";
       if (job.type === "studio" && job.awards && job.awards.length) {
         body += '<p class="job-awards"><span class="aw-label">Awards</span>' + job.awards.map(function (a) {
           var label = a.kind === "winner" ? "Winner" : (a.kind === "nominee" ? "Nominated" : (a.kind || ""));
           return '<span class="award">' + esc(label) + " — " + esc(a.title) + ", " + esc(a.year) + "</span>";
         }).join(' <span class="sep">·</span> ') + "</p>";
       }
-      var hv = job.highlightsVisibility || "cv";
-      if (job.highlights && job.highlights.length && (hv === "cv" || hv === "both")) {
+      if (showHl) {
         body += '<ul class="hl">' + job.highlights.map(function (hl) { return "<li>" + esc(hl) + "</li>"; }).join("") + "</ul>";
       }
       return '<article class="job">' + head + body + "</article>";
@@ -98,60 +107,65 @@ function buildCvPrintHtml(r, site, assetBase = "") {
              '<ul class="vlist skill-list">' + items + "</ul></div>";
     }).join("");
 
+    var pageRule = orientation === "portrait"
+      ? "@page{size:A4;margin:6.5mm 10mm}"
+      : "@page{size:A4 landscape;margin:5mm 8mm}";
     var style = [
       ":root{--accent:#b9783a;--ink:#1f1d1a;--muted:#6b6660;--line:#e4ddd3}",
-      "@page{size:A4;margin:6.5mm 10mm}",
+      pageRule,
       "*{box-sizing:border-box}",
       "html,body{margin:0;padding:0}",
-      'body{font-family:"Outfit","Segoe UI",system-ui,sans-serif;font-size:8.6pt;line-height:1.24;color:var(--ink);background:#fff}',
+      'body{font-family:"Outfit","Segoe UI",system-ui,sans-serif;font-size:8.2pt;line-height:1.18;color:var(--ink);background:#fff}',
       "a{color:var(--ink);text-decoration:none}",
-      ".hd{margin-bottom:0.3rem;border-bottom:2px solid var(--ink);padding-bottom:0.22rem}",
-      ".hd h1{margin:0;font-size:16pt;font-weight:700;letter-spacing:-0.01em;line-height:1.05}",
-      ".hd .tag{margin:0.05rem 0 0;font-size:9.3pt;font-weight:500;color:var(--accent)}",
-      ".hd .contact{margin:0.14rem 0 0;font-size:8pt;color:var(--muted)}",
-      ".hd .contact .sep{color:var(--line);margin:0 0.14rem}",
+      ".hd{margin-bottom:0.32rem;border-bottom:2px solid var(--ink);padding-bottom:0.2rem}",
+      ".hd h1{margin:0;font-size:14pt;font-weight:700;letter-spacing:-0.01em;line-height:1.05}",
+      ".hd .tag{margin:0.03rem 0 0;font-size:8.8pt;font-weight:500;color:var(--accent)}",
+      ".hd .contact{margin:0.1rem 0 0;font-size:7.6pt;color:var(--muted)}",
+      ".hd .contact .sep{color:var(--line);margin:0 0.12rem}",
       ".hd .contact a{color:var(--muted)}",
       ".hd .contact .c-note{color:var(--line)}",
-      ".ic{width:0.7rem;height:0.7rem;vertical-align:-0.09rem;color:var(--muted);margin-right:0.15rem;display:inline-block;flex:none}",
-      ".sec{margin-top:0.46rem}",
+      ".ic{width:0.65rem;height:0.65rem;vertical-align:-0.08rem;color:var(--muted);margin-right:0.12rem;display:inline-block;flex:none}",
+      ".sec{margin-top:0.52rem}",
       ".sec-col{margin-top:0.4rem}",
-      ".col .sec:first-child{margin-top:0}",
-      ".sec-h{margin:0 0 0.24rem;font-size:8.2pt;font-weight:700;letter-spacing:normal;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:0.1rem}",
-      ".sum .sum-text{margin:0;font-size:8.1pt;line-height:1.26;color:#2a2723}",
+      ".col .sec:first-child,.col .sec-col:first-child{margin-top:0}",
+      ".sec-h{margin:0 0 0.22rem;font-size:7.8pt;font-weight:700;letter-spacing:normal;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:0.1rem}",
+      ".sum .sum-text{margin:0;font-size:7.7pt;line-height:1.2;color:#2a2723}",
       ".vlist{margin:0;padding:0;list-style:none}",
-      ".vlist li{position:relative;margin:0.06rem 0;padding-left:0.62rem;font-size:8.1pt;line-height:1.26;color:#2a2723}",
-      '.vlist li::before{content:"";position:absolute;left:0;top:0.5em;width:0.22rem;height:0.22rem;border-radius:50%;background:var(--accent);opacity:0.7}',
-      ".skill-group{margin:0 0 0.26rem}",
+      ".vlist li{position:relative;margin:0.02rem 0;padding-left:0.55rem;font-size:7.5pt;line-height:1.18;color:#2a2723}",
+      '.vlist li::before{content:"";position:absolute;left:0;top:0.48em;width:0.2rem;height:0.2rem;border-radius:50%;background:var(--accent);opacity:0.7}',
+      ".skill-group{margin:0 0 0.14rem}",
       ".skill-group:last-child{margin-bottom:0}",
-      ".skill-grp-h{margin:0 0 0.1rem;font-size:7.4pt;font-weight:700;letter-spacing:normal;text-transform:uppercase;color:var(--muted)}",
-      ".two-col{display:grid;grid-template-columns:1.85fr 1fr;gap:0 1.1rem;align-items:start;margin-top:0.46rem}",
+      ".skill-grp-h{margin:0 0 0.06rem;font-size:7pt;font-weight:700;letter-spacing:normal;text-transform:uppercase;color:var(--muted)}",
+      ".two-col{display:grid;grid-template-columns:1.9fr 1fr;gap:0 1rem;align-items:start;margin-top:0.44rem}",
+      ".col-side .cert-row{flex-direction:column;align-items:flex-start;gap:0.02rem}",
+      ".col-side .cert-meta{margin-left:0}",
       ".col{min-width:0}",
-      ".tl{position:relative;padding-left:0.92rem;margin-top:0.06rem}",
-      ".tl::before{content:\"\";position:absolute;left:0.27rem;top:0.38rem;bottom:0.28rem;width:2px;margin-left:-1px;background:rgba(183,120,58,0.4)}",
-      ".job{position:relative;margin:0 0 0.2rem}",
+      ".tl{position:relative;padding-left:0.85rem;margin-top:0.02rem}",
+      ".tl::before{content:\"\";position:absolute;left:0.24rem;top:0.32rem;bottom:0.2rem;width:2px;margin-left:-1px;background:rgba(183,120,58,0.4)}",
+      ".job{position:relative;margin:0 0 0.1rem}",
       ".job:last-child{margin-bottom:0}",
-      ".tl .job::before{content:\"\";position:absolute;left:-0.92rem;top:0.2rem;width:0.54rem;height:0.54rem;border-radius:50%;background:#fff;border:2px solid var(--accent);box-sizing:border-box}",
+      ".tl .job::before{content:\"\";position:absolute;left:-0.85rem;top:0.16rem;width:0.48rem;height:0.48rem;border-radius:50%;background:#fff;border:2px solid var(--accent);box-sizing:border-box}",
       ".job-head{display:flex;flex-direction:column;gap:0}",
-      ".job-title{font-size:9pt;font-weight:700;color:var(--ink)}",
-      ".job-meta{margin-top:0;font-size:7.9pt;color:var(--muted)}",
-      ".job-sub{margin:0.03rem 0 0;font-size:8.4pt;font-weight:600;color:var(--ink)}",
-      ".job-sub-label{color:var(--accent);font-weight:700;letter-spacing:0.02em;margin-right:0.25rem}",
-      ".job-role{margin:0.02rem 0 0;font-size:8.3pt;color:var(--muted)}",
-      ".job-awards{margin:0.08rem 0 0;font-size:7.9pt;color:var(--accent)}",
-      ".job-awards .aw-label{font-size:7.2pt;font-weight:700;letter-spacing:normal;text-transform:uppercase;color:var(--accent);margin-right:0.3rem}",
-      ".job-awards .sep{color:var(--line);margin:0 0.14rem}",
-      ".hl{margin:0.06rem 0 0;padding:0;list-style:none}",
-      ".hl li{position:relative;margin:0.01rem 0;padding-left:0.56rem;font-size:8.1pt;line-height:1.2;color:#2a2723}",
+      ".job-title{font-size:8.5pt;font-weight:700;color:var(--ink)}",
+      ".job-meta{margin-top:0;font-size:7.5pt;color:var(--muted)}",
+      ".job-sub{margin:0.02rem 0 0;font-size:7.9pt;font-weight:600;color:var(--ink)}",
+      ".job-sub-label{color:var(--accent);font-weight:700;letter-spacing:normal;margin-right:0.2rem}",
+      ".job-role{margin:0.01rem 0 0;font-size:7.6pt;color:var(--muted);line-height:1.15}",
+      ".job-awards{margin:0.04rem 0 0;font-size:7.4pt;color:var(--accent)}",
+      ".job-awards .aw-label{font-size:6.8pt;font-weight:700;letter-spacing:normal;text-transform:uppercase;color:var(--accent);margin-right:0.25rem}",
+      ".job-awards .sep{color:var(--line);margin:0 0.1rem}",
+      ".hl{margin:0.03rem 0 0;padding:0;list-style:none}",
+      ".hl li{position:relative;margin:0;padding-left:0.5rem;font-size:7.7pt;line-height:1.16;color:#2a2723}",
       '.hl li::before{content:"–";position:absolute;left:0;color:var(--accent);font-weight:700}',
-      ".edu-row{margin:0 0 0.12rem}",
+      ".edu-row{margin:0 0 0.06rem}",
       ".edu-row:last-child{margin-bottom:0}",
-      ".edu-line1{display:flex;justify-content:space-between;align-items:baseline;gap:0.4rem}",
-      ".edu-inst{font-weight:700;font-size:8.3pt}",
-      ".edu-degree{margin:0.04rem 0 0;font-size:7.9pt;color:var(--muted)}",
-      ".edu-period{font-size:7.8pt;color:var(--muted);white-space:nowrap}",
-      ".cert-row{display:flex;justify-content:space-between;align-items:baseline;gap:0.4rem;margin:0 0 0.1rem}",
-      ".cert-title{font-weight:600;font-size:8.3pt}",
-      ".cert-meta{font-size:7.8pt;color:var(--muted)}",
+      ".edu-line1{display:flex;justify-content:space-between;align-items:baseline;gap:0.35rem}",
+      ".edu-inst{font-weight:700;font-size:7.8pt}",
+      ".edu-degree{margin:0.02rem 0 0;font-size:7.4pt;color:var(--muted)}",
+      ".edu-period{font-size:7.3pt;color:var(--muted);white-space:nowrap}",
+      ".cert-row{display:flex;justify-content:space-between;align-items:baseline;gap:0.35rem;margin:0 0 0.05rem}",
+      ".cert-title{font-weight:600;font-size:7.8pt}",
+      ".cert-meta{font-size:7.3pt;color:var(--muted)}",
       "@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}"
     ].join("\n");
 
@@ -168,9 +182,9 @@ function buildCvPrintHtml(r, site, assetBase = "") {
       '<div class="col col-side">',
       languages,
       (r.skills && r.skills.length) ? '<section class="sec sec-col"><h2 class="sec-h">Skills</h2>' + skills + "</section>" : "",
+      (r.courses && r.courses.length) ? '<section class="sec sec-col"><h2 class="sec-h">Certifications</h2>' + courses + "</section>" : "",
       "</div>",
       "</div>",
-      (r.courses && r.courses.length) ? '<section class="sec"><h2 class="sec-h">Certifications</h2>' + courses + "</section>" : "",
       education ? '<section class="sec"><h2 class="sec-h">Education</h2>' + education + "</section>" : "",
       "</div>"
     ].join("\n");
