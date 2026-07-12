@@ -1,7 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background-color:#0a0908;color-scheme:dark">
   <head>
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a0908" />
+    <style>
+      html{background-color:#0a0908;color-scheme:dark}
+      #project-main{min-height:calc(100dvh - 72px - 5rem)}
+      body{margin:0;min-height:100dvh;display:flex;flex-direction:column;padding-top:72px}
+      body>.site-footer{margin-top:auto}
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="" />
     <title>Project · VCHAudio</title>
@@ -11,6 +19,13 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      window.__VCH_PROJECTS_FETCH__ = fetch("data/projects.json", { cache: "default" }).then(function (r) {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      });
+    </script>
+    <link rel="preload" as="image" href="assets/vch-mark-transparent.png" fetchpriority="high" />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/project-portfolio.css" />
     <link rel="stylesheet" href="css/audio-player.css" />
@@ -23,7 +38,7 @@
       <a class="brand brand--with-vch-mark" href="index.html" aria-label="VCH Audio"><img class="brand-vch-mark" src="assets/vch-mark-transparent.png" width="762" height="330" alt="" decoding="sync" fetchpriority="high" loading="eager" /><span>Audio</span></a>
     </header>
 
-    <main id="project-main" class="project-page--hero-glow"></main>
+    <main id="project-main" class="project-page--hero-glow" style="min-height:calc(100dvh - 72px - 5rem)"></main>
 
     <button type="button" class="scroll-to-top scroll-to-top--dual is-visible" data-scroll-to-top data-home-href="index.html" aria-label="Home">
       <svg class="scroll-to-top__icon scroll-to-top__icon--home" viewBox="0 0 24 24" aria-hidden="true">

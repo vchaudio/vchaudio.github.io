@@ -84,6 +84,11 @@
         if (destKind === here) return;
         if (here === "index" && destKind === "sub") {
           sessionStorage.setItem(STORAGE, "to-sub");
+          try {
+            if (window.__VCH_DATA__ && window.__VCH_DATA__.projects) {
+              sessionStorage.setItem("vchProjectsBoot", JSON.stringify(window.__VCH_DATA__.projects));
+            }
+          } catch (eStash) {}
         } else if (here === "sub" && destKind === "index") {
           sessionStorage.setItem(STORAGE, "to-index");
         }

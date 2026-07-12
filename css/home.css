@@ -19,6 +19,9 @@ html { overflow-x: clip; }
 
 main.home-main {
   max-width: min(960px, 100%);
+  flex: 1 0 auto;
+  /* Reserve space before JSON fills rows — scrollbar + footer position stay stable. */
+  min-height: calc(100dvh - var(--header-h) + 70vh);
 }
 
 /* Wider breakout only for Best Works; keep Resume / Portfolio / Contact at main width */
@@ -558,6 +561,7 @@ main.home-main {
 /* Roll panels */
 .home-panel-wrap {
   position: relative;
+  min-height: min(980px, 105vh);
 }
 
 .home-panel {

@@ -41,6 +41,7 @@
 html {
   scroll-behavior: smooth;
   background-color: #0a0908;
+  color-scheme: dark;
   scroll-padding-top: var(--header-h);
 }
 
@@ -77,6 +78,8 @@ body {
   margin: 0;
   min-height: 100vh;
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   padding-top: var(--header-h);
   font-family: var(--font);
   font-weight: 400;
@@ -85,6 +88,17 @@ body {
   color: var(--text);
   background: transparent;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Keep footer at the bottom while #project-main is still empty (pre-JSON). */
+body > .site-footer {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+#project-main {
+  flex: 1 0 auto;
+  min-height: calc(100dvh - var(--header-h) - 5rem);
 }
 
 a {
@@ -184,7 +198,8 @@ img:not(.brand-vch-mark):not(.page-overview-banner__img):not(.avatar-photo) {
   justify-content: center;
   gap: 0.06em;
   line-height: 1;
-  animation: logo-fade-in 0.4s var(--ease-out) both;
+  /* No fade-in: opacity:0 on load reads as a black flash over the header mark. */
+  opacity: 1;
 }
 
 .brand-vch-mark {
@@ -194,7 +209,8 @@ img:not(.brand-vch-mark):not(.page-overview-banner__img):not(.avatar-photo) {
   display: block;
   flex-shrink: 0;
   object-fit: contain;
-  animation: logo-breathe 2s ease-in-out 0.45s infinite;
+  opacity: 1;
+  animation: logo-breathe 2s ease-in-out 0.6s infinite;
 }
 
 .brand--with-vch-mark:hover .brand-vch-mark {
@@ -3550,7 +3566,7 @@ a.job-card.job-card--to-project:focus-visible {
 
 @keyframes brand-rehome {
   0% {
-    opacity: 0;
+    opacity: 1;
     transform: translateX(var(--brand-rehome-from)) scale(0.94);
   }
   100% {

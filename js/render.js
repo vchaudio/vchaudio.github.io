@@ -63,9 +63,48 @@
   }
 
   function fetchData() {
+    var cacheMode = location.search.indexOf("preview=1") >= 0 ? "no-store" : "default";
+    var type = pageType();
+
+    if (type === "project") {
+      var cached = null;
+      try {
+        var raw = sessionStorage.getItem("vchProjectsBoot");
+        if (raw) {
+          sessionStorage.removeItem("vchProjectsBoot");
+          cached = JSON.parse(raw);
+        }
+      } catch (eBoot) {}
+      if (cached) {
+        return Promise.resolve({
+          site: null,
+          projects: cached,
+          videos: null,
+          resume: null,
+          studio: null
+        });
+      }
+      var early = window.__VCH_PROJECTS_FETCH__;
+      window.__VCH_PROJECTS_FETCH__ = null;
+      var projectsPromise = early
+        ? Promise.resolve(early).catch(function () {
+            return fetch(DATA_DIR + "projects.json", { cache: cacheMode }).then(function (r) {
+              if (!r.ok) throw new Error("Cannot load data/projects.json (" + r.status + ")");
+              return r.json();
+            });
+          })
+        : fetch(DATA_DIR + "projects.json", { cache: cacheMode }).then(function (r) {
+            if (!r.ok) throw new Error("Cannot load data/projects.json (" + r.status + ")");
+            return r.json();
+          });
+      return projectsPromise.then(function (projects) {
+        return { site: null, projects: projects, videos: null, resume: null, studio: null };
+      });
+    }
+
     return Promise.all(
       DATA_FILES.map(function (name) {
-        return fetch(DATA_DIR + name + ".json", { cache: "no-store" }).then(function (r) {
+        return fetch(DATA_DIR + name + ".json", { cache: cacheMode }).then(function (r) {
           if (!r.ok) throw new Error("Cannot load data/" + name + ".json (" + r.status + ")");
           return r.json();
         });
@@ -729,17 +768,32 @@
 
     if (!bannerAdded) {
       var banner = h("div", { class: "page-overview-banner" }, [
-        h("img", { class: "page-overview-banner__img", src: project.banner, alt: "", width: 1024, height: 576, loading: "lazy" })
+        h("img", { class: "page-overview-banner__img", src: project.banner, alt: "", width: 1024, height: 576, loading: "eager", decoding: "async", fetchpriority: "high" })
       ]);
       main.parentNode.insertBefore(banner, main);
     }
+
+    /* Start entrance in the same turn as DOM insert — first paint is already visible. */
+    (function primeProjectEnter() {
+      var reduceMotion = false;
+      try {
+        reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      } catch (e0) {}
+      if (reduceMotion) return;
+      var bannerEl = document.querySelector(".page-overview-banner");
+      if (bannerEl) bannerEl.classList.add("project-enter");
+      main.querySelectorAll(".reveal").forEach(function (el, index) {
+        el.classList.add("project-enter");
+        el.style.animationDelay = (0.14 + index * 0.1) + "s";
+      });
+    })();
   }
 
   function buildProjectBlock(block, project) {
     switch (block.type) {
       case "banner":
         return h("div", { class: "page-overview-banner" }, [
-          h("img", { class: "page-overview-banner__img", src: block.src, alt: "", width: block.w || 1024, height: block.h || 576, loading: "lazy" })
+          h("img", { class: "page-overview-banner__img", src: block.src, alt: "", width: block.w || 1024, height: block.h || 576, loading: "eager", decoding: "async", fetchpriority: "high" })
         ]);
       case "raw-banner":
         return h("div", { class: "page-overview-banner " + (block.class || ""), html: block.html || "" });
