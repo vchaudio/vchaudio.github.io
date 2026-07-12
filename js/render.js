@@ -605,6 +605,12 @@
       });
       kids.push(awards);
     }
+    var hv = job.highlightsVisibility || "cv";
+    if (job.highlights && job.highlights.length && (hv === "site" || hv === "both")) {
+      kids.push(h("ul", { class: "job-card__highlights" },
+        job.highlights.map(function (hl) { return h("li", { text: hl }); })
+      ));
+    }
     return h(tag, attrs, kids);
   }
 

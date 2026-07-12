@@ -2102,6 +2102,29 @@ a.job-card.job-card--to-project:focus-visible .job-card__project {
   border-left: 2px solid rgba(228, 160, 74, 0.35);
 }
 
+/* Highlights — minimal list with a subtle accent rail. */
+.home-panel--resume .job-card__highlights {
+  margin: 0.6rem 0 0;
+  padding: 0.4rem 0 0 0.85rem;
+  list-style: none;
+  border-left: 2px solid rgba(228, 160, 74, 0.28);
+}
+.home-panel--resume .job-card__highlights li {
+  position: relative;
+  margin: 0.25rem 0;
+  padding-left: 0.85rem;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.home-panel--resume .job-card__highlights li::before {
+  content: "·";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .home-panel--resume .job-card__awards-item {
   margin: 0 0 0.65rem;
   font-size: 0.86rem;

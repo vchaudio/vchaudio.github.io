@@ -470,21 +470,17 @@
     return el("label", { class: "admin-field" }, [el("span", { text: label }), sel]);
   }
 
-  /* 3-state visibility toggle for Education entries:
-     "site" = show on the site, "cv" = show in the CV/PDF, "hidden" = hide everywhere. */
-  function visibilityControl(entry, onInput) {
-    var states = [
-      { value: "site", label: "Site" },
-      { value: "cv", label: "CV" },
-      { value: "hidden", label: "Hide" }
-    ];
-    var current = entry.visibility || "cv";
+  /* Segmented visibility toggle. states is a list of {value,label}; field is
+     the property name on entry; defaultValue is used when the property is unset.
+     Used for Education (Site/CV/Hide) and Highlights (Site/CV/Both/Hide). */
+  function segControl(entry, field, states, defaultValue, onInput) {
+    var current = entry[field] || defaultValue;
     var group = el("div", { class: "admin-field admin-field--full admin-seg" }, [el("span", { text: "Show in" })]);
     var btns = {};
     states.forEach(function (s) {
       var b = el("button", { type: "button", class: "admin-btn admin-btn--small admin-seg__btn", text: s.label });
       b.addEventListener("click", function () {
-        entry.visibility = s.value;
+        entry[field] = s.value;
         current = s.value;
         refresh();
         onInput();
@@ -500,6 +496,12 @@
     }
     refresh();
     return group;
+  }
+
+  function visibilityControl(entry, onInput) {
+    return segControl(entry, "visibility",
+      [{ value: "site", label: "Site" }, { value: "cv", label: "CV" }, { value: "hidden", label: "Hide" }],
+      "cv", onInput);
   }
 
   /* Friendly width control: a slider + number input + unit selector (rem/px/%)
@@ -614,7 +616,7 @@
   /* object list editor (array of homogeneous objects) */
   function objectList(label, arr, fieldsFor, opts) {
     opts = opts || {};
-    var box = el("div", {}, []);
+    var box = el("div", { class: "admin-obj-list-box" }, []);
     /* Skip the inner title when empty — the surrounding wrapSection() already
        provides the heading, so a non-empty label would duplicate it
        (e.g. "Experience Experience"). */
@@ -667,7 +669,6 @@
     renderDetail();
     box.appendChild(items);
     box.appendChild(addBtn);
-    box.appendChild(el("div", { style: "height:0.6rem" }));
     box.appendChild(detail);
     return box;
   }
@@ -1116,7 +1117,7 @@
 
   function respItemsEditor(b, dirty) {
     var arr = b.items || (b.items = []);
-    var box = el("div", {}, [el("span", { text: "Items", style: "font-weight:500;color:var(--text)" })]);
+    var box = el("div", { class: "admin-sub" }, [el("span", { text: "Items", style: "font-weight:500;color:var(--text)" })]);
     var list = el("div", { class: "admin-obj-list" });
     function render() {
       clear(list);
@@ -1178,7 +1179,7 @@
   /* Releases / downloadable versions editor for the `releases` block. */
   function releasesItemsEditor(b, dirty) {
     var arr = b.items || (b.items = []);
-    var box = el("div", {}, [el("span", { text: "Versions", style: "font-weight:500;color:var(--text)" })]);
+    var box = el("div", { class: "admin-sub" }, [el("span", { text: "Versions", style: "font-weight:500;color:var(--text)" })]);
     var list = el("div", { class: "admin-obj-list" });
     function render() {
       clear(list);
@@ -1211,7 +1212,7 @@
   /* Accordion sections editor for the `accordion` block (Features / Requirements / etc.). */
   function accordionSectionsEditor(b, dirty) {
     var arr = b.items || (b.items = []);
-    var box = el("div", {}, [el("span", { text: "Sections", style: "font-weight:500;color:var(--text)" })]);
+    var box = el("div", { class: "admin-sub" }, [el("span", { text: "Sections", style: "font-weight:500;color:var(--text)" })]);
     var list = el("div", { class: "admin-obj-list" });
     function render() {
       clear(list);
@@ -1245,7 +1246,7 @@
      (e.g. " — rest of the line"). */
   function accordionListItemsEditor(sec, dirty) {
     var arr = sec.items || (sec.items = []);
-    var box = el("div", { class: "admin-field admin-field--full" }, [el("span", { text: "Items" })]);
+    var box = el("div", { class: "admin-field admin-field--full admin-sub" }, [el("span", { text: "Items" })]);
     var list = el("div", { class: "admin-obj-list" });
     function render() {
       clear(list);
@@ -1320,7 +1321,8 @@
           return "<li>" + esc(label) + " — " + esc(a.title) + ", " + esc(a.year) + "</li>";
         }).join("") + "</ul>";
       }
-      if (job.highlights && job.highlights.length) {
+      var hv = job.highlightsVisibility || "cv";
+      if (job.highlights && job.highlights.length && (hv === "cv" || hv === "both")) {
         body += '<ul class="highlights">' + job.highlights.map(function (hl) {
           return "<li>" + esc(hl) + "</li>";
         }).join("") + "</ul>";
@@ -1481,7 +1483,10 @@
       if (job.type === "studio") {
         out.push(awardsEditor(job, d));
       }
-      out.push(stringsList("Highlights (CV bullets)", job.highlights || (job.highlights = []), function (arr) { job.highlights = arr; d(); }));
+      out.push(stringsList("Highlights", job.highlights || (job.highlights = []), function (arr) { job.highlights = arr; d(); }));
+      out.push(segControl(job, "highlightsVisibility",
+        [{ value: "site", label: "Site" }, { value: "cv", label: "CV" }, { value: "both", label: "Both" }, { value: "hidden", label: "Hide" }],
+        "cv", d));
       return out;
     };
     root.appendChild(wrapSection("Experience", objectList("", r.experience || (r.experience = []), expFields, {
@@ -1674,7 +1679,8 @@
         y += 5.5;
         if (job.type === "project" && job.project) write(job.project, { size: 10, style: "bold", gap: 0.5 });
         if (job.description) write(job.description, { size: 9.5, gap: 1 });
-        if (job.highlights && job.highlights.length) bullets(job.highlights, 5);
+        var hvPdf = job.highlightsVisibility || "cv";
+        if (job.highlights && job.highlights.length && (hvPdf === "cv" || hvPdf === "both")) bullets(job.highlights, 5);
         if (job.type === "studio" && job.awards && job.awards.length) {
           job.awards.forEach(function (a) {
             var label = a.kind === "winner" ? "Winner" : (a.kind === "nominee" ? "Nominated" : (a.kind || ""));
@@ -1723,7 +1729,7 @@
 
   function awardsEditor(job, dirty) {
     var arr = job.awards || (job.awards = []);
-    var box = el("div", {}, [el("span", { text: "Awards", style: "font-weight:500;color:var(--text)" })]);
+    var box = el("div", { class: "admin-sub" }, [el("span", { text: "Awards", style: "font-weight:500;color:var(--text)" })]);
     var list = el("div", { class: "admin-obj-list" });
     function render() {
       clear(list);
@@ -1739,7 +1745,7 @@
         list.appendChild(card);
       });
     }
-    var addBtn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: "+ Add award" });
+    var addBtn = el("button", { type: "button", class: "admin-btn admin-btn--small admin-add-btn", text: "+ Add award" });
     addBtn.onclick = function () { arr.push({ title: "New award", year: "", kind: "nominee" }); dirty(); render(); };
     render(); box.appendChild(list); box.appendChild(addBtn);
     return box;
@@ -1792,7 +1798,7 @@
 
   function gearItemsEditor(g, dirty) {
     var arr = g.items || (g.items = []);
-    var box = el("div", {}, [el("span", { text: "Definition items (dt / dd)", style: "font-weight:500;color:var(--text)" })]);
+    var box = el("div", { class: "admin-sub" }, [el("span", { text: "Definition items (dt / dd)", style: "font-weight:500;color:var(--text)" })]);
     var list = el("div", { class: "admin-obj-list" });
     function render() {
       clear(list);
