@@ -587,8 +587,11 @@
     return wrap;
   }
 
-  /* strings list (array of strings) */
-  function stringsList(label, arr, onChange) {
+  /* strings list (array of strings). opts.addOnRow is an optional node placed
+     on the same row as the "+ Add" button (e.g. the Highlights visibility
+     toggle), so it visibly belongs to this block. */
+  function stringsList(label, arr, onChange, opts) {
+    opts = opts || {};
     var list = arr.slice();
     /* Skip the inner label when empty — the surrounding wrapSection() already
        provides the title, so a non-empty label here would duplicate it
@@ -607,9 +610,11 @@
     }
     var addBtn = el("button", { type: "button", class: "admin-btn admin-btn--small admin-add-btn", text: "+ Add" });
     addBtn.addEventListener("click", function () { list.push(""); onChange(list); render(); });
+    var addRow = el("div", { class: "admin-add-row" }, [addBtn]);
+    if (opts.addOnRow) addRow.appendChild(opts.addOnRow);
     render();
     box.appendChild(rows);
-    box.appendChild(addBtn);
+    box.appendChild(addRow);
     return box;
   }
 
@@ -1483,10 +1488,10 @@
       if (job.type === "studio") {
         out.push(awardsEditor(job, d));
       }
-      out.push(stringsList("Highlights", job.highlights || (job.highlights = []), function (arr) { job.highlights = arr; d(); }));
-      out.push(segControl(job, "highlightsVisibility",
+      var hlSeg = segControl(job, "highlightsVisibility",
         [{ value: "site", label: "Site" }, { value: "cv", label: "CV" }, { value: "both", label: "Both" }, { value: "hidden", label: "Hide" }],
-        "cv", d));
+        "cv", d);
+      out.push(stringsList("Highlights", job.highlights || (job.highlights = []), function (arr) { job.highlights = arr; d(); }, { addOnRow: hlSeg }));
       return out;
     };
     root.appendChild(wrapSection("Experience", objectList("", r.experience || (r.experience = []), expFields, {

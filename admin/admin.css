@@ -313,8 +313,15 @@
    otherwise stretch the button to the block width). */
 .admin-add-btn { align-self: flex-start; width: auto; }
 
+/* Row that holds a list's "+ Add" button and an inline control (e.g. the
+   Highlights visibility toggle), centered so the control visibly belongs to
+   that block. */
+.admin-add-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.6rem; }
+.admin-add-row .admin-add-btn { align-self: center; }
+.admin-add-row .admin-seg { flex: 0 1 auto; }
+
 /* Segmented visibility toggle (Education: Site/CV/Hide, Highlights: Site/CV/Both/Hide). */
-.admin-seg { display: flex; flex-wrap: nowrap; align-items: center; gap: 0.3rem; }
+.admin-seg { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 0.3rem; }
 .admin-seg > span { color: var(--text-muted); margin-right: 0.25rem; }
 .admin-seg__btn { width: auto; flex: 0 0 auto; padding: 0.3rem 0.6rem; }
 
