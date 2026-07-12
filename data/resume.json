@@ -19,7 +19,7 @@
     {
       "type": "studio",
       "title": "VCHAudio — Individual Entrepreneur",
-      "meta": "2017 — Present · Remote, contracts, freelance",
+      "meta": "Sep 2017 — Nov 2021 · Remote, contracts, freelance",
       "description": "Working as self-employed in my music studio. Individual contract projects, freelance, contracts with various media, TV, shows, advertisement, and game industry.",
       "highlights": [
         "Music Composing",
@@ -38,13 +38,14 @@
           "year": "2019",
           "kind": "nominee"
         }
-      ]
+      ],
+      "highlightsVisibility": "both"
     },
     {
       "type": "project",
       "title": "Argentics / Night Street Games",
       "project": "Last Flag",
-      "meta": "2025 — 2026 · USA, remote",
+      "meta": "July 2025 — July 2026 · USA, remote",
       "description": "Senior Sound Designer, Technical Sound Designer, Lead Audio Designer",
       "highlights": [
         "Sound design & implementation for gameplay, characters, weapons, abilities, and UI (Unreal Engine, Wwise).",
@@ -54,13 +55,14 @@
         "Contributed to dynamic mixing and HDR audio implementation."
       ],
       "link": "project.html?slug=last-flag",
-      "aria": "Argentics / Night Street Games — Last Flag — open project overview"
+      "aria": "Argentics / Night Street Games — Last Flag — open project overview",
+      "highlightsVisibility": "both"
     },
     {
       "type": "project",
       "title": "Moonray PBC",
       "project": "Moonray: Battle Lands",
-      "meta": "2021 — 2025 · USA, remote",
+      "meta": "Oct 2021 — July 2025 · USA, remote",
       "description": "Audio Producer, Principal Sound Designer, Technical Sound Designer, Audio Developer, Music Composer",
       "highlights": [
         "Full-cycle sound design from scratch — custom foley, processed layers, and a sci-fi audio aesthetic.",
@@ -70,51 +72,38 @@
         "Interactive mixing; platform-specific optimization for PC, Android, and PlayStation 5."
       ],
       "link": "moonray-battle-lands.html",
-      "aria": "Moonray PBC — Moonray: Battle Lands — open project overview"
+      "aria": "Moonray PBC — Moonray: Battle Lands — open project overview",
+      "highlightsVisibility": "both"
     },
     {
       "type": "plain",
       "title": "Broadcast TV channel",
-      "meta": "2020 — 2021 · Odesa, part-time",
+      "meta": "Sep 2020 — Sep 2021 · Odesa, on-site part-time",
       "description": "Live sound director for live broadcasts, hosts, TV programs, and music bands.",
       "highlights": [
         "Live mixing for broadcasts, hosts, TV programs, and music bands.",
         "Microphone tuning, balancing, and technical support — full live-broadcast sound engineer duties and assistant work."
-      ]
+      ],
+      "highlightsVisibility": "both"
     },
     {
       "type": "plain",
       "title": "NLO TV",
-      "meta": "2019 — 2021 · Kyiv, remote",
+      "meta": "Jan 2019 — May 2021 · Kyiv, remote part-time",
       "description": "Cartoon series sound director, sound designer, foley artist, mix engineer.",
       "highlights": [
         "Sound design, foley, mixing and mastering for an animated cartoon series.",
         "Created and integrated custom sound assets for episodes, keeping consistent tone and clarity.",
         "VO editing and processing for characters and narration."
-      ]
-    },
-    {
-      "type": "plain",
-      "title": "Fiverr",
-      "meta": "2019 — 2021 · Freelance",
-      "description": "Music composer and sound designer.",
-      "highlights": [
-        "Custom sound design and foley on demand.",
-        "Music composition and audio post-production for freelance clients."
-      ]
+      ],
+      "highlightsVisibility": "both"
     }
   ],
   "education": [
     {
-      "period": "Sep 2015 – Apr 2018",
-      "institution": "Odessa National Academy of Building and Architecture",
-      "degree": "Bachelor of Engineering (BE)",
-      "visibility": "cv"
-    },
-    {
-      "period": "Sep 2010 – May 2014",
-      "institution": "Bilhorod-Dnistrovskyi College of Nature Management, Construction and Computer Technology",
-      "degree": "Junior Specialist",
+      "period": "Apr 2012 – Present",
+      "institution": "Self-educated",
+      "degree": "Music Composer, Sound Designer",
       "visibility": "cv"
     },
     {
@@ -124,9 +113,15 @@
       "visibility": "cv"
     },
     {
-      "period": "Apr 2012 – Present",
-      "institution": "Self-educated",
-      "degree": "Music Composer, Sound Designer",
+      "period": "Sep 2010 – May 2014",
+      "institution": "Bilhorod-Dnistrovskyi College of Nature Management, Construction and Computer Technology",
+      "degree": "Junior Specialist",
+      "visibility": "cv"
+    },
+    {
+      "period": "Sep 2015 – Apr 2018",
+      "institution": "Odessa National Academy of Building and Architecture",
+      "degree": "Bachelor of Engineering (BE)",
       "visibility": "cv"
     }
   ],
@@ -168,12 +163,13 @@
       "heading": "Soft skills",
       "headingClass": "skills-heading--featured",
       "items": [
-        "Creative thinking",
+        "Problem Solving",
         "Team collaboration",
         "Detail-oriented",
-        "Adaptability",
-        "Communication",
-        "Time management"
+        "Tech Documentation",
+        "Collaboration",
+        "Time management",
+        "Audio Direction"
       ]
     }
   ],
