@@ -1391,22 +1391,27 @@
   }
 
   /* Generate / publish the resume PDF.
-     - "Print View (Resume>PDF)" opens the data-driven cv-print HTML (landscape).
+     - "Print View — portrait / landscape" opens cv-print HTML for browser print.
      - "Generate file — portrait / landscape" triggers GitHub Actions to build
        and commit Valentyn-Chumachenko-CV.pdf with the chosen orientation. */
   function generatePdfSection(r) {
     var siteObj = (state.files.site && state.files.site.obj) || {};
 
-    var printBtn = el("button", { type: "button", class: "admin-btn admin-btn--primary admin-btn--small", text: "Print View (Resume>PDF)" });
-    printBtn.addEventListener("click", function () {
+    function openPrintView(orientation) {
       var base = (window.location.href || "").replace(/\/admin\/.*$/, "/");
-      var html = buildCvPrintHtml(r, siteObj, base, { orientation: "landscape" });
+      var html = buildCvPrintHtml(r, siteObj, base, { orientation: orientation });
       var w = window.open("", "_blank");
       if (!w) { toast("Allow pop-ups to open the print view.", "error"); return; }
       w.document.open();
       w.document.write(html);
       w.document.close();
-    });
+    }
+
+    function makePrintBtn(label, orientation) {
+      var btn = el("button", { type: "button", class: "admin-btn admin-btn--primary admin-btn--small", text: label });
+      btn.addEventListener("click", function () { openPrintView(orientation); });
+      return btn;
+    }
 
     var genBtns = [];
     function makeGenBtn(label, orientation) {
@@ -1428,10 +1433,14 @@
       return btn;
     }
 
+    var printPortrait = makePrintBtn("Print View — portrait", "portrait");
+    var printLandscape = makePrintBtn("Print View — landscape", "landscape");
     var genPortrait = makeGenBtn("Generate file — portrait", "portrait");
     var genLandscape = makeGenBtn("Generate file — landscape", "landscape");
 
-    return wrapSection("Generate PDF file", el("div", { style: "display:flex;gap:0.5rem;flex-wrap:wrap" }, [printBtn, genPortrait, genLandscape]));
+    return wrapSection("Generate PDF file", el("div", { style: "display:flex;gap:0.5rem;flex-wrap:wrap" }, [
+      printPortrait, printLandscape, genPortrait, genLandscape
+    ]));
   }
 
   /* Trigger the CV PDF rebuild workflow on GitHub via a repository_dispatch
