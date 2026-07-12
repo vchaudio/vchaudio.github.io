@@ -502,6 +502,52 @@
     return group;
   }
 
+  /* Friendly width control: a slider + number input + unit selector (rem/px/%)
+     plus a "Default" button. The stored value is a CSS length string such as
+     "42rem" / "640px" / "100%", or "" for the stylesheet default. */
+  function fieldBioWidth(label, value, onInput) {
+    var raw = (value == null ? "" : String(value)).trim();
+    var m = raw.match(/^([\d.]+)\s*(rem|px|%)$/i);
+    var num = m ? parseFloat(m[1]) : 42;
+    var unit = m ? m[2].toLowerCase() : "rem";
+    var isDefault = !m;
+    var ranges = { rem: [16, 80, 0.5], px: [320, 1280, 8], "%": [50, 100, 1] };
+    function clamp(n, u) { var r = ranges[u]; return Math.max(r[0], Math.min(r[1], n)); }
+
+    var box = el("label", { class: "admin-field admin-field--full admin-width" }, [el("span", { text: label })]);
+    var slider = el("input", { type: "range", class: "admin-width__slider" });
+    var numInput = el("input", { type: "number", class: "admin-width__num" });
+    var unitSel = el("select", { class: "admin-width__unit" });
+    ["rem", "px", "%"].forEach(function (u) {
+      var o = el("option", { value: u, text: u });
+      if (u === unit) o.selected = true;
+      unitSel.appendChild(o);
+    });
+    var resetBtn = el("button", { type: "button", class: "admin-btn admin-btn--small admin-width__reset", text: "Default" });
+    var preview = el("span", { class: "admin-width__preview" });
+
+    function applyRange() {
+      var r = ranges[unit];
+      slider.min = r[0]; slider.max = r[1]; slider.step = r[2]; slider.value = num;
+      numInput.min = r[0]; numInput.max = r[1]; numInput.step = r[2]; numInput.value = num;
+    }
+    function emit() { onInput(isDefault ? "" : num + unit); }
+    function refresh() {
+      applyRange();
+      preview.textContent = isDefault ? "default" : num + unit;
+      resetBtn.classList.toggle("admin-btn--primary", isDefault);
+    }
+    slider.addEventListener("input", function () { num = parseFloat(slider.value) || 0; numInput.value = num; isDefault = false; emit(); refresh(); });
+    numInput.addEventListener("input", function () { num = clamp(parseFloat(numInput.value) || 0, unit); isDefault = false; emit(); refresh(); });
+    unitSel.addEventListener("change", function () { unit = unitSel.value; num = clamp(num, unit); isDefault = false; emit(); refresh(); });
+    resetBtn.addEventListener("click", function () { isDefault = true; num = 42; unit = "rem"; unitSel.value = "rem"; emit(); refresh(); });
+
+    refresh();
+    box.appendChild(slider);
+    box.appendChild(el("div", { class: "admin-width__row" }, [numInput, unitSel, resetBtn, preview]));
+    return box;
+  }
+
   function fieldImage(label, value, onInput) {
     var input = el("input", { type: "text", value: value || "", placeholder: "assets/… or URL" });
     var preview = el("img", { alt: "" });
@@ -641,7 +687,8 @@
       fieldImage("Avatar", s.hero && s.hero.avatar, function (v) { ensure(s, "hero").avatar = v; onDirty(); }),
       fieldText("Name", s.hero && s.hero.name, function (v) { ensure(s, "hero").name = v; onDirty(); }, { full: true }),
       fieldText("Role", s.hero && s.hero.role, function (v) { ensure(s, "hero").role = v; onDirty(); }, { full: true }),
-      fieldTextarea("Bio", s.hero && s.hero.bio, function (v) { ensure(s, "hero").bio = v; onDirty(); })
+      fieldTextarea("Bio", s.hero && s.hero.bio, function (v) { ensure(s, "hero").bio = v; onDirty(); }),
+      fieldBioWidth("Bio block width", s.hero && s.hero.bioMaxWidth, function (v) { ensure(s, "hero").bioMaxWidth = v; onDirty(); })
     ]));
 
     root.appendChild(section("Section headings & buttons", [

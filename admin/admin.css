@@ -318,6 +318,15 @@
 .admin-seg > span { color: var(--muted, #5c554c); }
 .admin-seg__btn { width: auto; }
 
+/* Friendly width control (slider + number + unit + default). */
+.admin-width { display: flex; flex-direction: column; gap: 0.4rem; }
+.admin-width__slider { width: 100%; accent-color: var(--accent, #e4a04a); }
+.admin-width__row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+.admin-width__num { width: 5rem; }
+.admin-width__unit { width: auto; }
+.admin-width__reset { width: auto; }
+.admin-width__preview { color: var(--muted, #5c554c); font-variant-numeric: tabular-nums; }
+
 .admin-string-list {
   display: flex;
   flex-direction: column;

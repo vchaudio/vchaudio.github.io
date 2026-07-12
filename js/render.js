@@ -133,6 +133,14 @@
     if (roleEl) roleEl.textContent = site.hero.role;
     var bioEl = document.querySelector(".intro-bio");
     if (bioEl) bioEl.textContent = site.hero.bio;
+    /* Configurable bio block width (overrides the CSS max-width on
+       .intro-block when set). Empty/absent keeps the stylesheet default. */
+    var introBlock = document.querySelector(".intro-block");
+    if (introBlock) {
+      var bw = site.hero && site.hero.bioMaxWidth;
+      if (bw && String(bw).trim()) introBlock.style.maxWidth = bw.trim();
+      else introBlock.style.maxWidth = "";
+    }
 
     /* action buttons */
     var toggleBtn = document.getElementById("home-toggle-btn");
