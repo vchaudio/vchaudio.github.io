@@ -2097,8 +2097,9 @@ a.job-card.job-card--to-project:focus-visible .job-card__project {
 
 .home-panel--resume .job-card__awards {
   margin-top: 0.75rem;
-  padding: 0.75rem 0 0 0.85rem;
+  padding: 0.75rem 0 0.75rem 0.85rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   border-left: 2px solid rgba(228, 160, 74, 0.35);
 }
 

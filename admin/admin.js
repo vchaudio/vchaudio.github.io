@@ -1296,152 +1296,158 @@
       if (/^https?:\/\//.test(src) || /^data:/.test(src)) return src;
       return (assetBase || "") + src.replace(/^\/+/, "");
     }
+    /* Minimal inline stroke icons (no text content -> ATS reads only the labels). */
+    function icon(name) {
+      var p = {
+        loc: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+        tel: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>',
+        mail: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+        li: '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>',
+        web: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'
+      };
+      return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (p[name] || "") + "</svg>";
+    }
     var fullName = esc((g.firstName || "") + " " + (g.lastName || "")).trim();
-    var avatar = asset(hero.avatar || (site && site.brand && site.brand.logo) || "");
     var tagline = esc(g.cvTitle || hero.role || "");
 
-    /* Contact + languages panel */
-    var contactItems = [
-      '<li><span class="label">Location</span>' + esc(g.location) + "</li>",
-      '<li><span class="label">Phone</span><a href="tel:' + esc(g.phoneHref) + '">' + esc(g.phone) + "</a></li>",
-      '<li class="span-2"><span class="label">Email</span><a href="mailto:' + esc(g.email) + '">' + esc(g.email) + "</a></li>",
-      '<li><span class="label">LinkedIn</span><a href="' + esc(g.linkedinHref) + '">' + esc(g.linkedinLabel) + "</a></li>",
-      '<li><span class="label">Web (Portfolio)</span><a href="https://vchaudio.com/">vchaudio.com</a></li>'
-    ].join("");
-    var langItems = (r.languages || []).map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("");
+    /* Single-line contact (location · phone · email · linkedin · web) with mini
+       icons, plus a compact languages line — text-based, one column (ATS-safe). */
+    var contactBits = [];
+    if (g.location) contactBits.push('<span class="c-loc">' + icon("loc") + esc(g.location) + "</span>");
+    if (g.phone) contactBits.push('<a class="c-tel" href="tel:' + esc(g.phoneHref) + '">' + icon("tel") + esc(g.phone) + "</a>");
+    if (g.email) contactBits.push('<a class="c-mail" href="mailto:' + esc(g.email) + '">' + icon("mail") + esc(g.email) + "</a>");
+    if (g.linkedinLabel) contactBits.push('<a class="c-li" href="' + esc(g.linkedinHref) + '">' + icon("li") + esc(g.linkedinLabel) + "</a>");
+    contactBits.push('<a class="c-web" href="https://vchaudio.com/">' + icon("web") + 'vchaudio.com <span class="c-note">(portfolio)</span></a>');
+    var contactLine = contactBits.join(' <span class="sep">·</span> ');
 
-    /* Experience */
+    /* Professional summary (from the site BIO block) and a Languages section
+       rendered in the side column of the two-column lower band. */
+    var summary = hero.bio
+      ? '<section class="sec sum"><h2 class="sec-h">Professional Summary</h2><p class="sum-text">' + esc(hero.bio) + "</p></section>"
+      : "";
+    var languages = (r.languages && r.languages.length)
+      ? '<section class="sec sec-col"><h2 class="sec-h">Languages</h2><ul class="vlist lang-list">' +
+        r.languages.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul></section>"
+      : "";
+
+    /* Experience — typography only (no cards/borders) for a clean, compact,
+       ATS-friendly single column. */
     var jobs = (r.experience || []).map(function (job) {
-      var cls = "job job--" + (job.type || "plain");
-      var head = '<div class="job-head"><h3>' + esc(job.title) + "</h3>" +
-                 (job.meta ? '<p class="meta">' + esc(job.meta) + "</p>" : "") + "</div>";
+      var head = '<div class="job-head"><span class="job-title">' + esc(job.title) + "</span>" +
+                 (job.meta ? '<span class="job-meta">' + esc(job.meta) + "</span>" : "") + "</div>";
       var body = "";
-      if (job.type === "project" && job.project) {
-        body += '<p class="project">' + esc(job.project) + "</p>";
-      }
-      if (job.description) body += '<p class="role">' + esc(job.description) + "</p>";
+      if (job.type === "project" && job.project) body += '<p class="job-sub">' + esc(job.project) + "</p>";
+      if (job.description) body += '<p class="job-role">' + esc(job.description) + "</p>";
       if (job.type === "studio" && job.awards && job.awards.length) {
-        body += '<ul class="awards">' + job.awards.map(function (a) {
+        body += '<p class="job-awards"><span class="aw-label">Awards</span>' + job.awards.map(function (a) {
           var label = a.kind === "winner" ? "Winner" : (a.kind === "nominee" ? "Nominated" : (a.kind || ""));
-          return "<li>" + esc(label) + " — " + esc(a.title) + ", " + esc(a.year) + "</li>";
-        }).join("") + "</ul>";
+          return '<span class="award">' + esc(label) + " — " + esc(a.title) + ", " + esc(a.year) + "</span>";
+        }).join(' <span class="sep">·</span> ') + "</p>";
       }
       var hv = job.highlightsVisibility || "cv";
       if (job.highlights && job.highlights.length && (hv === "cv" || hv === "both")) {
-        body += '<ul class="highlights">' + job.highlights.map(function (hl) {
-          return "<li>" + esc(hl) + "</li>";
-        }).join("") + "</ul>";
+        body += '<ul class="hl">' + job.highlights.map(function (hl) { return "<li>" + esc(hl) + "</li>"; }).join("") + "</ul>";
       }
-      return '<article class="' + cls + '"><div class="job-fill" aria-hidden="true"></div>' +
-             '<div class="job-inner">' + head + body + "</div></article>";
+      return '<article class="job">' + head + body + "</article>";
     }).join("");
 
-    /* Courses */
-    var courses = (r.courses || []).map(function (c) {
-      var line = esc(c.title) + " — " + esc(c.provider) + ", " + esc(c.year);
-      return '<article class="job job--course"><div class="job-fill" aria-hidden="true"></div>' +
-             '<div class="job-inner"><p class="role">' + line + "</p></div></article>";
-    }).join("");
-
-    /* Education (items marked for the CV) */
+    /* Education (items marked for the CV) — institution + period on line 1,
+       degree on its own line 2 so long names don't crowd the degree. */
     var education = (r.education || []).filter(function (e) { return e.visibility === "cv"; })
       .map(function (e) {
-        var line = esc(e.institution || "");
-        if (e.degree) line += " — " + esc(e.degree);
-        if (e.period) line = '<span class="meta">' + esc(e.period) + "</span> " + line;
-        return '<article class="job job--edu"><div class="job-fill" aria-hidden="true"></div>' +
-               '<div class="job-inner"><p class="role">' + line + "</p></div></article>";
+        var line1 = '<div class="edu-line1"><span class="edu-inst">' + esc(e.institution || "") + "</span>" +
+                    (e.period ? '<span class="edu-period">' + esc(e.period) + "</span>" : "") + "</div>";
+        var line2 = e.degree ? '<div class="edu-degree">' + esc(e.degree) + "</div>" : "";
+        return '<div class="edu-row">' + line1 + line2 + "</div>";
       }).join("");
 
-    /* Skills */
+    /* Certifications */
+    var courses = (r.courses || []).map(function (c) {
+      return '<div class="cert-row"><span class="cert-title">' + esc(c.title) + "</span>" +
+             '<span class="cert-meta">' + esc(c.provider) + (c.year ? ", " + esc(c.year) : "") + "</span></div>";
+    }).join("");
+
+    /* Skills — vertical list per group (one item per line) so the sidebar
+       doesn't look crammed; group heading as a small muted sub-label. */
     var skills = (r.skills || []).map(function (grp) {
-      var chips = (grp.items || []).map(function (it) { return '<span class="skill-chip">' + esc(it) + "</span>"; }).join("");
-      return '<div class="skill-group"><p class="skill-group__title">' + esc(grp.heading) + "</p>" +
-             '<div class="skill-chips">' + chips + "</div></div>";
+      var items = (grp.items || []).map(function (it) { return "<li>" + esc(it) + "</li>"; }).join("");
+      return '<div class="skill-group"><p class="skill-grp-h">' + esc(grp.heading) + "</p>" +
+             '<ul class="vlist skill-list">' + items + "</ul></div>";
     }).join("");
 
     var style = [
-      ":root{--accent:#e4a04a;--accent-dim:#c98a3a;--ink:#1a1612;--muted:#5c554c;--line:#e8dfd4;--panel:#faf7f3}",
-      "@page{size:A4;margin:8mm 9mm}",
+      ":root{--accent:#b9783a;--ink:#1f1d1a;--muted:#6b6660;--line:#e4ddd3}",
+      "@page{size:A4;margin:6.5mm 10mm}",
       "*{box-sizing:border-box}",
       "html,body{margin:0;padding:0}",
-      'body{font-family:"Outfit","Segoe UI",system-ui,sans-serif;font-size:9.8pt;line-height:1.36;color:var(--ink);background:#fff}',
-      "a{color:var(--accent-dim);text-decoration:underline;text-underline-offset:2px}",
-      ".page{display:flex;flex-direction:column;gap:0;min-height:279mm}",
-      ".section-title{margin:0 0 0.4rem;font-size:10.5pt;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-dim);border-bottom:1px solid var(--line);padding-bottom:0.16rem}",
-      ".section-block{margin-top:0.95rem}",
-      ".panel{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:0.45rem 0.52rem}",
-      ".panel h2{margin:0 0 0.28rem;font-size:7.6pt;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-dim)}",
-      ".hero-head{margin-bottom:0.42rem}",
-      ".hero-head h1{margin:0;font-size:21pt;font-weight:700;letter-spacing:-0.02em;line-height:1.05}",
-      ".hero-head .tagline{margin:0.2rem 0 0;font-size:11.5pt;font-weight:500;color:var(--accent-dim)}",
-      ".hero-head .summary{margin:0.32rem 0 0;font-size:9.6pt;color:#2e2a26}",
-      ".hero-band{display:grid;grid-template-columns:1fr;gap:14px;align-items:end;padding-bottom:0}",
-      ".photo-wrap{display:none}",
-      ".hero-panels{display:flex;flex-direction:column;gap:9px;min-width:0}",
-      ".meta-row{display:grid;grid-template-columns:1.4fr 0.85fr;gap:9px}",
-      ".contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.2rem 0.65rem;margin:0;padding:0;list-style:none}",
-      ".contact-grid .span-2{grid-column:1 / -1}",
-      ".contact-grid .label{display:block;font-size:7.2pt;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em}",
-      ".lang-list{margin:0;padding:0;list-style:none;font-size:9.1pt;line-height:1.35}",
-      ".lang-list li{margin:0.18rem 0;padding-left:0.82rem;text-indent:-0.82rem}",
-      '.lang-list li::before{content:"";display:inline-block;width:0.34rem;height:0.34rem;margin-right:0.38rem;border:1.5px solid var(--accent);border-radius:50%;vertical-align:0.06em;box-sizing:border-box}',
-      ".card-list{display:flex;flex-direction:column;gap:0.3rem}",
-      ".job{position:relative;overflow:hidden;border-radius:6px;border:1px solid var(--line);background:#fff}",
-      ".job-fill{position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none}",
-      ".job-inner{position:relative;z-index:1;padding:0.3rem 0.42rem}",
-      ".job > .job-fill{background-color:#fff;background-image:linear-gradient(90deg,rgba(228,160,74,0.09) 0%,#fff 52%)}",
-      ".job-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:0.1rem 0.5rem;align-items:baseline}",
-      ".job h3{margin:0;font-size:10.2pt;font-weight:700}",
-      ".job .meta{margin:0;font-size:8.6pt;color:var(--muted);white-space:nowrap}",
-      ".job .project{margin:0.06rem 0 0;font-size:9.2pt;font-weight:600}",
-      ".job .role,.job .skill-values{margin:0.1rem 0 0;font-size:9.4pt;user-select:all}",
-      ".job .highlights{margin:0.16rem 0 0;padding:0;list-style:none;font-size:9pt;color:#2e2a26}",
-      ".job .highlights li{margin:0.12rem 0;padding-left:0.7rem;text-indent:-0.7rem}",
-      '.job .highlights li::before{content:"· ";color:var(--accent);font-weight:700}',
-      ".job .awards{margin:0.12rem 0 0;padding:0;list-style:none;font-size:8.8pt;color:var(--muted)}",
-      '.job .awards li::before{content:"▸ ";color:var(--accent)}',
-      ".skill-group{margin-bottom:0.35rem;break-inside:avoid}",
+      'body{font-family:"Outfit","Segoe UI",system-ui,sans-serif;font-size:8.6pt;line-height:1.24;color:var(--ink);background:#fff}',
+      "a{color:var(--ink);text-decoration:none}",
+      ".hd{margin-bottom:0.3rem;border-bottom:2px solid var(--ink);padding-bottom:0.22rem}",
+      ".hd h1{margin:0;font-size:16pt;font-weight:700;letter-spacing:-0.01em;line-height:1.05}",
+      ".hd .tag{margin:0.05rem 0 0;font-size:9.3pt;font-weight:500;color:var(--accent)}",
+      ".hd .contact{margin:0.14rem 0 0;font-size:8pt;color:var(--muted)}",
+      ".hd .contact .sep{color:var(--line);margin:0 0.14rem}",
+      ".hd .contact a{color:var(--muted)}",
+      ".hd .contact .c-note{color:var(--line)}",
+      ".ic{width:0.7rem;height:0.7rem;vertical-align:-0.09rem;color:var(--muted);margin-right:0.15rem;display:inline-block;flex:none}",
+      ".sec{margin-top:0.46rem}",
+      ".sec-col{margin-top:0.4rem}",
+      ".col .sec:first-child{margin-top:0}",
+      ".sec-h{margin:0 0 0.24rem;font-size:8.2pt;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--line);padding-bottom:0.1rem}",
+      ".sum .sum-text{margin:0;font-size:8.1pt;line-height:1.26;color:#2a2723}",
+      ".vlist{margin:0;padding:0;list-style:none}",
+      ".vlist li{position:relative;margin:0.06rem 0;padding-left:0.62rem;font-size:8.1pt;line-height:1.26;color:#2a2723}",
+      '.vlist li::before{content:"";position:absolute;left:0;top:0.5em;width:0.22rem;height:0.22rem;border-radius:50%;background:var(--accent);opacity:0.7}',
+      ".skill-group{margin:0 0 0.26rem}",
       ".skill-group:last-child{margin-bottom:0}",
-      ".skill-group__title{margin:0 0 0.24rem;font-size:8.2pt;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent-dim)}",
-      ".skills-section .skill-chips{display:flex;flex-wrap:wrap;gap:0.28rem 0.26rem}",
-      ".skills-section .skill-chip{display:inline-block;padding:0.22rem 0.38rem;border-radius:6px;border:1px solid var(--line);background-color:#fff;background-image:linear-gradient(90deg,rgba(228,160,74,0.09) 0%,#fff 52%);font-size:8.5pt;font-weight:700;line-height:1.2;white-space:nowrap}",
-      ".courses-section .job{width:100%}",
-      "@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.job-fill{print-color-adjust:exact;-webkit-print-color-adjust:exact}.job > .job-fill{background-color:#fff!important;background-image:linear-gradient(90deg,rgba(228,160,74,0.09) 0%,#fff 52%)!important}.skills-section .skill-chip{print-color-adjust:exact;-webkit-print-color-adjust:exact;background-color:#fff!important;background-image:linear-gradient(90deg,rgba(228,160,74,0.09) 0%,#fff 52%)!important}}",
-      "@media (max-width:640px){.hero-band{grid-template-columns:1fr}.meta-row{grid-template-columns:1fr}}"
+      ".skill-grp-h{margin:0 0 0.1rem;font-size:7.4pt;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}",
+      ".two-col{display:grid;grid-template-columns:1.85fr 1fr;gap:0 1.1rem;align-items:start;margin-top:0.46rem}",
+      ".col{min-width:0}",
+      ".tl{position:relative;padding-left:0.92rem;margin-top:0.06rem}",
+      ".tl::before{content:\"\";position:absolute;left:0.27rem;top:0.38rem;bottom:0.28rem;width:2px;margin-left:-1px;background:rgba(183,120,58,0.4)}",
+      ".job{position:relative;margin:0 0 0.2rem}",
+      ".job:last-child{margin-bottom:0}",
+      ".tl .job::before{content:\"\";position:absolute;left:-0.92rem;top:0.2rem;width:0.54rem;height:0.54rem;border-radius:50%;background:#fff;border:2px solid var(--accent);box-sizing:border-box}",
+      ".job-head{display:flex;flex-direction:column;gap:0}",
+      ".job-title{font-size:9pt;font-weight:700;color:var(--ink)}",
+      ".job-meta{margin-top:0;font-size:7.9pt;color:var(--muted)}",
+      ".job-sub{margin:0.03rem 0 0;font-size:8.4pt;font-weight:600;color:var(--ink)}",
+      ".job-role{margin:0.02rem 0 0;font-size:8.3pt;color:var(--muted)}",
+      ".job-awards{margin:0.08rem 0 0;font-size:7.9pt;color:var(--accent)}",
+      ".job-awards .aw-label{font-size:7.2pt;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-right:0.3rem}",
+      ".job-awards .sep{color:var(--line);margin:0 0.14rem}",
+      ".hl{margin:0.06rem 0 0;padding:0;list-style:none}",
+      ".hl li{position:relative;margin:0.01rem 0;padding-left:0.56rem;font-size:8.1pt;line-height:1.2;color:#2a2723}",
+      '.hl li::before{content:"–";position:absolute;left:0;color:var(--accent);font-weight:700}',
+      ".edu-row{margin:0 0 0.12rem}",
+      ".edu-row:last-child{margin-bottom:0}",
+      ".edu-line1{display:flex;justify-content:space-between;align-items:baseline;gap:0.4rem}",
+      ".edu-inst{font-weight:700;font-size:8.3pt}",
+      ".edu-degree{margin:0.04rem 0 0;font-size:7.9pt;color:var(--muted)}",
+      ".edu-period{font-size:7.8pt;color:var(--muted);white-space:nowrap}",
+      ".cert-row{display:flex;justify-content:space-between;align-items:baseline;gap:0.4rem;margin:0 0 0.1rem}",
+      ".cert-title{font-weight:600;font-size:8.3pt}",
+      ".cert-meta{font-size:7.8pt;color:var(--muted)}",
+      "@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}"
     ].join("\n");
 
     var body = [
       '<div class="page">',
-      '<header class="hero-head">',
+      '<header class="hd">',
       "<h1>" + fullName + "</h1>",
-      '<p class="tagline">' + tagline + "</p>",
-      '<p class="summary">' + esc(hero.bio) + "</p>",
+      '<p class="tag">' + tagline + "</p>",
+      '<p class="contact">' + contactLine + "</p>",
       "</header>",
-      '<div class="hero-band">',
-      '<div class="hero-panels"><div class="meta-row">',
-      '<div class="panel"><h2>Contact</h2><ul class="contact-grid">' + contactItems + "</ul></div>",
-      '<div class="panel"><h2>Languages</h2><ul class="lang-list">' + langItems + "</ul></div>",
-      "</div></div>",
+      summary,
+      '<div class="two-col">',
+      '<div class="col col-main"><section class="sec sec-col"><h2 class="sec-h">Experience</h2><div class="tl">' + jobs + "</div></section></div>",
+      '<div class="col col-side">',
+      languages,
+      (r.skills && r.skills.length) ? '<section class="sec sec-col"><h2 class="sec-h">Skills</h2>' + skills + "</section>" : "",
       "</div>",
-      '<section class="experience section-block" aria-labelledby="experience-heading">',
-      '<h2 class="section-title" id="experience-heading">Experience</h2>',
-      '<div class="card-list">' + jobs + "</div>",
-      "</section>",
-      education ? (
-        '<section class="education-section section-block" aria-labelledby="education-heading">' +
-        '<h2 class="section-title" id="education-heading">Education</h2>' +
-        '<div class="card-list">' + education + "</div>" +
-        "</section>"
-      ) : "",
-      '<section class="courses-section section-block" aria-labelledby="courses-heading">',
-      '<h2 class="section-title" id="courses-heading">Certifications</h2>',
-      '<div class="card-list">' + courses + "</div>",
-      "</section>",
-      '<section class="skills-section section-block" aria-labelledby="skills-heading">',
-      '<h2 class="section-title" id="skills-heading">Skills</h2>',
-      skills,
-      "</section>",
+      "</div>",
+      (r.courses && r.courses.length) ? '<section class="sec"><h2 class="sec-h">Certifications</h2>' + courses + "</section>" : "",
+      education ? '<section class="sec"><h2 class="sec-h">Education</h2>' + education + "</section>" : "",
       "</div>"
     ].join("\n");
 
