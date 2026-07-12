@@ -109,7 +109,11 @@
       .then(function (res) {
         if (!res.ok && res.__status === 404) return { content: null, sha: null, missing: true };
         if (res.content) {
-          return { content: b64Decode(res.content.replace(/\n/g, "")), sha: res.sha, missing: false };
+          var raw = res.content.replace(/\n/g, "");
+          var decoded = null, binary = false;
+          try { decoded = b64Decode(raw); }
+          catch (e) { binary = true; /* binary file (e.g. PDF) — keep sha, skip text decode */ }
+          return { content: decoded, sha: res.sha, missing: false, binary: binary };
         }
         return { content: null, sha: null, missing: true };
       });
