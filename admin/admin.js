@@ -1399,7 +1399,7 @@
 
     function openPrintView(orientation) {
       var base = (window.location.href || "").replace(/\/admin\/.*$/, "/");
-      var html = buildCvPrintHtml(r, siteObj, base, { orientation: orientation });
+      var html = buildCvPrintHtml(r, siteObj, base, { orientation: orientation, pdfSafe: true });
       var w = window.open("", "_blank");
       if (!w) { toast("Allow pop-ups to open the print view.", "error"); return; }
       w.document.open();

@@ -16,6 +16,12 @@ function buildCvPrintHtml(r, site, assetBase, opts) {
     }
     opts = opts || {};
     var orientation = opts.orientation === "portrait" ? "portrait" : "landscape";
+    /* pdfSafe: system fonts only — Outfit's PDF subset drops spaces on copy and
+       triggers faux-bold in Edge when font-weight:700 without a bold face. */
+    var pdfSafe = !!opts.pdfSafe;
+    var bodyFont = pdfSafe
+      ? '"Segoe UI",Arial,Helvetica,sans-serif'
+      : '"Outfit","Segoe UI",system-ui,sans-serif';
     var g = (r && r.general) || {};
     var hero = (site && site.hero) || {};
     function esc(s) {
@@ -37,7 +43,9 @@ function buildCvPrintHtml(r, site, assetBase, opts) {
       };
       return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (p[name] || "") + "</svg>";
     }
-    var fullName = esc((g.firstName || "") + " " + (g.lastName || "")).trim();
+    var firstName = esc((g.firstName || "").trim());
+    var lastName = esc((g.lastName || "").trim());
+    var fullName = (firstName + (firstName && lastName ? " " : "") + lastName).trim();
     var tagline = esc(g.cvTitle || hero.role || "");
 
     /* Single-line contact (location · phone · email · linkedin · web) with mini
@@ -115,10 +123,12 @@ function buildCvPrintHtml(r, site, assetBase, opts) {
       pageRule,
       "*{box-sizing:border-box}",
       "html,body{margin:0;padding:0}",
-      'body{font-family:"Outfit","Segoe UI",system-ui,sans-serif;font-size:8.2pt;line-height:1.18;color:var(--ink);background:#fff}',
+      "body{font-family:" + bodyFont + ";font-size:8.2pt;line-height:1.18;color:var(--ink);background:#fff" +
+        (pdfSafe ? ";font-synthesis:none" : "") + "}",
       "a{color:var(--ink);text-decoration:none}",
       ".hd{margin-bottom:0.32rem;border-bottom:2px solid var(--ink);padding-bottom:0.2rem}",
-      ".hd h1{margin:0;font-size:14pt;font-weight:700;letter-spacing:-0.01em;line-height:1.05}",
+      ".hd h1{margin:0;font-size:14pt;font-weight:" + (pdfSafe ? "600" : "700") +
+        ";letter-spacing:normal;line-height:1.05" + (pdfSafe ? ";font-synthesis:none" : "") + "}",
       ".hd .tag{margin:0.03rem 0 0;font-size:8.8pt;font-weight:500;color:var(--accent)}",
       ".hd .contact{margin:0.1rem 0 0;font-size:7.6pt;color:var(--muted)}",
       ".hd .contact .sep{color:var(--line);margin:0 0.12rem}",
@@ -189,10 +199,12 @@ function buildCvPrintHtml(r, site, assetBase, opts) {
       "</div>"
     ].join("\n");
 
+    var fontLinks = pdfSafe ? "" :
+      '<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>';
     return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>' +
       "<title>" + fullName + " — CV</title>" +
-      '<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>' +
-      '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet"/>' +
+      fontLinks +
       "<style>\n" + style + "\n</style></head><body>\n" + body + "\n" +
       '<script>window.addEventListener("load",function(){setTimeout(function(){try{window.print()}catch(e){}},300)})</script>' +
       "</body></html>";

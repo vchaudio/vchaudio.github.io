@@ -30,7 +30,7 @@ async function main() {
   var site = JSON.parse(await fs.readFile(path.join(root, "data/site.json"), "utf-8"));
   var pdfName = (site && site.resumePdf) || "Valentyn-Chumachenko-CV.pdf";
 
-  var html = buildCvPrintHtml(resume, site, "", { orientation: orientation })
+  var html = buildCvPrintHtml(resume, site, "", { orientation: orientation, pdfSafe: true })
     .replace(/<script>[\s\S]*?<\/script>/, "");
 
   await fs.writeFile(path.join(root, "cv-print.html"), html);
@@ -40,8 +40,7 @@ async function main() {
   });
   try {
     var page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
-    await page.evaluate(function () { return document.fonts && document.fonts.ready; });
+    await page.setContent(html, { waitUntil: "load" });
     await page.emulateMediaType("print");
     var pdf = await page.pdf({
       format: "A4",
