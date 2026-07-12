@@ -121,12 +121,20 @@
   }
 
   function fail(message) {
+    revealSiteChrome();
     var main = document.querySelector("main") || document.body;
     var note = h("div", {
       class: "vch-render-error",
       style: "margin:2rem auto;max-width:640px;padding:1.2rem 1.4rem;border:1px solid rgba(220,90,70,0.4);border-radius:12px;background:#1a1714;color:#f0a39a;font-family:var(--font);"
     }, [h("p", { text: message })]);
     main.insertBefore(note, main.firstChild);
+  }
+
+  /* Footer (and project home button) stay hidden until JSON content is in the DOM. */
+  function revealSiteChrome() {
+    document.querySelectorAll("[data-vch-defer-chrome]").forEach(function (el) {
+      el.hidden = false;
+    });
   }
 
   /* ---------- homepage rendering ---------- */
@@ -241,6 +249,7 @@
 
     /* footer social */
     renderFooter(site);
+    revealSiteChrome();
   }
 
   function buildProjectCard(p) {
@@ -742,6 +751,7 @@
         h("p", { class: "project-about", text: "The project you are looking for does not exist. " }),
         h("p", {}, [h("a", { href: "index.html", text: "← Back to home" })])
       ]));
+      revealSiteChrome();
       return;
     }
 
@@ -787,6 +797,7 @@
         el.style.animationDelay = (0.14 + index * 0.1) + "s";
       });
     })();
+    revealSiteChrome();
   }
 
   function buildProjectBlock(block, project) {

@@ -9,6 +9,7 @@
       #project-main{min-height:calc(100dvh - 72px - 5rem)}
       body{margin:0;min-height:100dvh;display:flex;flex-direction:column;padding-top:72px}
       body>.site-footer{margin-top:auto}
+      [data-vch-defer-chrome][hidden]{display:none!important}
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="" />
@@ -40,7 +41,7 @@
 
     <main id="project-main" class="project-page--hero-glow" style="min-height:calc(100dvh - 72px - 5rem)"></main>
 
-    <button type="button" class="scroll-to-top scroll-to-top--dual is-visible" data-scroll-to-top data-home-href="index.html" aria-label="Home">
+    <button type="button" class="scroll-to-top scroll-to-top--dual is-visible" data-scroll-to-top data-home-href="index.html" data-vch-defer-chrome hidden aria-label="Home">
       <svg class="scroll-to-top__icon scroll-to-top__icon--home" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M5 11.5L12 5l7 6.5M8 10.5V18h3v-5h2v5h3v-7.5" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
@@ -62,7 +63,7 @@
       </div>
     </div>
 
-    <footer class="site-footer">© VCHAudio · Valentyn Chumachenko</footer>
+    <footer class="site-footer" data-vch-defer-chrome hidden>© VCHAudio · Valentyn Chumachenko</footer>
     <noscript>
       <p style="padding:2rem;text-align:center">This site requires JavaScript to display content.</p>
     </noscript>

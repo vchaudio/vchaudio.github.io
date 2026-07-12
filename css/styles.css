@@ -96,6 +96,11 @@ body > .site-footer {
   flex-shrink: 0;
 }
 
+/* Deferred chrome: stay fully out of layout until render.js reveals it. */
+[data-vch-defer-chrome][hidden] {
+  display: none !important;
+}
+
 #project-main {
   flex: 1 0 auto;
   min-height: calc(100dvh - var(--header-h) - 5rem);
