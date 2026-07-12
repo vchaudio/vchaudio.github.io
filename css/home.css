@@ -815,7 +815,7 @@ a.home-recommendations__name--link:focus-visible {
 /* Roll panels */
 .home-panel-wrap {
   position: relative;
-  min-height: min(980px, 105vh);
+  min-height: min(850px, 105vh);
 }
 
 .home-panel {
