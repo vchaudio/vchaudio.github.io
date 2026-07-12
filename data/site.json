@@ -17,8 +17,10 @@
     "avatarWidth": 400,
     "avatarHeight": 400,
     "name": "Valentyn Chumachenko",
-    "role": "Game Sound and Tech Designer / Music Composer",
-    "bio": "Senior Technical Sound Designer and Music Composer with 8+ years of professional experience across game development, television, animation, advertising, and live stadium shows. For the past five years, I have specialized in game audio, creating immersive sound design, interactive music systems, and technical audio solutions using Wwise and Unreal Engine. Experienced across the full audio production pipeline, from concept and composition to implementation, optimization, voice integration, and final mix.\n"
+    "role": "Sound Designer / Technical Sound Designer / Music Composer",
+    "bio": "8+ years of professional experience across game development, television, animation, advertising, and live stadium shows. For the past five years, I have specialized in game audio, creating immersive sound design, interactive music systems, and technical audio solutions using Wwise and Unreal Engine. Experienced across the full audio production pipeline, from concept and composition to implementation, optimization, voice integration, and final mix.\n",
+    "bioMaxWidth": "65.5rem",
+    "roleMaxWidth": "35rem"
   },
   "sections": {
     "projectsHeading": "Projects",
