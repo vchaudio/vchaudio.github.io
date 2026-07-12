@@ -150,6 +150,19 @@
     });
   }
 
+  function blobToBase64(blob) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onload = function () {
+        var dataUrl = fr.result;
+        var comma = dataUrl.indexOf(",");
+        resolve(dataUrl.slice(comma + 1));
+      };
+      fr.onerror = reject;
+      fr.readAsDataURL(blob);
+    });
+  }
+
   function uploadAsset(file, onProgress) {
     var c = state.config;
     var safeName = file.name.replace(/[^A-Za-z0-9._-]+/g, "-");
@@ -455,6 +468,38 @@
     });
     sel.addEventListener("change", function () { onInput(sel.value); });
     return el("label", { class: "admin-field" }, [el("span", { text: label }), sel]);
+  }
+
+  /* 3-state visibility toggle for Education entries:
+     "site" = show on the site, "cv" = show in the CV/PDF, "hidden" = hide everywhere. */
+  function visibilityControl(entry, onInput) {
+    var states = [
+      { value: "site", label: "Site" },
+      { value: "cv", label: "CV" },
+      { value: "hidden", label: "Hide" }
+    ];
+    var current = entry.visibility || "cv";
+    var group = el("div", { class: "admin-field admin-field--full admin-seg" }, [el("span", { text: "Show in" })]);
+    var btns = {};
+    states.forEach(function (s) {
+      var b = el("button", { type: "button", class: "admin-btn admin-btn--small admin-seg__btn", text: s.label });
+      b.addEventListener("click", function () {
+        entry.visibility = s.value;
+        current = s.value;
+        refresh();
+        onInput();
+      });
+      btns[s.value] = b;
+      group.appendChild(b);
+    });
+    function refresh() {
+      Object.keys(btns).forEach(function (k) {
+        btns[k].classList.toggle("admin-btn--primary", k === current);
+        btns[k].setAttribute("aria-pressed", k === current ? "true" : "false");
+      });
+    }
+    refresh();
+    return group;
   }
 
   function fieldImage(label, value, onInput) {
@@ -1195,6 +1240,7 @@
     }
     var fullName = esc((g.firstName || "") + " " + (g.lastName || "")).trim();
     var avatar = asset(hero.avatar || (site && site.brand && site.brand.logo) || "");
+    var tagline = esc(g.cvTitle || hero.role || "");
 
     /* Contact + languages panel */
     var contactItems = [
@@ -1238,6 +1284,16 @@
              '<div class="job-inner"><p class="role">' + line + "</p></div></article>";
     }).join("");
 
+    /* Education (items marked for the CV) */
+    var education = (r.education || []).filter(function (e) { return e.visibility === "cv"; })
+      .map(function (e) {
+        var line = esc(e.institution || "");
+        if (e.degree) line += " — " + esc(e.degree);
+        if (e.period) line = '<span class="meta">' + esc(e.period) + "</span> " + line;
+        return '<article class="job job--edu"><div class="job-fill" aria-hidden="true"></div>' +
+               '<div class="job-inner"><p class="role">' + line + "</p></div></article>";
+      }).join("");
+
     /* Skills */
     var skills = (r.skills || []).map(function (grp) {
       var chips = (grp.items || []).map(function (it) { return '<span class="skill-chip">' + esc(it) + "</span>"; }).join("");
@@ -1261,9 +1317,8 @@
       ".hero-head h1{margin:0;font-size:21pt;font-weight:700;letter-spacing:-0.02em;line-height:1.05}",
       ".hero-head .tagline{margin:0.2rem 0 0;font-size:11.5pt;font-weight:500;color:var(--accent-dim)}",
       ".hero-head .summary{margin:0.32rem 0 0;font-size:9.6pt;color:#2e2a26}",
-      ".hero-band{display:grid;grid-template-columns:133px 1fr;gap:14px;align-items:end;padding-bottom:0}",
-      ".photo-wrap{width:133px;height:133px;flex-shrink:0;align-self:end;border-radius:12px;overflow:hidden;border:2px solid var(--accent);box-shadow:0 4px 14px rgba(201,138,58,0.2);background:var(--panel)}",
-      ".photo-wrap img{display:block;width:133px;height:133px;object-fit:cover;object-position:50% 12%}",
+      ".hero-band{display:grid;grid-template-columns:1fr;gap:14px;align-items:end;padding-bottom:0}",
+      ".photo-wrap{display:none}",
       ".hero-panels{display:flex;flex-direction:column;gap:9px;min-width:0}",
       ".meta-row{display:grid;grid-template-columns:1.4fr 0.85fr;gap:9px}",
       ".contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.2rem 0.65rem;margin:0;padding:0;list-style:none}",
@@ -1294,18 +1349,17 @@
       ".skills-section .skill-chip{display:inline-block;padding:0.22rem 0.38rem;border-radius:6px;border:1px solid var(--line);background-color:#fff;background-image:linear-gradient(90deg,rgba(228,160,74,0.09) 0%,#fff 52%);font-size:8.5pt;font-weight:700;line-height:1.2;white-space:nowrap}",
       ".courses-section .job{width:100%}",
       "@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}.job-fill{print-color-adjust:exact;-webkit-print-color-adjust:exact}.job > .job-fill{background-color:#fff!important;background-image:linear-gradient(90deg,rgba(228,160,74,0.09) 0%,#fff 52%)!important}.skills-section .skill-chip{print-color-adjust:exact;-webkit-print-color-adjust:exact;background-color:#fff!important;background-image:linear-gradient(90deg,rgba(228,160,74,0.09) 0%,#fff 52%)!important}}",
-      "@media (max-width:640px){.hero-band{grid-template-columns:1fr}.meta-row{grid-template-columns:1fr}.photo-wrap{width:120px;height:120px}.photo-wrap img{width:120px;height:120px}}"
+      "@media (max-width:640px){.hero-band{grid-template-columns:1fr}.meta-row{grid-template-columns:1fr}}"
     ].join("\n");
 
     var body = [
       '<div class="page">',
       '<header class="hero-head">',
       "<h1>" + fullName + "</h1>",
-      '<p class="tagline">' + esc(hero.role) + "</p>",
+      '<p class="tagline">' + tagline + "</p>",
       '<p class="summary">' + esc(hero.bio) + "</p>",
       "</header>",
       '<div class="hero-band">',
-      '<div class="photo-wrap"><img src="' + esc(avatar) + '" width="400" height="400" alt="' + fullName + '"/></div>',
       '<div class="hero-panels"><div class="meta-row">',
       '<div class="panel"><h2>Contact</h2><ul class="contact-grid">' + contactItems + "</ul></div>",
       '<div class="panel"><h2>Languages</h2><ul class="lang-list">' + langItems + "</ul></div>",
@@ -1315,8 +1369,14 @@
       '<h2 class="section-title" id="experience-heading">Experience</h2>',
       '<div class="card-list">' + jobs + "</div>",
       "</section>",
+      education ? (
+        '<section class="education-section section-block" aria-labelledby="education-heading">' +
+        '<h2 class="section-title" id="education-heading">Education</h2>' +
+        '<div class="card-list">' + education + "</div>" +
+        "</section>"
+      ) : "",
       '<section class="courses-section section-block" aria-labelledby="courses-heading">',
-      '<h2 class="section-title" id="courses-heading">Courses</h2>',
+      '<h2 class="section-title" id="courses-heading">Certifications</h2>',
       '<div class="card-list">' + courses + "</div>",
       "</section>",
       '<section class="skills-section section-block" aria-labelledby="skills-heading">',
@@ -1343,6 +1403,7 @@
     root.appendChild(section("General", [
       fieldText("First name", r.general && r.general.firstName, function (v) { ensure(r, "general").firstName = v; dirty(); }),
       fieldText("Last name", r.general && r.general.lastName, function (v) { ensure(r, "general").lastName = v; dirty(); }),
+      fieldText("CV headline / title", r.general && r.general.cvTitle, function (v) { ensure(r, "general").cvTitle = v; dirty(); }, { full: true }),
       fieldText("Location", r.general && r.general.location, function (v) { ensure(r, "general").location = v; dirty(); }),
       fieldText("Phone (display)", r.general && r.general.phone, function (v) { ensure(r, "general").phone = v; dirty(); }),
       fieldText("Phone (tel: link)", r.general && r.general.phoneHref, function (v) { ensure(r, "general").phoneHref = v; dirty(); }),
@@ -1368,6 +1429,7 @@
       if (job.type === "studio") {
         out.push(awardsEditor(job, d));
       }
+      out.push(stringsList("Highlights (CV bullets)", job.highlights || (job.highlights = []), function (arr) { job.highlights = arr; d(); }));
       return out;
     };
     root.appendChild(wrapSection("Experience", objectList("", r.experience || (r.experience = []), expFields, {
@@ -1375,6 +1437,21 @@
       sub: function (j) { return j.meta; },
       addLabel: "+ Add experience",
       makeNew: function () { return { type: "plain", title: "New role", meta: "", description: "" }; }
+    })));
+
+    var eduFields = function (e, d) {
+      return [
+        fieldText("Institution", e.institution, function (v) { e.institution = v; d(); }, { full: true }),
+        fieldText("Degree / detail", e.degree, function (v) { e.degree = v; d(); }, { full: true }),
+        fieldText("Period", e.period, function (v) { e.period = v; d(); }),
+        visibilityControl(e, d)
+      ];
+    };
+    root.appendChild(wrapSection("Education", objectList("", r.education || (r.education = []), eduFields, {
+      label: function (e) { return e.institution || "(untitled)"; },
+      sub: function (e) { return (e.period || "") + " · " + (e.visibility || "cv"); },
+      addLabel: "+ Add education",
+      makeNew: function () { return { period: "", institution: "New entry", degree: "", visibility: "cv" }; }
     })));
 
     var skillFields = function (g, d) {
@@ -1398,27 +1475,28 @@
         fieldText("Year", c.year, function (v) { c.year = v; d(); })
       ];
     };
-    root.appendChild(wrapSection("Courses", objectList("", r.courses || (r.courses = []), courseFields, {
+    root.appendChild(wrapSection("Certifications", objectList("", r.courses || (r.courses = []), courseFields, {
       label: function (c) { return c.title || "(untitled)"; },
       sub: function (c) { return (c.provider || "") + " " + (c.year || ""); },
-      addLabel: "+ Add course",
-      makeNew: function () { return { title: "New course", provider: "", year: "" }; }
+      addLabel: "+ Add certification",
+      makeNew: function () { return { title: "New certification", provider: "", year: "" }; }
     })));
 
     root.appendChild(generatePdfSection(r));
   }
 
-  /* Generate / publish the resume PDF. The "generator" is the data-driven
-     cv-print template (buildCvPrintHtml) — opening it triggers the browser's
-     print-to-PDF. The published PDF is then replaced by uploading the saved
-     file to the path configured in Site → Resume PDF path. The local
-     scripts/build-cv-pdf.ps1 (Edge headless) can be used the same way. */
+  /* Generate / publish the resume PDF.
+     - "Print View (Resume>PDF)" opens the data-driven cv-print HTML (styled)
+       and lets the browser save it as a text-based PDF via the print dialog.
+     - "Generate and Publish PDF" builds an ATS-friendly text PDF directly from
+       the resume data with jsPDF (selectable text, single column) and uploads
+       it to the repository, replacing the published resume PDF in one click. */
   function generatePdfSection(r) {
     var siteObj = (state.files.site && state.files.site.obj) || {};
     var pdfPath = siteObj.resumePdf || "Valentyn-Chumachenko-CV.pdf";
 
-    var openBtn = el("button", { type: "button", class: "admin-btn admin-btn--primary admin-btn--small", text: "Open print view (resume → PDF)" });
-    openBtn.addEventListener("click", function () {
+    var printBtn = el("button", { type: "button", class: "admin-btn admin-btn--primary admin-btn--small", text: "Print View (Resume>PDF)" });
+    printBtn.addEventListener("click", function () {
       var base = (window.location.href || "").replace(/\/admin\/.*$/, "/");
       var html = buildCvPrintHtml(r, siteObj, base);
       var w = window.open("", "_blank");
@@ -1428,29 +1506,167 @@
       w.document.close();
     });
 
-    var fileInput = el("input", { type: "file", class: "admin-upload-input", accept: "application/pdf,.pdf" });
-    var upBtn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: "Upload & replace published PDF…" });
-    upBtn.addEventListener("click", function () { fileInput.click(); });
-    fileInput.addEventListener("change", function () {
-      if (!fileInput.files || !fileInput.files.length) return;
+    var genBtn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: "Generate and Publish PDF" });
+    genBtn.addEventListener("click", function () {
       if (!state.authenticated || !state.config) { toast("Sign in to publish the PDF.", "error"); showLogin(); return; }
-      var file = fileInput.files[0];
-      upBtn.disabled = true; upBtn.textContent = "Publishing…";
-      getContents(pdfPath).then(function (existing) {
-        return fileToBase64(file).then(function (b64) {
-          return putContentsB64(pdfPath, b64, existing.sha, "admin: publish resume PDF").then(function () {
-            toast("PDF replaced — the site will serve it after GitHub Pages rebuilds.", "success");
+      genBtn.disabled = true; genBtn.textContent = "Generating…";
+      buildCvPdfBlob(r, siteObj).then(function (blob) {
+        genBtn.textContent = "Publishing…";
+        return blobToBase64(blob).then(function (b64) {
+          return getContents(pdfPath).then(function (existing) {
+            return putContentsB64(pdfPath, b64, existing && existing.sha, "admin: generate & publish resume PDF").then(function () {
+              toast("PDF generated and published — the site will serve it after GitHub Pages rebuilds.", "success");
+            });
           });
         });
-      }).catch(function (err) { toast("Upload failed: " + (err.message || err), "error"); })
-        .finally(function () { upBtn.disabled = false; upBtn.textContent = "Upload & replace published PDF…"; fileInput.value = ""; });
+      }).catch(function (err) { toast("Generate & publish failed: " + (err.message || err), "error"); })
+        .finally(function () { genBtn.disabled = false; genBtn.textContent = "Generate and Publish PDF"; });
     });
 
-    return wrapSection("Generate PDF file", el("div", {}, [
-      el("p", { class: "admin-editor__sub", text: "Open the print view (built from this resume data), then use the browser's “Save as PDF” in the print dialog. After saving, upload the file below to publish it — it replaces “" + pdfPath + "”, which the site offers as the resume download." }),
-      el("div", { style: "display:flex;gap:0.5rem;flex-wrap:wrap;margin:0.4rem 0 0.6rem" }, [openBtn, upBtn, fileInput]),
-      el("p", { class: "admin-editor__sub", text: "Tip: for a pixel-exact PDF you can also run scripts/build-cv-pdf.ps1 locally (Edge headless) — it prints cv-print.html to the same PDF, which you then upload here. Edit buildCvPrintHtml() in admin.js to restyle the output." })
-    ]));
+    return wrapSection("Generate PDF file", el("div", { style: "display:flex;gap:0.5rem;flex-wrap:wrap" }, [printBtn, genBtn]));
+  }
+
+  /* Dynamically load jsPDF (UMD) from CDN the first time it's needed. */
+  function loadJsPdf() {
+    return new Promise(function (resolve, reject) {
+      if (window.jspdf && window.jspdf.jsPDF) return resolve(window.jspdf.jsPDF);
+      var s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+      s.onload = function () {
+        if (window.jspdf && window.jspdf.jsPDF) resolve(window.jspdf.jsPDF);
+        else reject(new Error("jsPDF failed to initialize."));
+      };
+      s.onerror = function () { reject(new Error("Could not load jsPDF (check your connection).")); };
+      document.head.appendChild(s);
+    });
+  }
+
+  /* Build a clean, ATS-friendly text PDF (selectable text, single column,
+     standard Helvetica) directly from the resume data. Edit the layout below
+     to restyle the generated PDF. Returns a Promise<Blob>. */
+  function buildCvPdfBlob(r, site) {
+    return loadJsPdf().then(function (JsPDF) {
+      var doc = new JsPDF({ unit: "mm", format: "a4" });
+      var g = (r && r.general) || {};
+      var hero = (site && site.hero) || {};
+      var PAGE_H = 297, M = 15, MW = 180, RIGHT = 195;
+      var ACC = [201, 138, 58], INK = [26, 22, 18], MUTED = [92, 85, 76], LINE = [228, 223, 212];
+      var y = 16;
+
+      function setFont(style, size) { doc.setFont("helvetica", style || "normal"); doc.setFontSize(size || 10); }
+      function setColor(c) { doc.setTextColor(c[0], c[1], c[2]); }
+      function ensure(h) { if (y + h > PAGE_H - 14) { doc.addPage(); y = 16; } }
+      function lh(size) { return size * 0.381; }
+
+      function write(str, o) {
+        o = o || {};
+        var size = o.size || 10, style = o.style || "normal", c = o.color || INK;
+        var x = o.x == null ? M : o.x;
+        var width = o.width == null ? MW - (x - M) : o.width;
+        setFont(style, size); setColor(c);
+        var lines = doc.splitTextToSize(String(str == null ? "" : str), width);
+        for (var i = 0; i < lines.length; i++) { ensure(lh(size) + 1); doc.text(lines[i], x, y); y += lh(size); }
+        y += (o.gap == null ? 1.5 : o.gap);
+      }
+
+      function heading(text) {
+        y += 3; ensure(12);
+        setFont("bold", 12); setColor(ACC);
+        doc.text(text, M, y); y += 5;
+        doc.setDrawColor(LINE[0], LINE[1], LINE[2]); doc.setLineWidth(0.3);
+        doc.line(M, y, M + MW, y); y += 3.5;
+      }
+
+      function bullets(arr, indent) {
+        indent = indent || 5;
+        (arr || []).forEach(function (b) {
+          setFont("normal", 9.5); setColor(INK);
+          var lines = doc.splitTextToSize(String(b), MW - indent);
+          for (var i = 0; i < lines.length; i++) {
+            ensure(lh(9.5) + 1);
+            if (i === 0) doc.text("•", M + 1, y);
+            doc.text(lines[i], M + indent, y);
+            y += lh(9.5);
+          }
+          y += 1;
+        });
+        y += 1.5;
+      }
+
+      function rightMeta(meta, size) {
+        if (!meta) return;
+        setFont("normal", size || 8.5); setColor(MUTED);
+        var lines = doc.splitTextToSize(String(meta), 70);
+        doc.text(lines[0], RIGHT, y, { align: "right" });
+      }
+
+      /* Header */
+      var full = ((g.firstName || "") + " " + (g.lastName || "")).trim();
+      write(full, { size: 22, style: "bold", gap: 1 });
+      write(g.cvTitle || hero.role || "", { size: 12, color: ACC, gap: 2 });
+      var contactParts = [];
+      if (g.location) contactParts.push(g.location);
+      if (g.phone) contactParts.push(g.phone);
+      if (g.email) contactParts.push(g.email);
+      if (g.linkedinLabel) contactParts.push(g.linkedinLabel);
+      contactParts.push("vchaudio.com");
+      write(contactParts.join("   ·   "), { size: 9.5, color: MUTED, gap: 1 });
+
+      /* Experience */
+      heading("Experience");
+      (r.experience || []).forEach(function (job) {
+        ensure(12);
+        setFont("bold", 11); setColor(INK);
+        doc.text(job.title || "", M, y);
+        rightMeta(job.meta, 8.5);
+        y += 5.5;
+        if (job.type === "project" && job.project) write(job.project, { size: 10, style: "bold", gap: 0.5 });
+        if (job.description) write(job.description, { size: 9.5, gap: 1 });
+        if (job.highlights && job.highlights.length) bullets(job.highlights, 5);
+        if (job.type === "studio" && job.awards && job.awards.length) {
+          job.awards.forEach(function (a) {
+            var label = a.kind === "winner" ? "Winner" : (a.kind === "nominee" ? "Nominated" : (a.kind || ""));
+            write(label + " — " + a.title + ", " + a.year, { size: 9, color: MUTED, x: M + 5, gap: 0.5 });
+          });
+          y += 1;
+        }
+        y += 1.5;
+      });
+
+      /* Education */
+      var edu = (r.education || []).filter(function (e) { return e.visibility === "cv"; });
+      if (edu.length) {
+        heading("Education");
+        edu.forEach(function (e) {
+          ensure(10);
+          setFont("bold", 10); setColor(INK); doc.text(e.institution || "", M, y);
+          rightMeta(e.period, 8.5);
+          y += 4.8;
+          if (e.degree) write(e.degree, { size: 9.5, gap: 1 });
+          y += 1.5;
+        });
+      }
+
+      /* Certifications */
+      if ((r.courses || []).length) {
+        heading("Certifications");
+        (r.courses || []).forEach(function (c) {
+          write(c.title + " — " + c.provider + ", " + c.year, { size: 9.5, gap: 1 });
+        });
+      }
+
+      /* Skills */
+      if ((r.skills || []).length) {
+        heading("Skills");
+        (r.skills || []).forEach(function (grp) {
+          ensure(8);
+          setFont("bold", 10); setColor(ACC); doc.text(grp.heading || "", M, y); y += 4.8;
+          write((grp.items || []).join(", "), { size: 9.5, gap: 2 });
+        });
+      }
+
+      return doc.output("blob");
+    });
   }
 
   function awardsEditor(job, dirty) {

@@ -477,6 +477,25 @@
       expList
     ]));
 
+    /* Education (only items marked to show on the site) */
+    var eduItems = (resume.education || []).filter(function (e) { return e.visibility === "site"; });
+    if (eduItems.length) {
+      var eduList = h("div", { class: "experience-list" });
+      eduItems.forEach(function (e) {
+        eduList.appendChild(h("article", { class: "job-card job-card--experience" }, [
+          h("div", { class: "job-card__head" }, [
+            h("h3", { class: "job-card__title", text: e.institution || "" }),
+            e.period ? h("p", { class: "job-card__meta", text: e.period }) : null
+          ]),
+          e.degree ? h("p", { class: "job-card__role", text: e.degree }) : null
+        ]));
+      });
+      panel.appendChild(h("section", { class: "resume-section reveal" }, [
+        h("h2", { class: "resume-section__heading", text: "Education" }),
+        eduList
+      ]));
+    }
+
     /* Skills */
     var skillsWrap = h("div", { class: "spoiler-inner spoiler-inner--skills" });
     resume.skills.forEach(function (g, i) {
@@ -487,7 +506,7 @@
       if (i === resume.skills.length - 1) skillsWrap.appendChild(h("div", { class: "divider", role: "presentation" }));
     });
     skillsWrap.appendChild(h("section", { class: "skills-group skills-group--notes", "aria-labelledby": "skills-courses-heading" }, [
-      h("h3", { class: "skills-heading skills-heading--notes", id: "skills-courses-heading", text: "Courses" }),
+      h("h3", { class: "skills-heading skills-heading--notes", id: "skills-courses-heading", text: "Certifications" }),
       resume.courses.map(function (c) {
         return h("p", { class: "course-line", html: "<strong>" + esc(c.title) + "</strong> — " + esc(c.provider) + ", " + esc(String(c.year)) });
       })

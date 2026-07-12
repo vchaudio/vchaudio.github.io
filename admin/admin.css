@@ -313,6 +313,11 @@
    otherwise stretch the button to the block width). */
 .admin-add-btn { align-self: flex-start; width: auto; }
 
+/* Segmented 3-state control (e.g. Education visibility: Site / CV / Hide). */
+.admin-seg { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+.admin-seg > span { color: var(--muted, #5c554c); }
+.admin-seg__btn { width: auto; }
+
 .admin-string-list {
   display: flex;
   flex-direction: column;
