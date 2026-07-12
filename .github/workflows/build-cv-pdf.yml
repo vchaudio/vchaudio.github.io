@@ -1,0 +1,46 @@
+name: Build CV PDF
+
+on:
+  repository_dispatch:
+    types: [cv-pdf-rebuild]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.branch || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Puppeteer
+        run: |
+          cd scripts
+          npm init -y >/dev/null
+          npm install puppeteer --no-audit --no-fund
+
+      - name: Build PDF
+        run: node scripts/build-cv-pdf.cjs
+
+      - name: Commit PDF
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f Valentyn-Chumachenko-CV.pdf
+          if git diff --cached --quiet; then
+            echo "No changes — PDF is already up to date."
+          else
+            git commit -m "admin: regenerate resume PDF (build-cv-pdf)"
+            git push
+          fi
