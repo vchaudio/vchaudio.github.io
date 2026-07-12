@@ -587,7 +587,10 @@
     else { cls += " job-card--experience"; attrs = { class: cls }; }
     var kids = [];
     kids.push(h("h3", { text: job.title }));
-    if (job.project) kids.push(h("p", { class: "job-card__project", text: job.project }));
+    if (job.project) kids.push(h("p", { class: "job-card__project" }, [
+      h("span", { class: "job-card__project-label", text: "Project:" }),
+      " " + job.project
+    ]));
     kids.push(h("div", { class: "job-meta", text: job.meta }));
     kids.push(h("p", { text: job.description }));
     var hv = job.highlightsVisibility || "cv";

@@ -59,7 +59,7 @@ function buildCvPrintHtml(r, site, assetBase = "") {
       var head = '<div class="job-head"><span class="job-title">' + esc(job.title) + "</span>" +
                  (job.meta ? '<span class="job-meta">' + esc(job.meta) + "</span>" : "") + "</div>";
       var body = "";
-      if (job.type === "project" && job.project) body += '<p class="job-sub">' + esc(job.project) + "</p>";
+      if (job.type === "project" && job.project) body += '<p class="job-sub"><span class="job-sub-label">Project:</span> ' + esc(job.project) + "</p>";
       if (job.description) body += '<p class="job-role">' + esc(job.description) + "</p>";
       if (job.type === "studio" && job.awards && job.awards.length) {
         body += '<p class="job-awards"><span class="aw-label">Awards</span>' + job.awards.map(function (a) {
@@ -135,6 +135,7 @@ function buildCvPrintHtml(r, site, assetBase = "") {
       ".job-title{font-size:9pt;font-weight:700;color:var(--ink)}",
       ".job-meta{margin-top:0;font-size:7.9pt;color:var(--muted)}",
       ".job-sub{margin:0.03rem 0 0;font-size:8.4pt;font-weight:600;color:var(--ink)}",
+      ".job-sub-label{color:var(--accent);font-weight:700;letter-spacing:0.04em;margin-right:0.25rem}",
       ".job-role{margin:0.02rem 0 0;font-size:8.3pt;color:var(--muted)}",
       ".job-awards{margin:0.08rem 0 0;font-size:7.9pt;color:var(--accent)}",
       ".job-awards .aw-label{font-size:7.2pt;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin-right:0.3rem}",

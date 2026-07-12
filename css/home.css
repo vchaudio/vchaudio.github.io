@@ -2073,6 +2073,13 @@ a.home-social-btn {
   color: var(--text-muted);
 }
 
+.home-panel--resume .job-card__project-label {
+  color: var(--accent-dim);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-right: 0.2rem;
+}
+
 a.job-card.job-card--to-project .job-card__project {
   transition: color 0.2s var(--ease-out);
 }
