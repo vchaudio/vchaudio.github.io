@@ -593,7 +593,7 @@
 
   /* strings list (array of strings). opts.addOnRow is an optional node placed
      on the same row as the "+ Add" button (e.g. the Highlights visibility
-     toggle), so it visibly belongs to this block. */
+     toggle), so it visibly belongs to this block. Each row has ↑/↓ to reorder. */
   function stringsList(label, arr, onChange, opts) {
     opts = opts || {};
     var list = arr.slice();
@@ -607,9 +607,19 @@
       list.forEach(function (val, i) {
         var input = el("input", { type: "text", value: val });
         input.addEventListener("input", function () { list[i] = input.value; onChange(list); });
+        var upBtn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: "↑", title: "Move up" });
+        upBtn.disabled = i === 0;
+        upBtn.addEventListener("click", function () {
+          if (i > 0) { var t = list[i - 1]; list[i - 1] = list[i]; list[i] = t; onChange(list); render(); }
+        });
+        var downBtn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: "↓", title: "Move down" });
+        downBtn.disabled = i === list.length - 1;
+        downBtn.addEventListener("click", function () {
+          if (i < list.length - 1) { var t = list[i + 1]; list[i + 1] = list[i]; list[i] = t; onChange(list); render(); }
+        });
         var del = el("button", { type: "button", class: "admin-btn admin-btn--small admin-btn--danger", text: "✕" });
         del.addEventListener("click", function () { list.splice(i, 1); onChange(list); render(); });
-        rows.appendChild(el("div", { class: "admin-string-list__row" }, [input, del]));
+        rows.appendChild(el("div", { class: "admin-string-list__row" }, [input, upBtn, downBtn, del]));
       });
     }
     var addBtn = el("button", { type: "button", class: "admin-btn admin-btn--small admin-add-btn", text: "+ Add" });

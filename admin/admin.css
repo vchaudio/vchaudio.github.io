@@ -339,8 +339,9 @@
   flex-direction: column;
   gap: 0.4rem;
 }
-.admin-string-list__row { display: flex; gap: 0.4rem; }
-.admin-string-list__row input { flex: 1; }
+.admin-string-list__row { display: flex; gap: 0.4rem; align-items: center; }
+.admin-string-list__row input { flex: 1; min-width: 0; }
+.admin-string-list__row .admin-btn { flex-shrink: 0; }
 
 .admin-obj-list {
   display: flex;
