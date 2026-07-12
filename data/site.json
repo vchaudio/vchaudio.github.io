@@ -18,7 +18,7 @@
     "avatarHeight": 400,
     "name": "Valentyn Chumachenko",
     "role": "Game Sound and Tech Designer / Music Composer",
-    "bio": "8 years of experience focused on games, live shows, and advertising. Skilled in building original audio from concept through implementation. Passionate about storytelling through sound and delivering immersive, emotionally driven content."
+    "bio": "Senior Technical Sound Designer and Music Composer with 8+ years of professional experience across game development, television, animation, advertising, and live stadium shows. For the past five years, I have specialized in game audio, creating immersive sound design, interactive music systems, and technical audio solutions using Wwise and Unreal Engine. Experienced across the full audio production pipeline, from concept and composition to implementation, optimization, voice integration, and final mix.\n"
   },
   "sections": {
     "projectsHeading": "Projects",
@@ -33,10 +33,26 @@
     "formTitle": "Mail to me",
     "formEndpoint": "https://formspree.io/f/xpqnkwvb",
     "fields": {
-      "email": { "label": "Your email", "placeholder": "your@email.com", "required": true },
-      "name": { "label": "Name", "placeholder": "Your name", "required": true },
-      "subject": { "label": "Subject", "placeholder": "Subject", "required": true },
-      "message": { "label": "Message", "placeholder": "Your message…", "required": true }
+      "email": {
+        "label": "Your email",
+        "placeholder": "your@email.com",
+        "required": true
+      },
+      "name": {
+        "label": "Name",
+        "placeholder": "Your name",
+        "required": true
+      },
+      "subject": {
+        "label": "Subject",
+        "placeholder": "Subject",
+        "required": true
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Your message…",
+        "required": true
+      }
     },
     "submitLabel": "Send message",
     "status": {
@@ -55,7 +71,9 @@
       "icon": "M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.65 1.65 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.77v1.21h.04a3.11 3.11 0 012.7-1.48c1.78 0 3.16 1.16 3.16 3.61z"
     }
   ],
-  "mailButton": { "label": "Mail to me" },
+  "mailButton": {
+    "label": "Mail to me"
+  },
   "footer": {
     "copyright": "© VCHAudio · Valentyn Chumachenko"
   },
