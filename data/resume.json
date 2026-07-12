@@ -19,8 +19,8 @@
     {
       "type": "studio",
       "title": "VCHAudio — Individual Entrepreneur",
-      "meta": "Sep 2017 — Nov 2021 · Remote, contracts, freelance",
-      "description": "Working as self-employed in my music studio. Individual contract projects, freelance, contracts with various media, TV, shows, advertisement, and game industry.",
+      "meta": "Sep 2017 — Oct 2021 · Remote, contracts, freelance",
+      "description": "Operated an independent music studio, delivering end‑to‑end audio solutions. Individual contract projects, freelance, contracts with various media, TV, shows, advertisement, and game industry.",
       "highlights": [
         "Music Composing",
         "Foley, Sound Design",
@@ -62,7 +62,7 @@
       "type": "project",
       "title": "Moonray PBC",
       "project": "Moonray: Battle Lands",
-      "meta": "Oct 2021 — July 2025 · USA, remote",
+      "meta": "Nov 2021 — June 2025 · USA, remote",
       "description": "Audio Producer, Principal Sound Designer, Technical Sound Designer, Audio Developer, Music Composer",
       "highlights": [
         "Full-cycle sound design from scratch — custom foley, processed layers, and a sci-fi audio aesthetic.",
@@ -79,7 +79,7 @@
       "type": "plain",
       "title": "Broadcast TV channel",
       "meta": "Sep 2020 — Sep 2021 · Odesa, on-site part-time",
-      "description": "Live sound director for live broadcasts, hosts, TV programs, and music bands.",
+      "description": "Directed live sound for broadcast TV, operating the mixing console and coordinating with production crew to ensure flawless audio",
       "highlights": [
         "Live mixing for broadcasts, hosts, TV programs, and music bands.",
         "Microphone tuning, balancing, and technical support — full live-broadcast sound engineer duties and assistant work."
@@ -89,8 +89,8 @@
     {
       "type": "plain",
       "title": "NLO TV",
-      "meta": "Jan 2019 — May 2021 · Kyiv, remote part-time",
-      "description": "Cartoon series sound director, sound designer, foley artist, mix engineer.",
+      "meta": "Jan 2019 — May 2021 · Kyiv, remote part-time contract",
+      "description": "Led audio production for the animated TV series Chortoviyki (2019–2021), creating sound design, foley, and final broadcast mixes. The series aired on NLO TV",
       "highlights": [
         "Sound design, foley, mixing and mastering for an animated cartoon series.",
         "Created and integrated custom sound assets for episodes, keeping consistent tone and clarity.",
@@ -140,7 +140,10 @@
         "Jira",
         "FMOD",
         "Git",
-        "Unity"
+        "Unity",
+        "Audio Systems",
+        "Audio Optimization",
+        "Interactive Music"
       ]
     },
     {
@@ -154,7 +157,7 @@
         "Music composing",
         "Mixing & mastering",
         "Audio implementation",
-        "VO editing & directing"
+        "Dialogue editing & directing"
       ]
     },
     {
