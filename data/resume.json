@@ -63,13 +63,17 @@
       "title": "Moonray PBC",
       "project": "Moonray: Battle Lands",
       "meta": "Nov 2021 — June 2025 · USA, remote",
-      "description": "Audio Producer, Principal Sound Designer, Technical Sound Designer, Audio Developer, Music Composer",
+      "description": "Principal Sound Designer, Audio Producer, Technical Sound Designer, Audio Developer, Music Composer",
       "highlights": [
-        "Full-cycle sound design from scratch — custom foley, processed layers, and a sci-fi audio aesthetic.",
-        "Implementation in Wwise and Unreal Engine 5 (Blueprints, Niagara).",
-        "Designed and maintained complex Blueprint-based audio systems.",
-        "Composed original interactive combat tracks, menu theme, and musical emotes.",
-        "Interactive mixing; platform-specific optimization for PC, Android, and PlayStation 5."
+        "Sole Audio Designer responsible for every aspect of the project's audio, from composition and sound design to technical implementation, optimization, voice direction, and production.",
+        "Owned the complete audio production pipeline as the sole Audio Designer, delivering 1,000+ sound assets, interactive music, voice-over, implementation, optimization, and final mix for the entire project.",
+        "Designed and implemented 10+ gameplay audio systems in Wwise and Unreal Engine 5, including interactive music, footsteps, UI, announcer, HDR mixing, and dynamic audio behaviors using Blueprints.",
+        "Composed six adaptive music tracks and developed a Blueprint-driven interactive music system supporting multiple gameplay states and game modes.",
+        "Produced sound design and music for 12 cinematic marketing videos and character reveals.",
+        "Directed remote voice-over sessions for four professional voice actors and implemented voice systems for in-game announcer and God voice events.",
+        "Served as Principal Audio Designer, defining audio standards, documentation, workflows, naming conventions, implementation guidelines, and final creative direction across the project.",
+        "Designed the project's audio architecture, including RTPCs, States, Switches, Events, SoundBanks, audio buses, profiling, memory optimization, and platform-specific audio optimization.",
+        "Created audio for multiple melee combat systems, ranged weapons, UI, character movement, voice reactions, marketing trailers, and gameplay feedback across PC, Android, PlayStation 5, and iOS."
       ],
       "link": "moonray-battle-lands.html",
       "aria": "Moonray PBC — Moonray: Battle Lands — open project overview",
@@ -104,7 +108,7 @@
       "period": "Apr 2012 – Present",
       "institution": "Self-educated",
       "degree": "Music Composer, Sound Designer",
-      "visibility": "cv"
+      "visibility": "hidden"
     },
     {
       "period": "2002 – 2009",
