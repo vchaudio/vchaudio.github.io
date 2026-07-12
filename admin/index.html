@@ -33,6 +33,10 @@
     </section>
 
     <div class="admin-toast" id="admin-toast" role="status" aria-live="polite" hidden></div>
+    <!-- Shared CV print-HTML generator (defines global buildCvPrintHtml). Loaded
+         synchronously so it's available to admin.js, and shared with the GitHub
+         Action that regenerates the resume PDF. -->
+    <script src="../js/cv-print-html.js?v=20260712d"></script>
     <script>
       // Cache-bust admin.js so fixes load immediately without a hard refresh.
       (function () {

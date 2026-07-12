@@ -1,6 +1,11 @@
-# CV source (regenerate PDF with scripts/build-cv-pdf.ps1; published PDF is tracked)
+# CV source (regenerate PDF with scripts/build-cv-pdf.cjs locally or via the
+# GitHub Actions workflow; published PDF is tracked)
 cv-print.html
 scripts/build-cv-pdf.ps1
+# Puppeteer install artifacts (created by the workflow / local run, not committed)
+scripts/node_modules/
+scripts/package.json
+scripts/package-lock.json
 
 # Email signature (local tool; regenerate with scripts/build_signature_asset.py)
 email-signature.html
