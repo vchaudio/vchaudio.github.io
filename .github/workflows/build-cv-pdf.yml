@@ -31,7 +31,7 @@ jobs:
           npm install puppeteer --no-audit --no-fund
 
       - name: Build PDF
-        run: node scripts/build-cv-pdf.cjs
+        run: node scripts/build-cv-pdf.cjs --orientation=${{ github.event.client_payload.orientation || 'landscape' }}
 
       - name: Commit PDF
         run: |
@@ -41,6 +41,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes — PDF is already up to date."
           else
-            git commit -m "admin: regenerate resume PDF (build-cv-pdf)"
+            git commit -m "admin: regenerate resume PDF (${{ github.event.client_payload.orientation || 'landscape' }})"
             git push
           fi
