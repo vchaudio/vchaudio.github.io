@@ -1147,7 +1147,7 @@ main.home-main {
 
 .best-works .video-thumb--card:hover,
 .best-works .video-thumb--card:focus-visible {
-  transform: translateY(-4px) scale(1.012);
+  transform: translateY(-4px);
   border-color: rgba(228, 160, 74, 0.65);
   box-shadow:
     var(--shadow-hover),
@@ -1166,6 +1166,7 @@ main.home-main {
 
 .best-works .video-thumb__media {
   display: block;
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
@@ -1174,11 +1175,54 @@ main.home-main {
 }
 
 .best-works .video-thumb__media img {
+  --thumb-zoom: 1;
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+  max-width: none;
   object-fit: cover;
-  transition: filter 0.3s var(--ease-out);
+  transform: scale(var(--thumb-zoom));
+  transform-origin: bottom center;
+  will-change: transform;
+  transition: transform 0.3s var(--ease-out), filter 0.3s var(--ease-out);
+}
+
+.best-works .video-thumb--card:hover .video-thumb__media img,
+.best-works .video-thumb--card:focus-visible .video-thumb__media img {
+  transform: scale(calc(var(--thumb-zoom) * 1.02));
+}
+
+/* Custom poster assets (Core Punk, Noblemen, etc.) — match global poster crop;
+   zoom origin follows the focal point so hover doesn't look like a shrink. */
+.best-works .video-thumb--poster:not([class*="video-thumb--ua-"]) .video-thumb__media img {
+  object-position: center 18%;
+  transform-origin: center 18%;
+}
+
+.best-works .video-thumb--ua-eva .video-thumb__media img {
+  --thumb-zoom: 1.2;
+  object-position: 24% 50%;
+  transform-origin: 22% 48%;
+}
+
+.best-works .video-thumb--ua-doove .video-thumb__media img {
+  --thumb-zoom: 1;
+  object-position: center center;
+  transform-origin: center center;
+}
+
+.best-works .video-thumb--ua-boxing .video-thumb__media img {
+  --thumb-zoom: 1.06;
+  object-position: 50% 44%;
+  transform-origin: 50% 42%;
+}
+
+.best-works .video-thumb--ua-bbk .video-thumb__media img {
+  --thumb-zoom: 1;
+  object-position: center center;
+  transform-origin: center center;
 }
 
 .best-works .video-thumb__caption {
@@ -1289,30 +1333,6 @@ main.home-main {
 .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(8) { animation-delay: 0.32s; }
 .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(9) { animation-delay: 0.36s; }
 .best-works__videos-extra.is-hiding .video-thumb-wrap:nth-child(10) { animation-delay: 0.40s; }
-
-.best-works .video-thumb--ua-eva .video-thumb__media img {
-  object-position: 24% 50%;
-  transform: scale(1.2);
-  transform-origin: 22% 48%;
-}
-
-.best-works .video-thumb--ua-doove .video-thumb__media img {
-  object-position: 30% 50%;
-  transform: scale(1.16);
-  transform-origin: 28% 52%;
-}
-
-.best-works .video-thumb--ua-boxing .video-thumb__media img {
-  object-position: 50% 44%;
-  transform: scale(1.06);
-  transform-origin: 50% 42%;
-}
-
-.best-works .video-thumb--ua-bbk .video-thumb__media img {
-  object-position: 76% 48%;
-  transform: scale(1.18);
-  transform-origin: 78% 48%;
-}
 
 @media (max-width: 1080px) {
   .best-works {
