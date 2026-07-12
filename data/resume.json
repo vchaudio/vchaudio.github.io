@@ -142,7 +142,6 @@
         "Git",
         "Unity",
         "Audio Systems",
-        "Audio Optimization",
         "Interactive Music"
       ]
     },
@@ -157,6 +156,7 @@
         "Music composing",
         "Mixing & mastering",
         "Audio implementation",
+        "Audio Optimization",
         "Dialogue editing & directing"
       ]
     },
@@ -167,12 +167,11 @@
       "headingClass": "skills-heading--featured",
       "items": [
         "Problem Solving",
-        "Team collaboration",
         "Detail-oriented",
         "Tech Documentation",
-        "Collaboration",
         "Time management",
-        "Audio Direction"
+        "Audio Direction",
+        "Cross Functional Collaboration"
       ]
     }
   ],
