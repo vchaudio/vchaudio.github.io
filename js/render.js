@@ -590,6 +590,12 @@
     if (job.project) kids.push(h("p", { class: "job-card__project", text: job.project }));
     kids.push(h("div", { class: "job-meta", text: job.meta }));
     kids.push(h("p", { text: job.description }));
+    var hv = job.highlightsVisibility || "cv";
+    if (job.highlights && job.highlights.length && (hv === "site" || hv === "both")) {
+      kids.push(h("ul", { class: "job-card__highlights" },
+        job.highlights.map(function (hl) { return h("li", { text: hl }); })
+      ));
+    }
     if (job.awards && job.awards.length) {
       var awards = h("div", { class: "job-card__awards", role: "group", "aria-label": "Awards and nominations" });
       job.awards.forEach(function (a) {
@@ -604,12 +610,6 @@
         ]));
       });
       kids.push(awards);
-    }
-    var hv = job.highlightsVisibility || "cv";
-    if (job.highlights && job.highlights.length && (hv === "site" || hv === "both")) {
-      kids.push(h("ul", { class: "job-card__highlights" },
-        job.highlights.map(function (hl) { return h("li", { text: hl }); })
-      ));
     }
     return h(tag, attrs, kids);
   }
