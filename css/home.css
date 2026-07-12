@@ -1344,9 +1344,9 @@ main.home-main {
   }
 }
 
-@media (max-width: 960px) {
-  /* 2 columns at this width is set via the --work-cols variable by render.js.
-     Center an orphaned last tile (odd count) so it doesn't hug the left. */
+/* Tablet only (2-up grid): center an orphaned last tile. Not on mobile —
+   there the row is 1 column and every card should share the same full width. */
+@media (min-width: 721px) and (max-width: 960px) {
   .best-works__row--projects > .home-portfolio-project:last-child:nth-child(odd):not(:only-child) {
     grid-column: 1 / -1;
     justify-self: center;
@@ -1422,13 +1422,6 @@ main.home-main {
 
   .best-works__row--projects {
     grid-template-columns: 1fr;
-  }
-
-  .best-works__row--projects > .home-portfolio-project:last-child:nth-child(3) {
-    grid-column: auto;
-    justify-self: stretch;
-    width: auto;
-    max-width: none;
   }
 
   /* Equal-height video cards: fixed caption block + 2-line clamp */
