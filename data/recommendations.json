@@ -1,13 +1,36 @@
 {
-  "hidden": false,
+  "hidden": true,
   "heading": "Recommendations",
-  "hideHeading": false,
-  "offsetTop": "1.25rem",
-  "offsetBottom": "1.5rem",
-  "autoplayMinSec": 5,
+  "hideHeading": true,
+  "offsetTop": "4rem",
+  "offsetBottom": "0rem",
+  "autoplayMinSec": 10,
   "autoplayMaxSec": 10,
-  "quoteFontSize": "0.9rem",
-  "animMs": 350,
+  "quoteFontSize": "1rem",
+  "animMs": 1000,
   "quotePreviewChars": 280,
-  "items": []
+  "items": [
+    {
+      "name": "Mac Raynolds",
+      "nameLink": false,
+      "nameHref": "",
+      "role": "CEO",
+      "company": "Night Street Games",
+      "year": "2026",
+      "quote": "Valentyn was a total pleasure to work with - he's one of the rare audio designers who is dangerous in both SFX and music. He came in later to our project and jumped in with both feet. He was collaborative, quick, and super creative. Any team would be lucky to have him",
+      "avatar": "https://media.licdn.com/dms/image/v2/C5603AQF1IFOCvdOulQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1661143810919?e=1785369600&v=beta&t=9WKUVXStbQtLOSuuXx-sS4oPS9ZAMJepMT3DNpwckZY",
+      "hidden": false
+    },
+    {
+      "name": "Tim Blueris",
+      "nameLink": false,
+      "nameHref": "",
+      "role": "Gameplay Animator",
+      "company": "Moonray PBC",
+      "year": "2025",
+      "quote": "Working with Valentyn Chumachenko was an absolute pleasure. As a Sound Designer and Music Composer on our project, he brought a unique emotional layer to the experience that elevated everything from gameplay moments to cinematic sequences.\nValentyn is incredibly versatile: he can design impactful SFX that hit just right in combat, then shift gears to compose a dynamic combat track. He has a strong sense of pacing and knows exactly how audio supports narrative, tension, and player immersion.\nHe’s collaborative, open to feedback, fast when needed, and detail-oriented when it counts. If you need someone to bring your game world to life through sound, Valentyn is that person",
+      "avatar": "https://media.licdn.com/dms/image/v2/D4D03AQFBCmS1mpsbig/profile-displayphoto-scale_400_400/B4DZzSxRO4I4Ak-/0/1773062661020?e=1785369600&v=beta&t=NQux2BRT9ZrmaOaXOx99s_KDBzMNb8r2NI84hQHJZCw",
+      "hidden": false
+    }
+  ]
 }
