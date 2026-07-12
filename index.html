@@ -79,6 +79,28 @@
               <h3 class="best-works__subhead best-works__subhead--tools" aria-label="Tools"></h3>
               <div class="best-works__row best-works__row--tools"></div>
             </div>
+            <section class="home-recommendations home-recommendations--pre-puzzle" id="home-recommendations" hidden aria-label="Recommendations">
+              <h2 class="home-recommendations__heading best-works__subhead"></h2>
+              <div class="home-recommendations__carousel">
+                <button type="button" class="best-works__carousel-arrow best-works__carousel-arrow--prev home-recommendations__arrow home-recommendations__arrow--prev" hidden aria-label="Previous recommendation">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="home-recommendations__stage">
+                  <article class="home-recommendations__card">
+                    <img class="home-recommendations__avatar" alt="" width="96" height="96" decoding="async" hidden />
+                    <div class="home-recommendations__name-wrap">
+                      <p class="home-recommendations__name"></p>
+                    </div>
+                    <p class="home-recommendations__meta"></p>
+                    <p class="home-recommendations__year"></p>
+                    <blockquote class="home-recommendations__quote"></blockquote>
+                  </article>
+                </div>
+                <button type="button" class="best-works__carousel-arrow best-works__carousel-arrow--next home-recommendations__arrow home-recommendations__arrow--next" hidden aria-label="Next recommendation">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </section>
           </div>
         </section>
 

@@ -170,13 +170,25 @@
 .admin-check input { width: 16px; height: 16px; }
 
 /* ---------- app layout ---------- */
+/* Site styles.css sets body { display:flex; flex-direction:column } and
+   main { max-width:720px }. Keep those overrides scoped to the admin shell. */
+.admin-body.admin-body--app {
+  width: 100%;
+  max-width: none;
+  align-items: stretch;
+}
+
 .admin-app {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 0;
-  min-height: calc(100vh - var(--header-h));
-  max-width: min(1420px, 100%);
+  width: 100%;
+  max-width: min(1500px, 100%);
   margin-inline: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: calc(100vh - var(--header-h));
+  min-height: calc(100dvh - var(--header-h));
 }
 .admin-collections {
   border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -217,12 +229,13 @@
   vertical-align: middle;
 }
 
+main.admin-editor,
 .admin-editor {
-  /* Override the global `main { max-width: 720px }` from styles.css; the
-     .admin-app wrapper above centers the whole workspace (sidebar + editor)
-     at ~1420px so the editor column matches the site's project-page width. */
-  max-width: none;
-  margin: 0;
+  /* Beat site `main { max-width: 720px; margin: 0 auto }` from styles.css */
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  min-width: 0;
   padding: 1.5rem var(--admin-pad) 6rem;
   overflow: auto;
 }

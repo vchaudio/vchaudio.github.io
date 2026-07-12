@@ -1,0 +1,13 @@
+{
+  "hidden": false,
+  "heading": "Recommendations",
+  "hideHeading": false,
+  "offsetTop": "1.25rem",
+  "offsetBottom": "1.5rem",
+  "autoplayMinSec": 5,
+  "autoplayMaxSec": 10,
+  "quoteFontSize": "0.9rem",
+  "animMs": 350,
+  "quotePreviewChars": 280,
+  "items": []
+}

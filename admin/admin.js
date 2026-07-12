@@ -11,7 +11,8 @@
     { id: "projects", label: "Projects", file: "data/projects.json" },
     { id: "videos", label: "Videos", file: "data/videos.json" },
     { id: "resume", label: "Resume", file: "data/resume.json" },
-    { id: "studio", label: "Studio", file: "data/studio.json" }
+    { id: "studio", label: "Studio", file: "data/studio.json" },
+    { id: "recommendations", label: "Recommendations", file: "data/recommendations.json" }
   ];
 
   /* Preset social icons (24x24 viewBox, single fill path — matches the site style). */
@@ -384,6 +385,7 @@
     else if (id === "videos") renderVideosEditor(root);
     else if (id === "resume") renderResumeEditor(root);
     else if (id === "studio") renderStudioEditor(root);
+    else if (id === "recommendations") renderRecommendationsEditor(root);
   }
 
   function saveHeader(root, onSave) {
@@ -1520,6 +1522,153 @@
       addLabel: "+ Add gear card",
       makeNew: function () { return { title: "New card", wide: false, type: "deflist", items: [] }; }
     })));
+  }
+
+  /* ============================== Recommendations editor ============================== */
+  function renderRecommendationsEditor(root) {
+    saveHeader(root, saveCurrentCollection);
+    var data = getFile().obj || (getFile().obj = {});
+    if (!Array.isArray(data.items)) data.items = [];
+    var arr = data.items;
+    var list = el("div", { class: "admin-items" });
+    var detail = el("div", {});
+
+    function dirty() { markDirty("recommendations"); }
+
+    function renderLists() {
+      clear(list);
+      arr.forEach(function (it, i) {
+        var row = el("div", { class: "admin-item-row" + (state.selectedObj === it ? " is-active" : "") + (it.hidden ? " is-hidden" : "") }, [
+          el("div", { class: "admin-item-row__label" }, [
+            document.createTextNode(it.name || "(unnamed)"),
+            it.hidden ? el("span", { class: "admin-item-row__badge", text: "hidden" }) : null,
+            el("small", { text: [it.role, it.company, it.year].filter(Boolean).join(" · ") })
+          ]),
+          el("div", { class: "admin-item-row__btns" }, [
+            el("button", { type: "button", class: "admin-btn admin-btn--small", text: "↑", title: "Move up" }),
+            el("button", { type: "button", class: "admin-btn admin-btn--small", text: "↓", title: "Move down" }),
+            el("button", { type: "button", class: "admin-btn admin-btn--small", text: it.hidden ? "Show" : "Hide", title: it.hidden ? "Show on the site" : "Hide from the site (without deleting)" }),
+            el("button", { type: "button", class: "admin-btn admin-btn--small admin-btn--danger", text: "✕", title: "Delete" })
+          ])
+        ]);
+        var btns = row.querySelectorAll("button");
+        btns[0].onclick = function () {
+          if (i > 0) { var t = arr[i - 1]; arr[i - 1] = arr[i]; arr[i] = t; dirty(); renderLists(); }
+        };
+        btns[1].onclick = function () {
+          if (i < arr.length - 1) { var t = arr[i + 1]; arr[i + 1] = arr[i]; arr[i] = t; dirty(); renderLists(); }
+        };
+        btns[2].onclick = function () { it.hidden = !it.hidden; dirty(); renderLists(); };
+        btns[3].onclick = function () {
+          if (confirm("Delete this recommendation?")) {
+            if (state.selectedObj === it) state.selectedObj = null;
+            arr.splice(i, 1);
+            dirty();
+            renderLists();
+            renderDetail();
+          }
+        };
+        row.querySelector(".admin-item-row__label").onclick = function () {
+          state.selectedObj = it;
+          renderLists();
+          renderDetail();
+        };
+        list.appendChild(row);
+      });
+    }
+
+    function renderDetail() {
+      clear(detail);
+      var it = state.selectedObj;
+      if (!it || arr.indexOf(it) < 0) {
+        detail.appendChild(el("div", { class: "admin-empty", text: "Select a recommendation above to edit, or add a new one." }));
+        return;
+      }
+      var card = el("div", { class: "admin-obj-card" }, [
+        el("div", { class: "admin-obj-card__head" }, [el("strong", { text: it.name || "Recommendation" })])
+      ]);
+      card.appendChild(fieldImage("Avatar", it.avatar, function (v) { it.avatar = v; dirty(); }));
+      card.appendChild(fieldText("Name", it.name, function (v) { it.name = v; dirty(); renderLists(); }, { full: true }));
+      card.appendChild(fieldBool("Make name a clickable link (profile / LinkedIn / site)", it.nameLink, function (v) {
+        it.nameLink = v;
+        dirty();
+        renderDetail();
+      }));
+      if (it.nameLink) {
+        card.appendChild(fieldText("Name link URL", it.nameHref, function (v) { it.nameHref = v; dirty(); }, { type: "url", full: true }));
+      }
+      card.appendChild(fieldText("Role / title", it.role, function (v) { it.role = v; dirty(); renderLists(); }, { full: true }));
+      card.appendChild(fieldText("Company", it.company, function (v) { it.company = v; dirty(); renderLists(); }, { full: true }));
+      card.appendChild(fieldText("Year", it.year, function (v) { it.year = v; dirty(); renderLists(); }));
+      card.appendChild(fieldTextarea("Quote / recommendation", it.quote, function (v) { it.quote = v; dirty(); }));
+      card.appendChild(fieldBool("Hide this recommendation", it.hidden, function (v) { it.hidden = v; dirty(); renderLists(); }));
+      detail.appendChild(card);
+    }
+
+    root.appendChild(section("Section settings", [
+      fieldBool("Hide entire Recommendations block on the homepage", data.hidden, function (v) { data.hidden = v; dirty(); }),
+      fieldBool("Hide heading label", data.hideHeading, function (v) { data.hideHeading = v; dirty(); }),
+      fieldText("Heading", data.heading, function (v) { data.heading = v; dirty(); }, { full: true }),
+      fieldText("Offset from Tools tiles (CSS, e.g. 1.25rem or 24px)", data.offsetTop || "1.25rem", function (v) {
+        data.offsetTop = v;
+        dirty();
+      }),
+      fieldText("Offset from footer (CSS, e.g. 1.5rem or 24px)", data.offsetBottom || "1.5rem", function (v) {
+        data.offsetBottom = v;
+        dirty();
+      }),
+      fieldNumber("Autoplay min (seconds)", data.autoplayMinSec, function (v) {
+        data.autoplayMinSec = v == null || v === "" ? 5 : v;
+        dirty();
+      }),
+      fieldNumber("Autoplay max (seconds)", data.autoplayMaxSec, function (v) {
+        data.autoplayMaxSec = v == null || v === "" ? 10 : v;
+        dirty();
+      }),
+      fieldNumber("Slide animation (ms)", data.animMs, function (v) {
+        data.animMs = v == null || v === "" ? 350 : v;
+        dirty();
+      }),
+      fieldText("Quote font size (CSS, e.g. 0.9rem)", data.quoteFontSize || "0.9rem", function (v) {
+        data.quoteFontSize = v;
+        dirty();
+      }),
+      fieldNumber("Quote preview length (characters)", data.quotePreviewChars != null ? data.quotePreviewChars : data.quotePreviewWords, function (v) {
+        data.quotePreviewChars = v == null || v === "" ? 280 : v;
+        if (data.quotePreviewWords != null) delete data.quotePreviewWords;
+        dirty();
+      })
+    ]));
+    root.appendChild(el("p", {
+      class: "admin-empty",
+      text: "Visible recommendations rotate at a random interval between min and max. Longer quotes collapse after N characters with gray “read more” / “show less”. Arrows appear when there are 2+ visible items."
+    }));
+
+    renderLists();
+    renderDetail();
+
+    root.appendChild(wrapSection("Recommendations", el("div", {}, [
+      list,
+      makeAddButton("+ Add recommendation", function () {
+        var n = {
+          name: "New person",
+          nameLink: false,
+          nameHref: "",
+          role: "",
+          company: "",
+          year: "",
+          quote: "",
+          avatar: "",
+          hidden: false
+        };
+        arr.push(n);
+        state.selectedObj = n;
+        dirty();
+        renderLists();
+        renderDetail();
+      })
+    ])));
+    root.appendChild(wrapSection("Edit selected", detail));
   }
 
   function gearItemsEditor(g, dirty) {

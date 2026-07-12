@@ -2,7 +2,7 @@
   "use strict";
 
   var DATA_DIR = "data/";
-  var DATA_FILES = ["site", "projects", "videos", "resume", "studio"];
+  var DATA_FILES = ["site", "projects", "videos", "resume", "studio", "recommendations"];
 
   /* ---------- small DOM helpers ---------- */
   function h(tag, attrs, children) {
@@ -81,7 +81,8 @@
           projects: cached,
           videos: null,
           resume: null,
-          studio: null
+          studio: null,
+          recommendations: null
         });
       }
       var early = window.__VCH_PROJECTS_FETCH__;
@@ -98,7 +99,7 @@
             return r.json();
           });
       return projectsPromise.then(function (projects) {
-        return { site: null, projects: projects, videos: null, resume: null, studio: null };
+        return { site: null, projects: projects, videos: null, resume: null, studio: null, recommendations: null };
       });
     }
 
@@ -116,6 +117,7 @@
         videos: results[2],
         resume: results[3],
         studio: results[4],
+        recommendations: results[5],
       };
     });
   }
@@ -246,6 +248,9 @@
 
     /* studio */
     renderStudio(data.studio);
+
+    /* recommendations (above footer) */
+    renderRecommendations(data.recommendations);
 
     /* footer social */
     renderFooter(site);
@@ -706,6 +711,319 @@
         gearGrid.appendChild(art);
       });
     }
+  }
+
+  /* ---------- recommendations (homepage, above footer) ---------- */
+  function renderRecommendations(data) {
+    var root = document.getElementById("home-recommendations");
+    if (!root) return;
+
+    var cfg = data || {};
+    var items = (cfg.items || []).filter(function (it) { return it && !it.hidden; });
+    if (cfg.hidden || !items.length) {
+      root.hidden = true;
+      root.setAttribute("aria-hidden", "true");
+      return;
+    }
+
+    root.hidden = false;
+    root.removeAttribute("aria-hidden");
+
+    var offsetTop = (cfg.offsetTop && String(cfg.offsetTop).trim()) || "1.25rem";
+    var offsetBottom = (cfg.offsetBottom && String(cfg.offsetBottom).trim()) || "1.5rem";
+    root.style.setProperty("--rec-offset-top", offsetTop);
+    root.style.setProperty("--rec-offset-bottom", offsetBottom);
+
+    var heading = root.querySelector(".home-recommendations__heading");
+    if (heading) {
+      if (cfg.hideHeading) {
+        heading.hidden = true;
+        heading.textContent = "";
+      } else {
+        heading.hidden = false;
+        heading.textContent = cfg.heading || "Recommendations";
+      }
+    }
+
+    var stage = root.querySelector(".home-recommendations__stage");
+    var card = root.querySelector(".home-recommendations__card");
+    var avatar = root.querySelector(".home-recommendations__avatar");
+    var nameWrap = root.querySelector(".home-recommendations__name-wrap");
+    var metaEl = root.querySelector(".home-recommendations__meta");
+    var yearEl = root.querySelector(".home-recommendations__year");
+    var quoteEl = root.querySelector(".home-recommendations__quote");
+    var carousel = root.querySelector(".home-recommendations__carousel");
+    if (!stage || !card || !avatar || !nameWrap || !metaEl || !yearEl || !quoteEl || !carousel) return;
+
+    var minSec = Number(cfg.autoplayMinSec);
+    var maxSec = Number(cfg.autoplayMaxSec);
+    if (!(minSec > 0)) minSec = 5;
+    if (!(maxSec > 0)) maxSec = 10;
+    if (maxSec < minSec) {
+      var swap = minSec;
+      minSec = maxSec;
+      maxSec = swap;
+    }
+
+    var animMs = Number(cfg.animMs);
+    if (!(animMs > 0)) animMs = 350;
+    animMs = Math.max(120, Math.min(2000, animMs));
+    carousel.style.setProperty("--rec-anim-ms", animMs + "ms");
+
+    var quoteSize = (cfg.quoteFontSize && String(cfg.quoteFontSize).trim()) || "0.9rem";
+    root.style.setProperty("--rec-quote-size", quoteSize);
+
+    var previewChars = Number(cfg.quotePreviewChars);
+    if (!(previewChars > 0) && Number(cfg.quotePreviewWords) > 0) {
+      /* Migrate older word-based setting to a character budget. */
+      previewChars = Number(cfg.quotePreviewWords);
+    }
+    if (!(previewChars > 0)) previewChars = 280;
+
+    var index = Math.floor(Math.random() * items.length);
+    var timer = null;
+    var transitioning = false;
+    var quoteExpanded = false;
+    var arrowPreviewY = null;
+    var reduceMotion = false;
+    try {
+      reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e0) {}
+
+    function metaLine(it) {
+      var parts = [];
+      if (it.role) parts.push(it.role);
+      if (it.company) parts.push(it.company);
+      return parts.join(" · ");
+    }
+
+    function syncPanelHeight() {
+      var panel = root.closest(".home-panel");
+      if (!panel || panel.classList.contains("is-hidden")) return;
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    }
+
+    /* Center arrows on the quote; when expanded, keep the character-preview mid-line. */
+    function syncArrowPosition() {
+      if (!carousel || !quoteEl || quoteEl.hidden) {
+        arrowPreviewY = null;
+        if (carousel) carousel.style.removeProperty("--rec-arrow-y");
+        return;
+      }
+      if (quoteExpanded && arrowPreviewY != null) {
+        carousel.style.setProperty("--rec-arrow-y", arrowPreviewY + "px");
+        return;
+      }
+      var cRect = carousel.getBoundingClientRect();
+      var qRect = quoteEl.getBoundingClientRect();
+      if (!qRect.height) return;
+      var y = qRect.top - cRect.top + qRect.height / 2;
+      arrowPreviewY = y;
+      carousel.style.setProperty("--rec-arrow-y", y + "px");
+    }
+
+    function afterQuoteLayout(followScroll) {
+      syncPanelHeight();
+      syncArrowPosition();
+      if (!followScroll || !quoteEl) return;
+      var rect = quoteEl.getBoundingClientRect();
+      var pad = 40;
+      var overflow = rect.bottom - (window.innerHeight - pad);
+      if (overflow > 8) {
+        window.scrollBy({
+          top: overflow,
+          behavior: reduceMotion ? "auto" : "smooth"
+        });
+      }
+    }
+
+    function paintQuote(it, expanded, followScroll) {
+      clear(quoteEl);
+      var full = String(it.quote || "").trim();
+      if (!full) {
+        quoteEl.hidden = true;
+        afterQuoteLayout(false);
+        return;
+      }
+      quoteEl.hidden = false;
+      var needsClamp = full.length > previewChars;
+
+      if (expanded && needsClamp) {
+        quoteEl.appendChild(document.createTextNode(full + " "));
+        var less = h("button", {
+          type: "button",
+          class: "home-recommendations__more",
+          text: "show less"
+        });
+        less.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          quoteExpanded = false;
+          paintQuote(it, false, false);
+          scheduleAutoplay();
+        });
+        quoteEl.appendChild(less);
+        afterQuoteLayout(!!followScroll);
+        return;
+      }
+
+      if (!needsClamp) {
+        quoteEl.appendChild(document.createTextNode(full));
+        afterQuoteLayout(false);
+        return;
+      }
+
+      var clipped = full.slice(0, previewChars).replace(/\s+\S*$/, "");
+      if (!clipped) clipped = full.slice(0, previewChars);
+      quoteEl.appendChild(document.createTextNode(clipped + "… "));
+      var more = h("button", {
+        type: "button",
+        class: "home-recommendations__more",
+        text: "read more"
+      });
+      more.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        quoteExpanded = true;
+        paintQuote(it, true, true);
+        clearTimer();
+      });
+      quoteEl.appendChild(more);
+      afterQuoteLayout(false);
+    }
+
+    function paintName(it) {
+      clear(nameWrap);
+      var label = it.name || "";
+      var href = (it.nameHref && String(it.nameHref).trim()) || "";
+      var linkable = !!it.nameLink && !!href;
+      if (linkable) {
+        nameWrap.appendChild(h("a", {
+          class: "home-recommendations__name home-recommendations__name--link",
+          href: href,
+          rel: "noopener noreferrer",
+          target: "_blank",
+          text: label
+        }));
+      } else {
+        nameWrap.appendChild(h("p", { class: "home-recommendations__name", text: label }));
+      }
+    }
+
+    function paint(it) {
+      quoteExpanded = false;
+      arrowPreviewY = null;
+      if (it.avatar) {
+        avatar.hidden = false;
+        avatar.setAttribute("src", it.avatar);
+        avatar.setAttribute("alt", it.name || "");
+      } else {
+        avatar.removeAttribute("src");
+        avatar.hidden = true;
+        avatar.setAttribute("alt", "");
+      }
+      paintName(it);
+      metaEl.textContent = metaLine(it);
+      metaEl.hidden = !metaEl.textContent;
+      yearEl.textContent = it.year || "";
+      yearEl.hidden = !yearEl.textContent;
+      paintQuote(it, false, false);
+    }
+
+    function pickNext(dir) {
+      if (items.length < 2) return index;
+      if (dir === 1 || dir === -1) {
+        return (index + dir + items.length) % items.length;
+      }
+      if (items.length === 2) return index === 0 ? 1 : 0;
+      var next = index;
+      while (next === index) next = Math.floor(Math.random() * items.length);
+      return next;
+    }
+
+    function clearTimer() {
+      if (timer) {
+        window.clearTimeout(timer);
+        timer = null;
+      }
+    }
+
+    function scheduleAutoplay() {
+      clearTimer();
+      if (items.length < 2 || reduceMotion || quoteExpanded) return;
+      var span = Math.max(0, maxSec - minSec);
+      var delay = (minSec + Math.random() * span) * 1000;
+      timer = window.setTimeout(function () {
+        showAt(pickNext(0), 1);
+      }, delay);
+    }
+
+    function showAt(nextIndex, dir) {
+      if (transitioning || nextIndex === index) {
+        scheduleAutoplay();
+        return;
+      }
+      var nextItem = items[nextIndex];
+      if (!nextItem) return;
+
+      if (reduceMotion) {
+        index = nextIndex;
+        paint(nextItem);
+        scheduleAutoplay();
+        return;
+      }
+
+      transitioning = true;
+      clearTimer();
+      carousel.classList.add("is-animating");
+      card.classList.remove("is-enter", "is-enter-from-left", "is-enter-active");
+      card.classList.add(dir < 0 ? "is-leave-right" : "is-leave-left");
+
+      window.setTimeout(function () {
+        index = nextIndex;
+        paint(nextItem);
+        card.classList.remove("is-leave-left", "is-leave-right");
+        card.classList.add("is-enter");
+        if (dir < 0) card.classList.add("is-enter-from-left");
+        void card.offsetWidth;
+        card.classList.add("is-enter-active");
+        window.setTimeout(function () {
+          card.classList.remove("is-enter", "is-enter-from-left", "is-enter-active");
+          carousel.classList.remove("is-animating");
+          transitioning = false;
+          syncPanelHeight();
+          syncArrowPosition();
+          scheduleAutoplay();
+        }, animMs);
+      }, animMs);
+    }
+
+    /* Arrows — same chevron style as project carousels; only when 2+ items. */
+    var prev = carousel.querySelector(".home-recommendations__arrow--prev");
+    var next = carousel.querySelector(".home-recommendations__arrow--next");
+    var showArrows = items.length > 1;
+    if (prev) {
+      prev.hidden = !showArrows;
+      prev.onclick = function () {
+        if (!showArrows || transitioning) return;
+        showAt(pickNext(-1), -1);
+      };
+    }
+    if (next) {
+      next.hidden = !showArrows;
+      next.onclick = function () {
+        if (!showArrows || transitioning) return;
+        showAt(pickNext(1), 1);
+      };
+    }
+
+    paint(items[index]);
+    scheduleAutoplay();
+
+    document.addEventListener("visibilitychange", function onVis() {
+      if (document.hidden) clearTimer();
+      else scheduleAutoplay();
+    });
   }
 
   function renderFooter(site) {

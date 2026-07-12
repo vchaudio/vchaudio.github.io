@@ -438,14 +438,24 @@
     function syncToolsPuzzleState() {
       var wrap = panelMain ? panelMain.querySelector(".best-works-wrap") : null;
       var tools = panelMain ? panelMain.querySelector(".best-works-tools") : null;
-      if (!tools) return;
-      tools.classList.remove("best-works-tools--pre-puzzle", "best-works-tools--puzzle");
+      var recs = panelMain ? panelMain.querySelector("#home-recommendations") : null;
+      if (tools) {
+        tools.classList.remove("best-works-tools--pre-puzzle", "best-works-tools--puzzle");
+      }
+      if (recs) {
+        recs.classList.remove(
+          "home-recommendations--pre-puzzle",
+          "home-recommendations--puzzle"
+        );
+      }
       if (!wrap || reduceMotion) return;
       if (wrap.classList.contains("best-works-wrap--pre-puzzle")) {
-        tools.classList.add("best-works-tools--pre-puzzle");
+        if (tools) tools.classList.add("best-works-tools--pre-puzzle");
+        if (recs) recs.classList.add("home-recommendations--pre-puzzle");
       }
       if (wrap.classList.contains("best-works-wrap--puzzle")) {
-        tools.classList.add("best-works-tools--puzzle");
+        if (tools) tools.classList.add("best-works-tools--puzzle");
+        if (recs) recs.classList.add("home-recommendations--puzzle");
       }
     }
 

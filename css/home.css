@@ -172,6 +172,18 @@ main.home-main {
     animation: none;
   }
 
+  .home-recommendations--pre-puzzle .home-recommendations__heading,
+  .home-recommendations--pre-puzzle .home-recommendations__carousel {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .home-recommendations--puzzle .home-recommendations__heading,
+  .home-recommendations--puzzle .home-recommendations__carousel {
+    animation: none;
+  }
+
   .best-works__videos-extra.is-open:not(.is-hiding) .video-thumb-wrap,
   .best-works__videos-extra.is-hiding .video-thumb-wrap {
     animation: none;
@@ -460,6 +472,248 @@ main.home-main {
 
 .home-bottom[hidden] {
   display: none;
+}
+
+/* Recommendations — above footer, under Tools */
+.home-recommendations {
+  width: min(720px, 100%);
+  margin: var(--rec-offset-top, 1.25rem) auto var(--rec-offset-bottom, 1.5rem);
+  padding: 0 0.25rem;
+  text-align: center;
+}
+
+.home-recommendations[hidden] {
+  display: none !important;
+}
+
+.home-recommendations__heading.best-works__subhead {
+  margin: 0 0 0.85rem;
+}
+
+/* Same float fade as videos: hidden until puzzle replay on load / back from resume */
+.home-recommendations--pre-puzzle .home-recommendations__heading,
+.home-recommendations--pre-puzzle .home-recommendations__carousel {
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(1.5px);
+}
+
+.home-recommendations--puzzle .home-recommendations__heading {
+  animation: best-works-puzzle-float 1.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 1.08s;
+}
+
+.home-recommendations--puzzle .home-recommendations__carousel {
+  animation: best-works-puzzle-float 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 1.16s;
+  will-change: transform, opacity;
+}
+
+.home-recommendations__carousel {
+  position: relative;
+  --work-row-w: min(560px, 100%);
+  --bw-arrow-w: 1.75rem;
+  --rec-anim-ms: 350ms;
+  --rec-arrow-y: 50%;
+}
+
+.home-recommendations__stage {
+  max-width: var(--work-row-w);
+  margin-inline: auto;
+  overflow: visible;
+  min-height: 10rem;
+}
+
+.home-recommendations__carousel.is-animating .home-recommendations__stage {
+  overflow: hidden;
+}
+
+.home-recommendations__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem 0.35rem;
+  transition:
+    opacity var(--rec-anim-ms) var(--ease-out),
+    transform var(--rec-anim-ms) var(--ease-out);
+}
+
+.home-recommendations__card.is-leave-left {
+  opacity: 0;
+  transform: translateX(-18px);
+}
+
+.home-recommendations__card.is-leave-right {
+  opacity: 0;
+  transform: translateX(18px);
+}
+
+.home-recommendations__card.is-enter {
+  opacity: 0;
+  transform: translateX(18px);
+}
+
+.home-recommendations__card.is-enter.is-enter-from-left {
+  transform: translateX(-18px);
+}
+
+.home-recommendations__card.is-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity var(--rec-anim-ms) var(--ease-out),
+    transform var(--rec-anim-ms) var(--ease-out);
+}
+
+.home-recommendations__avatar {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 0 0.45rem;
+  border: 1px solid rgba(240, 215, 140, 0.28);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+.home-recommendations__avatar[hidden] {
+  display: none !important;
+}
+
+.home-recommendations__name-wrap {
+  margin: 0;
+}
+
+.home-recommendations__name {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.4vw, 1.22rem);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text, #f5efe8);
+}
+
+a.home-recommendations__name--link {
+  color: var(--text, #f5efe8);
+  text-decoration: none;
+  transition: color 0.2s var(--ease-out);
+}
+
+a.home-recommendations__name--link:hover,
+a.home-recommendations__name--link:focus-visible {
+  color: #f0d78c;
+  text-decoration: underline;
+  outline: none;
+}
+
+.home-recommendations__meta {
+  margin: 0;
+  font-size: clamp(0.82rem, 1.9vw, 0.95rem);
+  font-weight: 500;
+  line-height: 1.35;
+  color: #c4b6a4;
+}
+
+.home-recommendations__year {
+  margin: 0.1rem 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #9c948a);
+}
+
+.home-recommendations__quote {
+  margin: 0;
+  max-width: 36rem;
+  font-size: var(--rec-quote-size, 0.9rem);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.55;
+  color: rgba(245, 239, 232, 0.88);
+  text-align: center;
+}
+
+.home-recommendations__more {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  font-style: normal;
+  color: var(--text-muted, #9c948a);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.home-recommendations__more:hover,
+.home-recommendations__more:focus-visible {
+  color: #c4b6a4;
+  text-decoration: underline;
+  outline: none;
+}
+
+.home-recommendations__arrow.best-works__carousel-arrow {
+  top: var(--rec-arrow-y);
+  bottom: auto;
+  width: var(--bw-arrow-w);
+  height: auto;
+  transform: translateY(-50%);
+  color: rgba(196, 192, 184, 0.55);
+  opacity: 0.7;
+  animation: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.home-recommendations__arrow.best-works__carousel-arrow:hover,
+.home-recommendations__arrow.best-works__carousel-arrow:focus-visible {
+  opacity: 0.95;
+  color: rgba(210, 206, 198, 0.72);
+  transform: translateY(-50%);
+  animation: none;
+}
+
+.home-recommendations__arrow.best-works__carousel-arrow:focus-visible {
+  outline-color: rgba(196, 192, 184, 0.45);
+}
+
+.home-recommendations__arrow.best-works__carousel-arrow svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  filter: none;
+}
+
+.home-recommendations__arrow--prev {
+  left: max(0px, calc(50% - var(--work-row-w) / 2 - var(--bw-arrow-w)));
+}
+
+.home-recommendations__arrow--next {
+  right: max(0px, calc(50% - var(--work-row-w) / 2 - var(--bw-arrow-w)));
+}
+
+.home-recommendations__arrow[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .home-recommendations {
+    width: min(100%, calc(100% - 1.5rem));
+  }
+
+  .home-recommendations__carousel {
+    --bw-arrow-w: 1.5rem;
+  }
+
+  .home-recommendations__arrow.best-works__carousel-arrow svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-recommendations__card {
+    transition: none;
+  }
 }
 
 /* Site footer — LinkedIn, Mail above copyright */
