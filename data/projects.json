@@ -14,7 +14,7 @@
       "blocks": [
         {
           "type": "banner",
-          "src": "assets/banner-last-flag-hq.png",
+          "src": "assets/banner-last-flag-hq.jpg",
           "w": 1024,
           "h": 576
         },
@@ -159,7 +159,7 @@
       "blocks": [
         {
           "type": "banner",
-          "src": "assets/banner-moonray-battle-lands-hq.png",
+          "src": "assets/banner-moonray-battle-lands-hq.jpg",
           "w": 1024,
           "h": 576
         },
@@ -320,7 +320,7 @@
       "blocks": [
         {
           "type": "banner",
-          "src": "assets/banner-tajikistan-hq.png",
+          "src": "assets/banner-tajikistan-hq.jpg",
           "w": 1536,
           "h": 1024
         },
