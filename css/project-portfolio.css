@@ -546,6 +546,22 @@ main.project-page--hero-glow .project-about--gameplay-intro {
   aspect-ratio: 16 / 9;
 }
 
+/* Hover zoom on project-page video thumbnails — mirrors the homepage best-works
+   zoom (scale 1 -> 1.02). The .video-thumb button already clips
+   (overflow: hidden), so the scaled image stays inside the tile and the
+   play-button overlay (::after) stays put. transform-origin: bottom center
+   grows the image upward, matching the button's hover lift. */
+.project-portfolio-block .video-thumb img {
+  transform: scale(1);
+  transform-origin: bottom center;
+  will-change: transform;
+  transition: transform 0.3s var(--ease-out);
+}
+.project-portfolio-block .video-thumb:hover img,
+.project-portfolio-block .video-thumb:focus-visible img {
+  transform: scale(1.02);
+}
+
 @supports not (container-type: inline-size) {
   .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb,
   .project-portfolio-block .video-scroller__strip--grid-2 > .video-thumb-wrap {
