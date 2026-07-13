@@ -2151,26 +2151,28 @@ a.job-card.job-card--to-project:focus-visible {
 
 .page-overview-banner__img {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 3px);
   object-fit: cover;
   object-position: center;
   display: block;
 }
 
-/* Bottom ~35% of banner: fade into page (transparent only — no dark wash on the image) */
+/* Bottom ~35% of banner: fade into page (transparent only — no dark wash on the image).
+   Overlay fills the whole banner box so its bottom edge is the same box edge the
+   image fills. A fixed 4px solid var(--bg) tail matches the image's 4px mask fade,
+   so the bottom 4px is fully var(--bg) with no sub-pixel image leak on mid-size
+   viewports where aspect-ratio yields a fractional banner height. */
 .page-overview-banner::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: calc(35% + 2px);
+  inset: 0;
   z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     to bottom,
     transparent 0%,
-    transparent 28%,
+    transparent 74%,
+    var(--bg) calc(100% - 4px),
     var(--bg) 100%
   );
 }
