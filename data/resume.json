@@ -20,12 +20,12 @@
       "type": "studio",
       "title": "VCHAudio — Individual Entrepreneur",
       "meta": "Sep 2017 — Oct 2021 · Remote, contracts, freelance",
-      "description": "Operated an independent music studio, delivering end-to-end audio solutions for individual contract projects across TV, live shows, advertising, and the game industry.",
+      "description": "Operated an independent music studio, delivering end-to-end audio solutions for individual contract projects across TV, live shows, advertising, and the game industry",
       "highlights": [
         "Music Composing",
         "Foley, Sound Design",
         "Composing, arranging, and producing songs",
-        "Mixing and mastering own and contract projects, TV series, shows, games, etc."
+        "Mixing and mastering own and contract projects, TV series, shows, games, etc"
       ],
       "awards": [
         {
@@ -48,13 +48,11 @@
       "meta": "July 2025 — July 2026 · USA, remote",
       "description": "Senior Sound Designer → Lead Audio Designer | Technical Sound Designer ",
       "highlights": [
-        "Designed and implemented gameplay audio for heroes, abilities, weapons, UI, finishers, and gameplay feedback using Wwise and Unreal Engine 5.",
-        "Created sound design for 10+ hero abilities, 20+ finishers, 3 weapons, 11 MVP screens, and gameplay UI, delivering immersive player feedback across multiple gameplay systems.",
-        "Composed 11 adaptive musical stingers for MVP screens, designed to match each hero's visual identity and integrate seamlessly with gameplay presentation.",
-        "Implemented gameplay audio using Wwise Events, RTPCs, States, Switches, SoundBanks, HDR mixing, audio buses, and Blueprint-driven systems.",
-        "Developed technical audio solutions for dynamic music playback, HDR mixing, gameplay events, weapons, and character abilities.",
-        "Produced sound design and mixing for four marketing videos, including the project's official gameplay trailer.",
-        "Served as the primary in-house Audio Designer after the department restructuring, supporting ongoing development and maintaining audio quality across gameplay systems."
+        "Designed and implemented gameplay audio for heroes, abilities, weapons, UI, finishers, and gameplay feedback using Wwise and Unreal Engine 5",
+        "Created sound design for 10+ hero abilities, 20+ finishers, 3 weapons, 11 MVP screens, gameplay UI, and four marketing videos, including the project's official gameplay trailer",
+        "Composed and implemented 11 adaptive musical stingers alongside sound design for MVP screens, reinforcing each hero's visual identity",
+        "Developed Blueprint- and Wwise-based technical solutions using RTPCs, States, Switches, dynamic mixing, and gameplay logic to streamline audio implementation",
+        "Served as the primary in-house Audio Designer following department restructuring, supporting ongoing development and maintaining audio quality across gameplay systems"
       ],
       "link": "project.html?slug=last-flag",
       "aria": "Argentics / Night Street Games — Last Flag — open project overview",
@@ -67,11 +65,11 @@
       "meta": "Nov 2021 — June 2025 · USA, remote",
       "description": "Principal Sound Designer | Audio Producer | Technical Sound Designer | Audio Developer | Music Composer",
       "highlights": [
-        "Sole Audio Designer for a 30-person development team, responsible for the project's complete audio vision, production, technical implementation, optimization, and voice direction.",
-        "Owned the complete audio production pipeline, delivering 1,000+ sound assets for melee combat, ranged weapons, UI, movement, voice reactions, gameplay feedback, interactive music, and marketing content across PC, Android, PlayStation 5, and iOS.",
-        "Designed and implemented 10+ gameplay audio systems and the project's audio architecture using Wwise and Unreal Engine 5, including RTPCs, States, Switches, Events, SoundBanks, HDR mixing, audio buses, profiling, memory optimization, and Blueprint-driven audio behaviors.",
-        "Composed six adaptive music tracks and developed a Blueprint-driven interactive music system supporting multiple gameplay states and game modes. Produced sound design and music for 12 cinematic marketing videos.",
-        "Served as Principal Audio Designer, directing remote voice-over sessions with four professional voice actors while defining audio standards, workflows, documentation, naming conventions, and implementation guidelines."
+        "Sole Audio Designer for a 30-person development team, responsible for the project's complete audio vision, production, technical implementation, optimization, and voice direction",
+        "Owned the complete audio production pipeline, delivering 1,000+ sound assets for melee combat, ranged weapons, UI, movement, voice reactions, gameplay feedback, interactive music, and marketing content across PC, Android, PlayStation 5, and iOS",
+        "Designed and implemented 10+ gameplay audio systems and the project's audio architecture using Wwise and Unreal Engine 5, including RTPCs, States, Switches, Events, SoundBanks, HDR mixing, audio buses, profiling, memory optimization, and Blueprint-driven audio behaviors",
+        "Composed six adaptive music tracks and developed a Blueprint-driven interactive music system supporting multiple gameplay states and game modes. Produced sound design and music for 12 cinematic marketing videos",
+        "Served as Principal Audio Designer, directing remote voice-over sessions with four professional voice actors while defining audio standards, workflows, documentation, naming conventions, and implementation guidelines"
       ],
       "link": "moonray-battle-lands.html",
       "aria": "Moonray PBC — Moonray: Battle Lands — open project overview",
@@ -83,10 +81,10 @@
       "meta": "Sep 2020 — Sep 2021 · Odesa, on-site part-time",
       "description": "Live Broadcast Audio Engineer",
       "highlights": [
-        "Operated live audio for weekly full-day television broadcasts, managing microphones, live mixing, and real-time audio quality throughout production.",
-        "Mixed live performances, television programs, hosts, and guest musicians in a fast-paced broadcast environment.",
-        "Resolved technical issues during live broadcasts, making rapid decisions to maintain uninterrupted on-air audio.",
-        "Occasionally operated live broadcasts independently, maintaining uninterrupted audio during full-day television productions."
+        "Operated live audio for weekly full-day television broadcasts, managing microphones, live mixing, and real-time audio quality throughout production",
+        "Mixed live performances, television programs, hosts, and guest musicians in a fast-paced broadcast environment",
+        "Resolved technical issues during live broadcasts, making rapid decisions to maintain uninterrupted on-air audio",
+        "Occasionally operated live broadcasts independently, maintaining uninterrupted audio during full-day television productions"
       ],
       "highlightsVisibility": "both"
     },
@@ -96,10 +94,10 @@
       "meta": "Jan 2019 — May 2021 · Kyiv, remote part-time contract",
       "description": "Audio Post Production Engineer | Sound Designer | Foley Artist",
       "highlights": [
-        "Owned the complete audio post-production pipeline for 10 broadcast episodes of the animated TV series Chortoviyki, delivering final masters for national television broadcast.",
-        "Created complete sound design, Foley, dialogue editing, mixing, mastering, and broadcast delivery for 22–25 minute episodes over a two-year production cycle.",
-        "Mixed and mastered final episodes to EBU R128 broadcast loudness standards for television delivery.",
-        "Established efficient REAPER-based post-production workflows to maintain consistent quality throughout a two-year production schedule."
+        "Owned the complete audio post-production pipeline for 10 broadcast episodes of the animated TV series Chortoviyki, delivering final masters for national television broadcast",
+        "Created complete sound design, Foley, dialogue editing, mixing, mastering, and broadcast delivery for 22–25 minute episodes over a two-year production cycle",
+        "Mixed and mastered final episodes to EBU R128 broadcast loudness standards for television delivery",
+        "Established efficient REAPER-based post-production workflows to maintain consistent quality throughout a two-year production schedule"
       ],
       "highlightsVisibility": "both"
     }
