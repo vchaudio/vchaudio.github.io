@@ -1324,12 +1324,16 @@
   }
 
   function projectVideoButton(v, res) {
-    var thumbSrc = v.thumb || ytThumb(v.id, res || "maxresdefault");
-    var attrs = { type: "button", class: "video-thumb", "data-youtube-id": v.id, "aria-label": "Play " + (v.heading || v.captionTitle || "") };
+    var useCustom = v.poster && v.thumb;
+    var thumbSrc = useCustom ? v.thumb : ytThumb(v.id, res || "maxresdefault");
+    var btnClass = "video-thumb";
+    if (useCustom) btnClass += " video-thumb--poster";
+    if (v.thumbClass) btnClass += " " + v.thumbClass;
+    var attrs = { type: "button", class: btnClass, "data-youtube-id": v.id, "aria-label": "Play " + (v.heading || v.captionTitle || "") };
     if (v.heading) attrs["data-lightbox-heading"] = v.heading;
     if (v.sub) attrs["data-lightbox-sub"] = v.sub;
     return h("button", attrs, [
-      h("img", { src: thumbSrc, alt: "", width: 1280, height: 720, loading: "lazy", decoding: "async" })
+      h("img", { src: thumbSrc, alt: "", width: v.thumbW || 1280, height: v.thumbH || 720, loading: "lazy", decoding: "async" })
     ]);
   }
 

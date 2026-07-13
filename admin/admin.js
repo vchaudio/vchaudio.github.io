@@ -1055,7 +1055,7 @@
     { label: "Hero", type: "hero", make: function () { return { type: "hero", title: "", platform: "", company: "", lead: "", steam: { label: "View on Steam", href: "" } }; } },
     { label: "About", type: "about", make: function () { return { type: "about", heading: "About", html: "" }; } },
     { label: "Responsibilities", type: "responsibilities", make: function () { return { type: "responsibilities", heading: "Responsibilities & Contributions", items: [] }; } },
-    { label: "Video (single)", type: "video-single", make: function () { return { type: "video-single", heading: "", intro: "", video: { id: "", heading: "", sub: "" }, captionTitle: "" }; } },
+      { label: "Video (single)", type: "video-single", make: function () { return { type: "video-single", heading: "", intro: "", video: { id: "", heading: "", sub: "", poster: false, thumb: null, thumbClass: "", thumbW: 1280, thumbH: 720 }, captionTitle: "" }; } },
     { label: "Showreel (2-up)", type: "video-showreel", make: function () { return { type: "video-showreel", heading: "ShowReels", videos: [] }; } },
     { label: "Video grid", type: "video-grid", make: function () { return { type: "video-grid", heading: "", date: "", rows: 2, noNav: true, videos: [] }; } },
     { label: "Releases / downloads (versioned)", type: "releases", make: function () { return { type: "releases", heading: "Download", open: true, wrapClass: "vm-xctrl-spoilers", lead: "", items: [] }; } },
@@ -1112,6 +1112,7 @@
       out.push(fieldText("Sub (lightbox)", b.video && b.video.sub, function (v) { ensure(b, "video").sub = v; dirty(); }));
       out.push(fieldText("Caption title", b.captionTitle, function (v) { b.captionTitle = v; dirty(); }));
       out.push(fieldTextarea("Caption HTML (optional — overrides Caption title)", b.captionHtml, function (v) { b.captionHtml = v; dirty(); }));
+      videoThumbFields(ensure(b, "video"), dirty).forEach(function (f) { out.push(f); });
     } else if (b.type === "video-showreel" || b.type === "video-grid") {
       out.push(fieldText("Heading", b.heading, function (v) { b.heading = v; dirty(); onChange(); }, { full: true }));
       if (b.type === "video-grid") {
@@ -1165,6 +1166,16 @@
     return box;
   }
 
+  function videoThumbFields(v, dirty) {
+    return [
+      fieldBool("Use custom thumbnail (off = YouTube)", v.poster, function (val) { v.poster = val; dirty(); }),
+      fieldImage("Thumbnail (custom poster image)", v.thumb, function (val) { v.thumb = val || null; dirty(); }),
+      fieldText("Extra thumb CSS class", v.thumbClass, function (val) { v.thumbClass = val; dirty(); }),
+      fieldNumber("Thumb width", v.thumbW, function (val) { v.thumbW = val; dirty(); }),
+      fieldNumber("Thumb height", v.thumbH, function (val) { v.thumbH = val; dirty(); })
+    ];
+  }
+
   function projectVideosEditor(b, dirty) {
     var arr = b.videos || (b.videos = []);
     var box = el("div", {}, [el("span", { text: "Videos", style: "font-weight:500;color:var(--text)" })]);
@@ -1187,11 +1198,12 @@
         card.appendChild(fieldText("Sub (lightbox)", v.sub, function (val) { v.sub = val; dirty(); }));
         card.appendChild(fieldText("Caption title", v.captionTitle, function (val) { v.captionTitle = val; dirty(); }));
         card.appendChild(fieldText("Caption sub", v.captionSub, function (val) { v.captionSub = val; dirty(); }));
+        videoThumbFields(v, dirty).forEach(function (f) { card.appendChild(f); });
         list.appendChild(card);
       });
     }
     var addBtn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: "+ Add video" });
-    addBtn.onclick = function () { arr.push({ id: "", heading: "", sub: "", captionTitle: "", captionSub: "" }); dirty(); render(); };
+    addBtn.onclick = function () { arr.push({ id: "", heading: "", sub: "", captionTitle: "", captionSub: "", poster: false, thumb: null, thumbClass: "", thumbW: 480, thumbH: 360 }); dirty(); render(); };
     render();
     box.appendChild(list); box.appendChild(addBtn);
     return box;
