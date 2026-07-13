@@ -1614,12 +1614,15 @@ a.home-recommendations__name--link:focus-visible {
 }
 
 /* Tablet only (2-up grid): center an orphaned last tile. Not on mobile —
-   there the row is 1 column and every card should share the same full width. */
+   there the row is 1 column and every card should share the same full width.
+   Cap the orphan at the same 22rem as the 2-up tiles above so it doesn't end
+   up wider than its siblings when the half-row exceeds 22rem (e.g. Surface Pro
+   7 at ~912px, where half-row ≈ 27rem). */
 @media (min-width: 721px) and (max-width: 960px) {
   .best-works__row--projects > .home-portfolio-project:last-child:nth-child(odd):not(:only-child) {
     grid-column: 1 / -1;
     justify-self: center;
-    width: calc((100% - var(--bw-gap, 0.75rem)) / 2);
+    width: min(calc((100% - var(--bw-gap, 0.75rem)) / 2), 22rem);
     max-width: calc((100% - var(--bw-gap, 0.75rem)) / 2);
   }
 }
