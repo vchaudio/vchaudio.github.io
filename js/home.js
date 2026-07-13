@@ -38,7 +38,11 @@
         var panel = panels[key];
         if (!panel) return;
         if (key === next) {
+          panel.classList.remove("home-tab-panel--fade");
           panel.hidden = false;
+          /* Re-trigger the fade-in now that the panel is displayed. */
+          void panel.offsetWidth;
+          panel.classList.add("home-tab-panel--fade");
           panel.querySelectorAll(".reveal").forEach(function (el) {
             el.classList.add("is-visible");
           });
@@ -733,10 +737,18 @@
         if (panel === panelMain) {
           panel.classList.remove("home-panel--flow", "home-panel--instant-height");
         }
+        /* Unhide while the is-hidden state (opacity:0, max-height:0) still
+           applies, and force a reflow so that start state is rendered.
+           Without this the browser jumps straight to the target and the
+           max-height/opacity transitions never run (the panel snaps open). */
+        panel.removeAttribute("hidden");
+        void panel.offsetWidth;
+        var targetH = measurePanel(panel);
         panel.classList.remove("is-hidden");
         panel.classList.add("is-visible");
-        panel.removeAttribute("hidden");
-        panel.style.maxHeight = measurePanel(panel) + "px";
+        panel.style.maxHeight = "0px";
+        void panel.offsetWidth;
+        panel.style.maxHeight = targetH + "px";
         if (inner && opts.rollMode) {
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
@@ -984,17 +996,12 @@
       if (layoutShrunk) {
         return;
       } else {
-        var closeFromH = measureVideosExtraCloseHeight();
-        videosExtra.classList.remove("is-close-measure");
-        videosExtra.style.transition = "none";
-        videosExtra.style.maxHeight = closeFromH + "px";
-        void videosExtra.offsetHeight;
-        videosExtra.style.transition =
-          "max-height " + closeMs / 1000 + "s " + VIDEOS_BLOCK_EASE;
-        videosExtra.style.maxHeight = "0px";
-
+        /* Desktop collapse: animate grid-template-rows 1fr -> 0fr (same property
+           as the open), driven by the CSS class. Symmetric with Show More and
+           smoother than the old max-height transition (no clipping dead-zone,
+           no per-frame fight with scroll anchoring). */
         function onTransitionEnd(e) {
-          if (e.target !== videosExtra || e.propertyName !== "max-height") return;
+          if (e.target !== videosExtra || e.propertyName !== "grid-template-rows") return;
           finishVideosClose();
         }
 

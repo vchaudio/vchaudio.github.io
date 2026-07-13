@@ -824,7 +824,7 @@ a.home-recommendations__name--link:focus-visible {
   perspective-origin: top center;
   transition:
     max-height var(--spoiler-roll) var(--ease-out),
-    opacity 0.32s var(--ease-out);
+    opacity 0.42s var(--ease-out);
 }
 
 .home-panel.is-hidden {
@@ -870,6 +870,21 @@ a.home-recommendations__name--link:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-panel {
+    perspective: none;
+  }
+
+  .home-panel__inner--roll,
+  .home-panel__inner--roll-close,
+  .home-panel__inner--roll-reverse {
+    animation: none;
+  }
+}
+
+/* Mobile: the 3D rotateX roll glitches on tall panels (resume). Drop the inner
+   roll keyframe and let the panel's own max-height + opacity transition carry
+   a single smooth unfold (no second fade layer). */
+@media (max-width: 720px) {
   .home-panel {
     perspective: none;
   }
@@ -1524,10 +1539,9 @@ a.home-recommendations__name--link:focus-visible {
 }
 
 .best-works__videos-extra.is-hiding.is-container-closing {
-  display: block;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 2.2s var(--ease-out);
   overflow: hidden;
-  max-height: 0;
-  transition: max-height 2.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .best-works__videos-extra.is-hiding.is-container-closing.is-unified-handoff {
@@ -1556,8 +1570,9 @@ a.home-recommendations__name--link:focus-visible {
 }
 
 .best-works__videos-extra.is-hiding.is-container-closing .best-works__videos-extra-inner {
-  min-height: auto;
-  padding-top: 0.75rem;
+  min-height: 0;
+  padding-top: 0;
+  transition: padding-top 2.2s var(--ease-out);
 }
 
 /* Show More: stagger in — extra inner (overflow primaries first when present) */
@@ -2781,6 +2796,16 @@ a.job-card.job-card--to-project:focus-visible .job-card__project {
 
 .home-tab-panel[hidden] {
   display: none;
+}
+
+@keyframes home-tab-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Fade the incoming tab content in on Resume ↔ My Studio switch. */
+.home-tab-panel--fade {
+  animation: home-tab-fade-in 0.3s var(--ease-out) both;
 }
 
 .home-tab-studio__lead {
