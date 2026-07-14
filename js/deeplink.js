@@ -131,6 +131,8 @@
         heading.style.cursor = "pointer";
         heading.style.userSelect = "none";
         heading.style.webkitUserSelect = "none";
+        heading.style.webkitTouchCallout = "none";
+        heading.style.webkitTapHighlightColor = "transparent";
         heading.title = "Copy link to this section";
         heading.addEventListener("click", function () {
           copyLinkToClipboard(b.anchor);

@@ -157,7 +157,20 @@
         label.style.cursor = "pointer";
         label.style.userSelect = "none";
         label.style.webkitUserSelect = "none";
+        label.style.webkitTouchCallout = "none";
+        label.style.webkitTapHighlightColor = "transparent";
         label.title = "Copy link to this section";
+        /* Neutralise selection on the whole summary top too — on touch devices
+           a tap-and-hold on the label otherwise highlights the entire card top
+           (the <summary>), not just the label. The summary has no selectable
+           body text (label + chevron only), so this is safe. */
+        var summaryEl = details.querySelector("summary");
+        if (summaryEl) {
+          summaryEl.style.userSelect = "none";
+          summaryEl.style.webkitUserSelect = "none";
+          summaryEl.style.webkitTouchCallout = "none";
+          summaryEl.style.webkitTapHighlightColor = "transparent";
+        }
         label.addEventListener("click", function (e) {
           e.preventDefault();
           copyLinkToClipboard(details.id);
@@ -1439,9 +1452,14 @@
          (video scrollers, images) settles. */
       var landing = false;
       var landingRO = null;
+      var landingRaf = 0;
       function cancelLanding() {
         landing = false;
+        if (landingRaf) { try { cancelAnimationFrame(landingRaf); } catch (e) {} landingRaf = 0; }
         if (landingRO) { try { landingRO.disconnect(); } catch (e) {} landingRO = null; }
+        /* Restore the site's smooth scroll-behavior (overridden to "auto" while
+           landing so the repeated re-scrolls don't fight each other). */
+        document.documentElement.style.scrollBehavior = "";
       }
 
       function switchTab(next) {
@@ -1511,32 +1529,59 @@
          consistently. Because inactive panels are absolutely positioned with
          height:0, a short active panel can leave the page too short to scroll
          its title to the top — so we give the landed panel temporary
-         scroll-room (cleared on the next tab click). A ResizeObserver keeps
-         re-scrolling as the panel's async layout (video scrollers, images)
-         settles, and the clamp is suppressed meanwhile so it can't fight us. */
+         scroll-room (cleared on the next tab click).
+
+         On a first visit, content ABOVE the landed panel (banner, hero, the
+         default tab's videos/images) loads async and shifts the panel's
+         position AFTER our initial scroll — so a single scroll lands wrong.
+         We therefore keep re-scrolling until layout settles: a ResizeObserver
+         watches both the panel and <main> (so above-content growth re-scrolls,
+         not just the panel's own size), rAF-throttled, plus a few periodic
+         re-scrolls as a catch-all. The clamp is suppressed meanwhile. */
       var hashKey = location.hash.replace(/^#/, "");
       if (hashKey && panels[hashKey]) {
         if (hashKey !== activeKey) switchTab(hashKey);
         var panel = panels[hashKey];
         landing = true;
+        /* Instant re-scrolls while landing (the site default is smooth, which
+           would animate every re-scroll and fight itself). Restored in
+           cancelLanding. */
+        document.documentElement.style.scrollBehavior = "auto";
         function landScroll() {
+          if (!landing) return;
           var need = window.innerHeight - headerHeight() - ANCHOR_GAP - 64;
           if (panel.getBoundingClientRect().height < need) {
             panel.style.minHeight = need + "px";
           }
           scrollToAnchor(panel);
         }
+        function scheduleLandScroll() {
+          if (!landing || landingRaf) return;
+          landingRaf = requestAnimationFrame(function () {
+            landingRaf = 0;
+            landScroll();
+          });
+        }
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             landScroll();
             if (typeof ResizeObserver !== "undefined") {
-              landingRO = new ResizeObserver(function () { landScroll(); });
+              landingRO = new ResizeObserver(function () { scheduleLandScroll(); });
               landingRO.observe(panel);
-              setTimeout(cancelLanding, 900);
+              var mainEl = document.querySelector("main");
+              if (mainEl) landingRO.observe(mainEl);
+              /* Catch-all re-scrolls for layout shifts the observer might batch
+                 late (or for browsers without ResizeObserver). */
+              setTimeout(landScroll, 250);
+              setTimeout(landScroll, 600);
+              setTimeout(landScroll, 1000);
+              setTimeout(cancelLanding, 1500);
             } else {
               setTimeout(landScroll, 140);
               setTimeout(landScroll, 380);
-              setTimeout(cancelLanding, 900);
+              setTimeout(landScroll, 800);
+              setTimeout(landScroll, 1200);
+              setTimeout(cancelLanding, 1500);
             }
           });
         });
@@ -1553,6 +1598,8 @@
         heading.style.cursor = "pointer";
         heading.style.userSelect = "none";
         heading.style.webkitUserSelect = "none";
+        heading.style.webkitTouchCallout = "none";
+        heading.style.webkitTapHighlightColor = "transparent";
         heading.title = "Copy link to this section";
         heading.addEventListener("click", function () {
           copyLinkToClipboard(key);
