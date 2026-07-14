@@ -1488,11 +1488,11 @@
         var type = pageType();
         if (type === "project") {
           renderProject(data);
-          return loadScript("js/main.js?v=20260714k").then(function () { return loadScript("js/audio-player.js"); });
+          return loadScript("js/main.js?v=20260714l").then(function () { return loadScript("js/audio-player.js"); });
         }
         if (type === "home") {
           renderHome(data);
-          return loadScript("js/main.js?v=20260714k").then(function () { return loadScript("js/home.js?v=20260714b"); });
+          return loadScript("js/main.js?v=20260714l").then(function () { return loadScript("js/home.js?v=20260714b"); });
         }
       })
       .catch(function (err) {

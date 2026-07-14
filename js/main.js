@@ -24,6 +24,7 @@
      extra gap. Uses an explicit offset instead of scrollIntoView so the gap is
      consistent regardless of scroll-padding. */
   var ANCHOR_GAP = 24;
+  var DOCK_DOWN_OFFSET = 25;
   function scrollToAnchor(el) {
     if (!el) return;
     var header = document.querySelector(".site-header");
@@ -1607,7 +1608,7 @@
           }
           var heading = panel.querySelector("h1, h2, h3");
           var anchorEl = heading || panel;
-          var want = headerHeight() + ANCHOR_GAP;
+          var want = headerHeight() + ANCHOR_GAP + DOCK_DOWN_OFFSET;
           var cur = anchorEl.getBoundingClientRect().top;
           var delta = cur - want;
           if (Math.abs(delta) >= 0.5) window.scrollBy(0, delta);

@@ -104,6 +104,7 @@
     var headerEl = document.querySelector(".site-header");
     function headerH() { return headerEl ? headerEl.getBoundingClientRect().height : 72; }
     var LANDING_GAP = 24;
+    var DOCK_DOWN_OFFSET = 25;
 
     function scrollToAnchor(el) {
       if (!el) return;
@@ -159,7 +160,7 @@
           docked = true;
           var heading = target.querySelector("h1, h2, h3");
           var anchorEl = heading || target;
-          var want = headerH() + LANDING_GAP;
+          var want = headerH() + LANDING_GAP + DOCK_DOWN_OFFSET;
           var cur = anchorEl.getBoundingClientRect().top;
           var delta = cur - want;
           if (Math.abs(delta) >= 0.5) window.scrollBy(0, delta);
