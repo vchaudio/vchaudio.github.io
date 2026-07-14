@@ -1595,10 +1595,11 @@
         var STABLE_MS = 250;
         var MIN_HOLD_MS = 1800;
         var fontsReady = false;
-        /* Single scroll op to the panel heading — never panel scrollTo + heading
-           scrollBy (that caused the visible 2-3 jumps). */
-        function dockHeading(reason, minDelta) {
-          if (!landing) return;
+        var docked = false;
+        /* One scroll only — dock the panel heading, then never scroll again. */
+        function dockOnce() {
+          if (docked) return;
+          docked = true;
           var need = window.innerHeight - headerHeight() - ANCHOR_GAP - 64;
           var pRect = panel.getBoundingClientRect();
           if (pRect.height < need) {
@@ -1609,32 +1610,23 @@
           var want = headerHeight() + ANCHOR_GAP;
           var cur = anchorEl.getBoundingClientRect().top;
           var delta = cur - want;
-          var threshold = minDelta != null ? minDelta : 2;
-          var moved = false;
-          if (Math.abs(delta) >= threshold) {
-            window.scrollBy(0, delta);
-            moved = true;
-          }
+          if (Math.abs(delta) >= 0.5) window.scrollBy(0, delta);
           if (DEBUG) {
-            dbg(reason, {
+            dbg("sync", {
               tab: hashKey,
               heading: heading ? (heading.id || heading.tagName) : null,
               headingTop: Math.round(cur),
               want: want,
               delta: Math.round(delta),
-              moved: moved,
-              scrollY: Math.round(window.scrollY),
-              fontsReady: fontsReady
+              scrollY: Math.round(window.scrollY)
             });
           }
-          armStable();
         }
         function maybeFinish() {
           if (!landing) return;
           var elapsed = performance.now() - landingStart;
           if (fontsReady && elapsed >= MIN_HOLD_MS) {
-            dbg("finish (stable " + STABLE_MS + "ms, fontsReady, " + (elapsed | 0) + "ms)");
-            dockHeading("final", 4);
+            dbg("finish (" + (elapsed | 0) + "ms)");
             cancelLanding();
           } else {
             armStable();
@@ -1644,44 +1636,15 @@
           if (stableTimer) clearTimeout(stableTimer);
           stableTimer = setTimeout(function () { stableTimer = 0; maybeFinish(); }, STABLE_MS);
         }
-        /* One synchronous dock before first paint. */
-        dockHeading("sync", 0);
-        function scheduleLandScroll() {
-          if (!landing || landingRaf) return;
-          landingRaf = requestAnimationFrame(function () {
-            landingRaf = 0;
-            dockHeading("obs", 3);
-          });
-        }
+        dockOnce();
         function finishLanding() { if (landing) cancelLanding(); }
-        /* Set up the ResizeObserver IMMEDIATELY (synchronously) so any layout
-           shift — font swap, image decode, async scroller init — is corrected
-           IN-FRAME. The ResizeObserver callback runs after layout, before
-           paint, so the user never sees the drifted state — only the corrected
-           one. This replaces the spread-out periodic macrotask re-docks, which
-           each landed at a slightly different position as layout drifted and
-           produced the visible 2-3 jumps. */
-        if (typeof ResizeObserver !== "undefined") {
-          landingRO = new ResizeObserver(function () { scheduleLandScroll(); });
-          landingRO.observe(panel);
-          var mainEl = document.querySelector("main");
-          if (mainEl) landingRO.observe(mainEl);
-        }
         armStable();
-        /* fonts.ready / window.load: mark fonts ready so the finish gate can
-           close, and act as a safety re-dock in case the observer missed a
-           shift. Normally a no-op (the observer already corrected in-frame),
-           so no visible jump. */
         try {
           if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(function () {
-              requestAnimationFrame(function () {
-                requestAnimationFrame(function () {
-                  if (!landing) return;
-                  fontsReady = true;
-                  dockHeading("fonts", 5);
-                });
-              });
+              if (!landing) return;
+              fontsReady = true;
+              armStable();
             });
           } else {
             fontsReady = true;
@@ -1693,11 +1656,9 @@
           window.addEventListener("load", function () {
             if (!landing) return;
             fontsReady = true;
-            dockHeading("load", 5);
+            armStable();
           });
         }
-        /* Hard cap so a never-resolving fonts.ready / endless resize can't
-           hold the clamp / scroll-behavior override forever. */
         setTimeout(finishLanding, 10000);
         dbg("armed; hash=" + hashKey + " readyState=" + document.readyState);
       }
