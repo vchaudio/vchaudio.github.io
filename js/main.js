@@ -204,6 +204,39 @@
     iframe.referrerPolicy = "strict-origin-when-cross-origin";
 
     var prevBodyOverflow = "";
+    var frame = iframe.parentNode; /* .video-lightbox__frame — sized via padding-bottom */
+    var panel = frame && frame.parentNode; /* .video-lightbox__panel — width drives the frame */
+    /* Ultrawide: the frame is set to the video's exact ratio BEFORE the video loads
+       (the ratio is supplied via data-lightbox-ratio, e.g. "2.37" or "2560:1080"), so
+       the video loads into the correctly-sized frame synchronously — just like 16:9,
+       with no auto-detect, no resize, and no IFrame API. The player is sized "edges
+       added to 16:9": keep the 16:9 height (540px = 0.5625 * 960 base panel) and widen
+       to the real ratio, capped by viewport width (96vw) and height (88vh) so it fits. */
+    var BASE_16_9_HEIGHT = 540; /* 16:9 height at the 960px base panel */
+
+    /* Parse a ratio string: "W:H" / "WxH" / "W/H" (e.g. 2560:1080) or a decimal
+       (e.g. 2.37). Returns 0 if unparseable. */
+    function parseRatio(str) {
+      if (!str) return 0;
+      str = String(str).trim();
+      var m = str.match(/^(\d+(?:\.\d+)?)\s*[:x\/]\s*(\d+(?:\.\d+)?)$/i);
+      if (m) { var w = parseFloat(m[1]), h = parseFloat(m[2]); return h > 0 ? w / h : 0; }
+      var d = parseFloat(str);
+      return d > 0 ? d : 0;
+    }
+
+    function applyUltrawideRatio(ratio) {
+      if (!frame || !panel || !(ratio > 0)) return;
+      var vw = window.innerWidth || document.documentElement.clientWidth;
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var availW = vw * 0.96;
+      var availH = vh * 0.88; /* leave room for close button + caption */
+      /* "Edges added to 16:9": keep the 16:9 height, widen to the real ratio, then
+         cap by viewport width and height so it never overflows. */
+      var w = Math.min(BASE_16_9_HEIGHT * ratio, availW, availH * ratio);
+      panel.style.width = Math.round(w) + "px";
+      frame.style.paddingBottom = (100 / ratio).toFixed(4) + "%";
+    }
 
     function setCaptionFromThumb(thumb) {
       if (!caption) return;
@@ -246,10 +279,19 @@
       root.setAttribute("aria-hidden", "true");
       document.body.style.overflow = prevBodyOverflow;
       setCaptionFromThumb(null);
+      if (frame) frame.style.paddingBottom = "";
+      if (panel) panel.style.width = "";
     }
 
     function open(id, thumb) {
       if (!id) return;
+      /* Set the frame to the video's exact ratio BEFORE loading, so the video loads
+         into the correctly-sized frame synchronously — like 16:9, no resize. The
+         ratio comes from data-lightbox-ratio (render.js v.ratio, or inline on static
+         buttons). No value / unparseable = 16:9 (CSS default, no override). */
+      var r = parseRatio(thumb && thumb.getAttribute("data-lightbox-ratio"));
+      if (r > 0) applyUltrawideRatio(r);
+      else { if (frame) frame.style.paddingBottom = ""; if (panel) panel.style.width = ""; }
       iframe.src = youtubeEmbedSrc(id);
       root.hidden = false;
       root.setAttribute("aria-hidden", "false");

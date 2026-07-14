@@ -461,6 +461,7 @@
       "data-lightbox-year": v.year,
       "aria-label": "Play " + v.title
     };
+    if (v.ratio) btnAttrs["data-lightbox-ratio"] = v.ratio;
     var media = h("span", { class: "video-thumb__media" }, [
       h("img", { src: thumbSrc, alt: "", width: v.thumbW || 480, height: v.thumbH || 360, loading: "lazy", decoding: "async" })
     ]);
@@ -1332,6 +1333,7 @@
     var attrs = { type: "button", class: btnClass, "data-youtube-id": v.id, "aria-label": "Play " + (v.heading || v.captionTitle || "") };
     if (v.heading) attrs["data-lightbox-heading"] = v.heading;
     if (v.sub) attrs["data-lightbox-sub"] = v.sub;
+    if (v.ratio) attrs["data-lightbox-ratio"] = v.ratio;
     return h("button", attrs, [
       h("img", { src: thumbSrc, alt: "", width: v.thumbW || 1280, height: v.thumbH || 720, loading: "lazy", decoding: "async" })
     ]);

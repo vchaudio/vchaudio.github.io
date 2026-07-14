@@ -476,6 +476,48 @@
     return el("label", { class: "admin-field" }, [el("span", { text: label }), sel]);
   }
 
+  /* Lightbox aspect ratio: 16:9 (default) / Ultrawide 2.37 / Custom. The exact
+     ratio is stored in v.ratio ("" = 16:9, "2.37", or a custom "W:H"/decimal like
+     "2560:1080"). The lightbox sets the frame to this ratio BEFORE the video loads,
+     so there's no resize (synchronous like 16:9). */
+  function fieldLightboxRatio(v, dirty) {
+    var box = el("div", { class: "admin-field admin-field--full" });
+    var isCustom = v.ratio && v.ratio !== "2.37";
+    var sel = el("select");
+    [
+      { value: "", label: "16:9 (default)" },
+      { value: "2.37", label: "Ultrawide 21:9 — 2560×1080 (2.37)" },
+      { value: "custom", label: "Custom ultrawide ratio…" }
+    ].forEach(function (o) {
+      var opt = el("option", { value: o.value, text: o.label });
+      if (o.value === (isCustom ? "custom" : (v.ratio || ""))) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    var customWrap = el("label", { class: "admin-field admin-field--full", style: "margin-top:0.4rem" }, [
+      el("span", { text: "Custom aspect (W:H or decimal, e.g. 2560:1080 or 2.35:1; empty = 2.37)" }),
+      el("input", { type: "text", value: isCustom ? v.ratio : "", placeholder: "2560:1080" })
+    ]);
+    var customInput = customWrap.querySelector("input");
+    function syncCustom() { customWrap.style.display = sel.value === "custom" ? "" : "none"; }
+    sel.addEventListener("change", function () {
+      if (sel.value === "custom") {
+        v.ratio = customInput.value.trim() || "2.37";
+      } else {
+        v.ratio = sel.value; /* "" or "2.37" */
+      }
+      syncCustom();
+      dirty();
+    });
+    customInput.addEventListener("input", function () {
+      if (sel.value === "custom") { v.ratio = customInput.value.trim() || "2.37"; dirty(); }
+    });
+    syncCustom();
+    box.appendChild(el("span", { text: "Lightbox aspect ratio" }));
+    box.appendChild(sel);
+    box.appendChild(customWrap);
+    return box;
+  }
+
   /* Segmented visibility toggle. states is a list of {value,label}; field is
      the property name on entry; defaultValue is used when the property is unset.
      Used for Education (Site/CV/Hide) and Highlights (Site/CV/Both/Hide). */
@@ -828,7 +870,8 @@
         fieldImage("Thumbnail (leave empty to use YouTube)", v.thumb, function (val) { v.thumb = val || null; dirty(); }),
         fieldText("Extra thumb CSS class", v.thumbClass, function (val) { v.thumbClass = val; dirty(); }),
         fieldNumber("Thumb width", v.thumbW, function (val) { v.thumbW = val; dirty(); }),
-        fieldNumber("Thumb height", v.thumbH, function (val) { v.thumbH = val; dirty(); })
+        fieldNumber("Thumb height", v.thumbH, function (val) { v.thumbH = val; dirty(); }),
+        fieldLightboxRatio(v, dirty)
       ];
     };
 
@@ -891,7 +934,7 @@
         toast("Primary videos are limited to 5. Move one to “More” first.");
         return;
       }
-      var n = { id: "", title: "New video", role: "", year: "", primary: primary, hidden: false, poster: false, thumb: null, thumbClass: "", thumbW: 480, thumbH: 360 };
+      var n = { id: "", title: "New video", role: "", year: "", primary: primary, hidden: false, poster: false, thumb: null, thumbClass: "", thumbW: 480, thumbH: 360, ratio: "" };
       arr.push(n); state.selectedObj = n; dirty(); renderLists(); renderDetail();
     }
 
@@ -1055,7 +1098,7 @@
     { label: "Hero", type: "hero", make: function () { return { type: "hero", title: "", platform: "", company: "", lead: "", steam: { label: "View on Steam", href: "" } }; } },
     { label: "About", type: "about", make: function () { return { type: "about", heading: "About", html: "" }; } },
     { label: "Responsibilities", type: "responsibilities", make: function () { return { type: "responsibilities", heading: "Responsibilities & Contributions", items: [] }; } },
-      { label: "Video (single)", type: "video-single", make: function () { return { type: "video-single", heading: "", intro: "", video: { id: "", heading: "", sub: "", poster: false, thumb: null, thumbClass: "", thumbW: 1280, thumbH: 720 }, captionTitle: "" }; } },
+      { label: "Video (single)", type: "video-single", make: function () { return { type: "video-single", heading: "", intro: "", video: { id: "", heading: "", sub: "", poster: false, thumb: null, thumbClass: "", thumbW: 1280, thumbH: 720, ratio: "" }, captionTitle: "" }; } },
     { label: "Showreel (2-up)", type: "video-showreel", make: function () { return { type: "video-showreel", heading: "ShowReels", videos: [] }; } },
     { label: "Video grid", type: "video-grid", make: function () { return { type: "video-grid", heading: "", date: "", rows: 2, noNav: true, videos: [] }; } },
     { label: "Releases / downloads (versioned)", type: "releases", make: function () { return { type: "releases", heading: "Download", open: true, wrapClass: "vm-xctrl-spoilers", lead: "", items: [] }; } },
@@ -1172,7 +1215,8 @@
       fieldImage("Thumbnail (custom poster image)", v.thumb, function (val) { v.thumb = val || null; dirty(); }),
       fieldText("Extra thumb CSS class", v.thumbClass, function (val) { v.thumbClass = val; dirty(); }),
       fieldNumber("Thumb width", v.thumbW, function (val) { v.thumbW = val; dirty(); }),
-      fieldNumber("Thumb height", v.thumbH, function (val) { v.thumbH = val; dirty(); })
+      fieldNumber("Thumb height", v.thumbH, function (val) { v.thumbH = val; dirty(); }),
+      fieldLightboxRatio(v, dirty)
     ];
   }
 
@@ -1203,7 +1247,7 @@
       });
     }
     var addBtn = el("button", { type: "button", class: "admin-btn admin-btn--small", text: "+ Add video" });
-    addBtn.onclick = function () { arr.push({ id: "", heading: "", sub: "", captionTitle: "", captionSub: "", poster: false, thumb: null, thumbClass: "", thumbW: 480, thumbH: 360 }); dirty(); render(); };
+    addBtn.onclick = function () { arr.push({ id: "", heading: "", sub: "", captionTitle: "", captionSub: "", poster: false, thumb: null, thumbClass: "", thumbW: 480, thumbH: 360, ratio: "" }); dirty(); render(); };
     render();
     box.appendChild(list); box.appendChild(addBtn);
     return box;
