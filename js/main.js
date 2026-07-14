@@ -1563,11 +1563,6 @@
            would animate every re-scroll and fight itself). Restored in
            cancelLanding. */
         document.documentElement.style.scrollBehavior = "auto";
-        /* Preliminary synchronous dock: reach the dock position ASAP, before
-           the browser's native #hash jump can flash the panel flush at y=0
-           (under the header). The rAF closed-loop below refines this once
-           layout settles. */
-        scrollToAnchor(panel);
         /* The landing window can run a few seconds (waiting for fonts/images to
            settle). If the user starts scrolling/interacting meanwhile, abort so
            we don't yank the scroll back out from under them. Input events only
@@ -1600,11 +1595,46 @@
         var STABLE_MS = 250;
         var MIN_HOLD_MS = 1800;
         var fontsReady = false;
+        /* Single scroll op to the panel heading — never panel scrollTo + heading
+           scrollBy (that caused the visible 2-3 jumps). */
+        function dockHeading(reason, minDelta) {
+          if (!landing) return;
+          var need = window.innerHeight - headerHeight() - ANCHOR_GAP - 64;
+          var pRect = panel.getBoundingClientRect();
+          if (pRect.height < need) {
+            panel.style.minHeight = need + "px";
+          }
+          var heading = panel.querySelector("h1, h2, h3");
+          var anchorEl = heading || panel;
+          var want = headerHeight() + ANCHOR_GAP;
+          var cur = anchorEl.getBoundingClientRect().top;
+          var delta = cur - want;
+          var threshold = minDelta != null ? minDelta : 2;
+          var moved = false;
+          if (Math.abs(delta) >= threshold) {
+            window.scrollBy(0, delta);
+            moved = true;
+          }
+          if (DEBUG) {
+            dbg(reason, {
+              tab: hashKey,
+              heading: heading ? (heading.id || heading.tagName) : null,
+              headingTop: Math.round(cur),
+              want: want,
+              delta: Math.round(delta),
+              moved: moved,
+              scrollY: Math.round(window.scrollY),
+              fontsReady: fontsReady
+            });
+          }
+          armStable();
+        }
         function maybeFinish() {
           if (!landing) return;
           var elapsed = performance.now() - landingStart;
           if (fontsReady && elapsed >= MIN_HOLD_MS) {
             dbg("finish (stable " + STABLE_MS + "ms, fontsReady, " + (elapsed | 0) + "ms)");
+            dockHeading("final", 4);
             cancelLanding();
           } else {
             armStable();
@@ -1614,101 +1644,62 @@
           if (stableTimer) clearTimeout(stableTimer);
           stableTimer = setTimeout(function () { stableTimer = 0; maybeFinish(); }, STABLE_MS);
         }
-        function landScroll(reason) {
-          if (!landing) return;
-          var need = window.innerHeight - headerHeight() - ANCHOR_GAP - 64;
-          var pRect = panel.getBoundingClientRect();
-          if (pRect.height < need) {
-            panel.style.minHeight = need + "px";
-          }
-          /* Closed-loop dock: jump near the panel, then measure the heading's
-             ACTUAL viewport position and nudge the scroll so it sits exactly at
-             header + gap. Robust to entrance/reveal transforms and late layout
-             shifts — it corrects whatever offset is present at the time, rather
-             than trusting the panel's bounding rect to be transform-free. */
-          var heading = panel.querySelector("h1, h2, h3");
-          scrollToAnchor(panel);
-          var want = headerHeight() + ANCHOR_GAP;
-          var cur = heading ? heading.getBoundingClientRect().top : panel.getBoundingClientRect().top;
-          var delta = cur - want;
-          var moved = false;
-          if (Math.abs(delta) > 1) { window.scrollBy(0, delta); moved = true; }
-          if (DEBUG) {
-            dbg(reason, {
-              tab: hashKey,
-              heading: heading ? (heading.id || heading.tagName) : null,
-              headingTop: Math.round(cur),
-              want: want,
-              delta: Math.round(delta),
-              moved: moved,
-              panelTop: Math.round(pRect.top),
-              panelH: Math.round(pRect.height),
-              scrollY: Math.round(window.scrollY),
-              maxScroll: Math.round(document.documentElement.scrollHeight - window.innerHeight),
-              fontsReady: fontsReady
-            });
-          }
-          armStable();
-        }
+        /* One synchronous dock before first paint. */
+        dockHeading("sync", 0);
         function scheduleLandScroll() {
           if (!landing || landingRaf) return;
           landingRaf = requestAnimationFrame(function () {
             landingRaf = 0;
-            landScroll("obs");
+            dockHeading("obs", 3);
           });
         }
         function finishLanding() { if (landing) cancelLanding(); }
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () {
-            landScroll("init");
-            if (typeof ResizeObserver !== "undefined") {
-              landingRO = new ResizeObserver(function () { scheduleLandScroll(); });
-              landingRO.observe(panel);
-              var mainEl = document.querySelector("main");
-              if (mainEl) landingRO.observe(mainEl);
-            }
-            /* Periodic catch-alls for layout shifts that settle during the
-               entrance animation and early resource loads. */
-            setTimeout(function () { landScroll("t250"); }, 250);
-            setTimeout(function () { landScroll("t600"); }, 600);
-            setTimeout(function () { landScroll("t1000"); }, 1000);
-            setTimeout(function () { landScroll("t1600"); }, 1600);
-            setTimeout(function () { landScroll("t2400"); }, 2400);
-            /* Web fonts: a late font swap reflows the hero/about/spoiler above
-               the panel and shifts the heading — the Ctrl+Shift+R case. Re-scroll
-               after two rAFs (the reflow lands a frame or two after the promise
-               resolves), then mark fonts ready so the finish gate can close. */
-            try {
-              if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(function () {
-                  requestAnimationFrame(function () {
-                    requestAnimationFrame(function () {
-                      if (!landing) return;
-                      fontsReady = true;
-                      landScroll("fonts");
-                    });
-                  });
+        /* Set up the ResizeObserver IMMEDIATELY (synchronously) so any layout
+           shift — font swap, image decode, async scroller init — is corrected
+           IN-FRAME. The ResizeObserver callback runs after layout, before
+           paint, so the user never sees the drifted state — only the corrected
+           one. This replaces the spread-out periodic macrotask re-docks, which
+           each landed at a slightly different position as layout drifted and
+           produced the visible 2-3 jumps. */
+        if (typeof ResizeObserver !== "undefined") {
+          landingRO = new ResizeObserver(function () { scheduleLandScroll(); });
+          landingRO.observe(panel);
+          var mainEl = document.querySelector("main");
+          if (mainEl) landingRO.observe(mainEl);
+        }
+        armStable();
+        /* fonts.ready / window.load: mark fonts ready so the finish gate can
+           close, and act as a safety re-dock in case the observer missed a
+           shift. Normally a no-op (the observer already corrected in-frame),
+           so no visible jump. */
+        try {
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(function () {
+              requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                  if (!landing) return;
+                  fontsReady = true;
+                  dockHeading("fonts", 5);
                 });
-              } else {
-                fontsReady = true;
-              }
-            } catch (eF) { fontsReady = true; }
-            /* window.load: re-scroll (sub-resources loaded) but don't end —
-               fonts may still be loading (they aren't required for load). */
-            if (document.readyState === "complete") {
-              landScroll("load-now");
-            } else {
-              window.addEventListener("load", function () {
-                landScroll("load");
-                setTimeout(function () { landScroll("load+150"); }, 150);
               });
-            }
-            /* Hard cap so a never-resolving fonts.ready / endless resize can't
-               hold the clamp / scroll-behavior override forever. */
-            setTimeout(finishLanding, 10000);
-            dbg("armed; hash=" + hashKey + " readyState=" + document.readyState);
+            });
+          } else {
+            fontsReady = true;
+          }
+        } catch (eF) { fontsReady = true; }
+        if (document.readyState === "complete") {
+          fontsReady = true;
+        } else {
+          window.addEventListener("load", function () {
+            if (!landing) return;
+            fontsReady = true;
+            dockHeading("load", 5);
           });
-        });
+        }
+        /* Hard cap so a never-resolving fonts.ready / endless resize can't
+           hold the clamp / scroll-behavior override forever. */
+        setTimeout(finishLanding, 10000);
+        dbg("armed; hash=" + hashKey + " readyState=" + document.readyState);
       }
 
       /* Click a panel heading -> copy this tab's deep-link to the clipboard
