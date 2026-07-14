@@ -1,6 +1,14 @@
 (function () {
   "use strict";
 
+  /* If the URL has a hash we'll be landing on (e.g. a project tab link),
+     stop the browser from doing its own auto scroll-restoration / hash
+     jump — we dock to header+gap ourselves. Set early so it takes effect
+     before the browser scrolls. */
+  if (history.scrollRestoration && location.hash) {
+    history.scrollRestoration = "manual";
+  }
+
   /* Replace the URL hash without adding history entries (so the Back button
      isn't filled with tab switches). The hash is just a copyable snapshot of
      the current section/tab/view. */
@@ -1555,6 +1563,11 @@
            would animate every re-scroll and fight itself). Restored in
            cancelLanding. */
         document.documentElement.style.scrollBehavior = "auto";
+        /* Preliminary synchronous dock: reach the dock position ASAP, before
+           the browser's native #hash jump can flash the panel flush at y=0
+           (under the header). The rAF closed-loop below refines this once
+           layout settles. */
+        scrollToAnchor(panel);
         /* The landing window can run a few seconds (waiting for fonts/images to
            settle). If the user starts scrolling/interacting meanwhile, abort so
            we don't yank the scroll back out from under them. Input events only

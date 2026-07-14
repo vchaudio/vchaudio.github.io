@@ -1,6 +1,14 @@
 (function () {
   "use strict";
 
+  /* If the URL has a hash we'll be landing on, stop the browser from doing
+     its own auto scroll-restoration / hash jump — we dock to header+gap
+     ourselves. Set as early as possible (this deferred script runs before
+     DOMContentLoaded) so it takes effect before the browser scrolls. */
+  if (history.scrollRestoration && location.hash) {
+    history.scrollRestoration = "manual";
+  }
+
   /* Deep-linking for stacked-block pages (project pages and other content
      pages whose blocks are vertically stacked <section>s).
 
@@ -135,6 +143,11 @@
         var MIN_HOLD_MS = 1500;
         var inputAbort = null;
         document.documentElement.style.scrollBehavior = "auto";
+        /* Preliminary synchronous dock: reach the dock position ASAP, before
+           the browser's native #hash jump can flash the block flush at y=0
+           (under the header). Layout may not be fully settled yet (fonts,
+           entrance animation), so the rAF closed-loop below refines this. */
+        scrollToAnchor(target);
         function dbg(msg, extra) {
           if (!DEBUG) return;
           try { console.log("[dlink " + ((performance.now() - landingStart) | 0) + "ms] " + msg, extra || ""); } catch (e) {}
