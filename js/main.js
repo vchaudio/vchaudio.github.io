@@ -1606,36 +1606,63 @@
               var mainEl = document.querySelector("main");
               if (mainEl) landingRO.observe(mainEl);
             }
-            /* Periodic catch-alls spread over a longer window for late image /
-               font loads that settle after the initial burst. */
+            /* Periodic catch-alls for layout shifts that settle during the
+               entrance animation and early resource loads. */
             setTimeout(landScroll, 250);
             setTimeout(landScroll, 600);
             setTimeout(landScroll, 1000);
             setTimeout(landScroll, 1600);
             setTimeout(landScroll, 2400);
-            /* Web fonts: a late font swap reflows the tablist/hero above the
-               panel and shifts it. Re-scroll once fonts are ready. */
+            /* Finish gate. The bug reproduces on Ctrl+Shift+R (no cache): web
+               fonts load slowly from the network and swap LATE — after a cached
+               F5 would already have swapped them. That font swap reflows the
+               hero/about/spoiler above the panel and shifts the heading, so we
+               must NOT end the landing until fonts have actually loaded. The
+               font-swap reflow also lands a frame or two after the promise
+               resolves, so we re-scroll after two rAFs. We also hold open past
+               the entrance/reveal animation (≈1.2s) so its transform settles
+               before the final dock. */
+            var landingStart = performance.now();
+            var fontsReady = false;
+            var MIN_HOLD_MS = 1800;
+            function maybeFinish() {
+              if (!landing) return;
+              if (fontsReady && performance.now() - landingStart >= MIN_HOLD_MS) {
+                cancelLanding();
+              }
+            }
             try {
               if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(function () { landScroll(); });
+                document.fonts.ready.then(function () {
+                  requestAnimationFrame(function () {
+                    requestAnimationFrame(function () {
+                      if (!landing) return;
+                      landScroll();
+                      fontsReady = true;
+                      maybeFinish();
+                    });
+                  });
+                });
+              } else {
+                fontsReady = true;
               }
-            } catch (eF) {}
-            /* window.load fires when all sub-resources are loaded — the true
-               "layout settled" moment. Do a final re-scroll then end. If the
-               page is already complete (fast/cached), run it now. */
+            } catch (eF) { fontsReady = true; }
+            /* window.load: re-scroll (sub-resources loaded) but don't end —
+               fonts may still be loading (they aren't required for load). */
             if (document.readyState === "complete") {
               landScroll();
-              setTimeout(finishLanding, 500);
             } else {
               window.addEventListener("load", function () {
                 landScroll();
                 setTimeout(landScroll, 150);
-                setTimeout(finishLanding, 600);
               });
             }
-            /* Hard cap so we never hold the clamp / scroll-behavior override
-               forever (e.g. a hanging resource delaying window.load). */
-            setTimeout(finishLanding, 4500);
+            /* Close once the min hold has elapsed (covers fonts already ready
+               on cached loads). */
+            setTimeout(maybeFinish, MIN_HOLD_MS + 50);
+            /* Hard cap so a never-resolving fonts.ready can't hold the clamp /
+               scroll-behavior override forever. */
+            setTimeout(finishLanding, 10000);
           });
         });
       }
