@@ -1454,9 +1454,11 @@
       var landingRO = null;
       var landingRaf = 0;
       var landingAbort = null;
+      var stableTimer = 0;
       function cancelLanding() {
         landing = false;
         if (landingRaf) { try { cancelAnimationFrame(landingRaf); } catch (e) {} landingRaf = 0; }
+        if (stableTimer) { try { clearTimeout(stableTimer); } catch (e) {} stableTimer = 0; }
         if (landingRO) { try { landingRO.disconnect(); } catch (e) {} landingRO = null; }
         if (landingAbort) { try { landingAbort(); } catch (e) {} landingAbort = null; }
         /* Restore the site's smooth scroll-behavior (overridden to "auto" while
@@ -1567,39 +1569,85 @@
             window.removeEventListener(type, onUserInput, { capture: true });
           });
         };
-        function landScroll() {
+        var DEBUG = /[?&]debug=1(?=&|$)/.test(location.search);
+        var landingStart = performance.now();
+        function dbg(msg, extra) {
+          if (!DEBUG) return;
+          try { console.log("[land " + ((performance.now() - landingStart) | 0) + "ms] " + msg, extra || ""); } catch (e) {}
+        }
+        /* Stable-then-finish. We keep re-docking while layout is still shifting
+           (entrance animation, late web-font swap, audio-player / scroller init,
+           image decode) and only end the landing once NOTHING has moved for
+           STABLE_MS — AND web fonts have loaded AND the min hold (past the
+           entrance animation) has elapsed. This is what fixes Ctrl+Shift+R
+           (no-cache, late font swap): the swap reflows the hero/about/tablist
+           ABOVE the panel and shifts the heading AFTER a naive finish would have
+           closed the landing — leaving the inner content (vch-player__now /
+           video-scroller__viewport) flush at the top instead of the heading. */
+        var STABLE_MS = 250;
+        var MIN_HOLD_MS = 1800;
+        var fontsReady = false;
+        function maybeFinish() {
+          if (!landing) return;
+          var elapsed = performance.now() - landingStart;
+          if (fontsReady && elapsed >= MIN_HOLD_MS) {
+            dbg("finish (stable " + STABLE_MS + "ms, fontsReady, " + (elapsed | 0) + "ms)");
+            cancelLanding();
+          } else {
+            armStable();
+          }
+        }
+        function armStable() {
+          if (stableTimer) clearTimeout(stableTimer);
+          stableTimer = setTimeout(function () { stableTimer = 0; maybeFinish(); }, STABLE_MS);
+        }
+        function landScroll(reason) {
           if (!landing) return;
           var need = window.innerHeight - headerHeight() - ANCHOR_GAP - 64;
-          if (panel.getBoundingClientRect().height < need) {
+          var pRect = panel.getBoundingClientRect();
+          if (pRect.height < need) {
             panel.style.minHeight = need + "px";
           }
           /* Closed-loop dock: jump near the panel, then measure the heading's
              ACTUAL viewport position and nudge the scroll so it sits exactly at
-             header + gap. This is robust to entrance/reveal transforms and late
-             layout shifts — it corrects whatever offset is present at the time,
-             rather than trusting the panel's bounding rect to be transform-free.
-             Re-called periodically and on fonts.ready / window.load so it
-             re-settles once animations finish. */
+             header + gap. Robust to entrance/reveal transforms and late layout
+             shifts — it corrects whatever offset is present at the time, rather
+             than trusting the panel's bounding rect to be transform-free. */
           var heading = panel.querySelector("h1, h2, h3");
           scrollToAnchor(panel);
-          if (heading) {
-            var want = headerHeight() + ANCHOR_GAP;
-            var cur = heading.getBoundingClientRect().top;
-            var delta = cur - want;
-            if (Math.abs(delta) > 1) window.scrollBy(0, delta);
+          var want = headerHeight() + ANCHOR_GAP;
+          var cur = heading ? heading.getBoundingClientRect().top : panel.getBoundingClientRect().top;
+          var delta = cur - want;
+          var moved = false;
+          if (Math.abs(delta) > 1) { window.scrollBy(0, delta); moved = true; }
+          if (DEBUG) {
+            dbg(reason, {
+              tab: hashKey,
+              heading: heading ? (heading.id || heading.tagName) : null,
+              headingTop: Math.round(cur),
+              want: want,
+              delta: Math.round(delta),
+              moved: moved,
+              panelTop: Math.round(pRect.top),
+              panelH: Math.round(pRect.height),
+              scrollY: Math.round(window.scrollY),
+              maxScroll: Math.round(document.documentElement.scrollHeight - window.innerHeight),
+              fontsReady: fontsReady
+            });
           }
+          armStable();
         }
         function scheduleLandScroll() {
           if (!landing || landingRaf) return;
           landingRaf = requestAnimationFrame(function () {
             landingRaf = 0;
-            landScroll();
+            landScroll("obs");
           });
         }
         function finishLanding() { if (landing) cancelLanding(); }
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
-            landScroll();
+            landScroll("init");
             if (typeof ResizeObserver !== "undefined") {
               landingRO = new ResizeObserver(function () { scheduleLandScroll(); });
               landingRO.observe(panel);
@@ -1608,38 +1656,23 @@
             }
             /* Periodic catch-alls for layout shifts that settle during the
                entrance animation and early resource loads. */
-            setTimeout(landScroll, 250);
-            setTimeout(landScroll, 600);
-            setTimeout(landScroll, 1000);
-            setTimeout(landScroll, 1600);
-            setTimeout(landScroll, 2400);
-            /* Finish gate. The bug reproduces on Ctrl+Shift+R (no cache): web
-               fonts load slowly from the network and swap LATE — after a cached
-               F5 would already have swapped them. That font swap reflows the
-               hero/about/spoiler above the panel and shifts the heading, so we
-               must NOT end the landing until fonts have actually loaded. The
-               font-swap reflow also lands a frame or two after the promise
-               resolves, so we re-scroll after two rAFs. We also hold open past
-               the entrance/reveal animation (≈1.2s) so its transform settles
-               before the final dock. */
-            var landingStart = performance.now();
-            var fontsReady = false;
-            var MIN_HOLD_MS = 1800;
-            function maybeFinish() {
-              if (!landing) return;
-              if (fontsReady && performance.now() - landingStart >= MIN_HOLD_MS) {
-                cancelLanding();
-              }
-            }
+            setTimeout(function () { landScroll("t250"); }, 250);
+            setTimeout(function () { landScroll("t600"); }, 600);
+            setTimeout(function () { landScroll("t1000"); }, 1000);
+            setTimeout(function () { landScroll("t1600"); }, 1600);
+            setTimeout(function () { landScroll("t2400"); }, 2400);
+            /* Web fonts: a late font swap reflows the hero/about/spoiler above
+               the panel and shifts the heading — the Ctrl+Shift+R case. Re-scroll
+               after two rAFs (the reflow lands a frame or two after the promise
+               resolves), then mark fonts ready so the finish gate can close. */
             try {
               if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(function () {
                   requestAnimationFrame(function () {
                     requestAnimationFrame(function () {
                       if (!landing) return;
-                      landScroll();
                       fontsReady = true;
-                      maybeFinish();
+                      landScroll("fonts");
                     });
                   });
                 });
@@ -1650,19 +1683,17 @@
             /* window.load: re-scroll (sub-resources loaded) but don't end —
                fonts may still be loading (they aren't required for load). */
             if (document.readyState === "complete") {
-              landScroll();
+              landScroll("load-now");
             } else {
               window.addEventListener("load", function () {
-                landScroll();
-                setTimeout(landScroll, 150);
+                landScroll("load");
+                setTimeout(function () { landScroll("load+150"); }, 150);
               });
             }
-            /* Close once the min hold has elapsed (covers fonts already ready
-               on cached loads). */
-            setTimeout(maybeFinish, MIN_HOLD_MS + 50);
-            /* Hard cap so a never-resolving fonts.ready can't hold the clamp /
-               scroll-behavior override forever. */
+            /* Hard cap so a never-resolving fonts.ready / endless resize can't
+               hold the clamp / scroll-behavior override forever. */
             setTimeout(finishLanding, 10000);
+            dbg("armed; hash=" + hashKey + " readyState=" + document.readyState);
           });
         });
       }
