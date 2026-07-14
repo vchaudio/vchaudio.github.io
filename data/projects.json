@@ -228,17 +228,23 @@
             {
               "id": "zxbPVzbwdJE",
               "heading": "Duel Mode",
-              "captionTitle": "Duel Mode"
+              "captionTitle": "Duel Mode",
+              "thumb": "https://i9.ytimg.com/vi_webp/zxbPVzbwdJE/mqdefault.webp?v=6a563749&sqp=CNTs2NIG&rs=AOn4CLA4ys2ZrQrJ3cJjTErPr1UbhdYb9Q",
+              "poster": true
             },
             {
               "id": "4O83X2Me-4Y",
               "heading": "TDM - SkyHand",
-              "captionTitle": "TDM - SkyHand"
+              "captionTitle": "TDM - SkyHand",
+              "poster": true,
+              "thumb": "https://i9.ytimg.com/vi_webp/4O83X2Me-4Y/mqdefault.webp?v=6a56363a&sqp=CKjq2NIG&rs=AOn4CLCbdJcorVsWRz0uG7eN5yWAaA1-ew"
             },
             {
               "id": "Sdw9CyR7T1s",
               "heading": "TDM - Pit",
-              "captionTitle": "TDM - Pit"
+              "captionTitle": "TDM - Pit",
+              "poster": true,
+              "thumb": "https://i9.ytimg.com/vi_webp/Sdw9CyR7T1s/mqdefault.webp?v=6a56361c&sqp=CKjq2NIG&rs=AOn4CLDHl9BuoBpDzturUmQ7bPbF97LKTw"
             }
           ],
           "intro": "In-game footage across different modes and maps — sound design, music, and audio systems as they run in the build.\n          I was the <strong>solo</strong> audio designer on the project, handling everything from recording and composition through\n          in-engine implementation.",
