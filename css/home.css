@@ -19,13 +19,10 @@ html { overflow-x: clip; }
 
 main.home-main {
   max-width: min(960px, 100%);
-  flex: 1 0 auto;
-  /* Floor at one viewport so the footer sits at the bottom before JSON fills
-     in, without reserving extra height that would leave an empty dark band
-     between the content and the footer once the page is loaded. flex:1 0 auto
-     then grows the panel to its real content height. vh (stable large-viewport
-     unit) keeps this constant while the mobile URL bar shows/hides. */
-  min-height: calc(100vh - var(--header-h));
+  flex: 0 0 auto;
+  /* Height follows content — no vh floor. vh-based min-heights grow with zoom
+     out / 4K and leave a large empty band between Tools and the footer. The
+     site footer uses margin-top: auto on body for short-page stickiness. */
 }
 
 /* Wider breakout only for Best Works; keep Resume / Portfolio / Contact at main width */
@@ -816,9 +813,15 @@ a.home-recommendations__name--link:focus-visible {
   outline: none;
 }
 
-/* Roll panels */
+/* Roll panels — min-height only while resume/contact is open (room for the
+   roll animation). On the main Best Works view, height follows content so
+   zoom-out / 4K doesn't reserve a 105vh band below Tools. */
 .home-panel-wrap {
   position: relative;
+}
+
+.home-panel-wrap:has(.home-panel--resume.is-visible),
+.home-panel-wrap:has(.home-panel--contact.is-visible) {
   min-height: min(850px, 105vh);
 }
 
