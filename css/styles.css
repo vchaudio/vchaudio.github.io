@@ -193,6 +193,8 @@ img:not(.brand-vch-mark):not(.page-overview-banner__img):not(.avatar-photo) {
   letter-spacing: 0.06em;
   color: var(--text);
   text-decoration: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .brand span {
@@ -465,6 +467,9 @@ main.page-other-projects {
   max-height: min(32vw, 200px);
   object-fit: contain;
   animation: logo-breathe 2s ease-in-out 0.85s infinite;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 @media (min-width: 480px) {
@@ -761,6 +766,42 @@ details.spoiler[open] .spoiler-chevron {
 /* Fallback when JavaScript is disabled */
 details.spoiler[open] .spoiler-body {
   max-height: 3200px;
+}
+
+/* —— Project / sub-page spoilers: the summary label is a copy-link anchor and
+   the open/close toggle is the chevron icon only, so the hover affordance and
+   pointer cursor belong on the chevron — not the whole summary/card top. —— */
+.project-page-spoilers details.spoiler summary {
+  cursor: default;
+}
+.project-page-spoilers details.spoiler .spoiler-summary-label,
+.project-page-spoilers details.spoiler .spoiler-chevron {
+  cursor: pointer;
+}
+/* No summary background highlight or press feedback on hover. */
+.project-page-spoilers details.spoiler summary:hover {
+  background: transparent;
+}
+.project-page-spoilers details.spoiler summary:active {
+  transform: none;
+}
+/* The chevron stays neutral while the rest of the summary is hovered… */
+.project-page-spoilers details.spoiler summary:hover .spoiler-chevron {
+  background: var(--surface);
+}
+/* …and highlights only on its own hover (kept after the rule above and made
+   specific enough to also beat the .spoiler--no-hover override). */
+.project-page-spoilers details.spoiler summary .spoiler-chevron:hover,
+.project-page-spoilers details.spoiler.spoiler--no-hover:not([open]) .spoiler-chevron:hover {
+  background: var(--surface-hover);
+}
+/* No card lift from hovering the closed card body. */
+.project-page-spoilers details.spoiler:not([open]):hover,
+.project-page-spoilers details.spoiler:not([open]):focus-within {
+  background: var(--bg-elevated);
+  border-color: rgba(255, 255, 255, 0.06);
+  transform: none;
+  box-shadow: var(--shadow);
 }
 
 @keyframes spoiler-roll-open {

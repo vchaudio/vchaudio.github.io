@@ -5,6 +5,119 @@
   var VIEW_RESUME = "resume";
   var VIEW_CONTACT = "contact";
 
+  /* Replace the URL hash without adding history entries (so the Back button
+     isn't filled with view/tab switches). The hash is a copyable snapshot of
+     the current view / Resume sub-tab. */
+  function setHash(hash) {
+    var next = hash ? "#" + hash : "";
+    if (location.hash === next) return;
+    try {
+      history.replaceState(null, "", next || location.pathname + location.search);
+    } catch (e) {}
+  }
+
+  function headerHeight() {
+    var header = document.querySelector(".site-header");
+    return header ? header.getBoundingClientRect().height : 72;
+  }
+  var ANCHOR_GAP = 24;
+  /* Force <html> scroll-behavior to `auto` (it's smooth by default) so our own
+     frames control the motion, then restore it. */
+  function withInstantBehavior(fn) {
+    var root = document.documentElement;
+    var prevBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    fn();
+    requestAnimationFrame(function () { root.style.scrollBehavior = prevBehavior; });
+  }
+  /* Jump to the anchor instantly (no smooth-scroll) — landing via a deep link
+     should open already at the block, not scroll to it. */
+  function instantScrollTo(targetTop) {
+    withInstantBehavior(function () {
+      window.scrollTo(0, Math.max(0, targetTop));
+    });
+  }
+  /* Ease from the current scroll position to the target over `duration` ms
+     (used for the Studio tab-row dock, which should glide rather than snap). */
+  function animateScrollTo(targetTop, duration) {
+    var root = document.documentElement;
+    var prevBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    var startTop = window.scrollY;
+    var startTime = performance.now();
+    var target = Math.max(0, targetTop);
+    function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function step(now) {
+      var t = Math.min(1, (now - startTime) / duration);
+      window.scrollTo(0, startTop + (target - startTop) * ease(t));
+      if (t < 1) requestAnimationFrame(step);
+      else root.style.scrollBehavior = prevBehavior;
+    }
+    requestAnimationFrame(step);
+  }
+  function scrollToAnchor(el, duration) {
+    if (!el) return;
+    var top = el.getBoundingClientRect().top + window.scrollY - headerHeight() - ANCHOR_GAP;
+    if (duration && duration > 0) animateScrollTo(top, duration);
+    else instantScrollTo(top);
+  }
+
+  function copyLinkToClipboard(hash) {
+    var base = location.href.split("#")[0];
+    var full = base + (hash ? "#" + hash : "");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(full).catch(function () {});
+      return;
+    }
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = full;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch (e) {}
+  }
+
+  function flashCopied(el) {
+    if (!el) return;
+    el.style.transition = "opacity 0.15s ease";
+    el.style.opacity = "0.45";
+    setTimeout(function () {
+      el.style.opacity = "";
+      setTimeout(function () { el.style.transition = ""; }, 170);
+    }, 150);
+  }
+
+  /* Resume sub-section anchors (deep-linkable + click heading to copy). */
+  var RESUME_SECTION_IDS = ["general", "experience", "education", "skills"];
+  function isResumeSectionHash(hash) {
+    return RESUME_SECTION_IDS.indexOf(hash) >= 0;
+  }
+
+  function initResumeSectionAnchors() {
+    var panel = document.getElementById("home-tab-panel-resume");
+    if (!panel) return;
+    RESUME_SECTION_IDS.forEach(function (id) {
+      var section = document.getElementById(id);
+      if (!section || !panel.contains(section)) return;
+      var heading = section.querySelector("h1, h2, h3");
+      if (!heading) return;
+      heading.style.cursor = "pointer";
+      heading.style.userSelect = "none";
+      heading.style.webkitUserSelect = "none";
+      heading.title = "Copy link to this section";
+      heading.addEventListener("click", function () {
+        copyLinkToClipboard(id);
+        flashCopied(heading);
+      });
+    });
+  }
+
   function initHomeTabGroup(tablistSelector, defaultTab, onLayoutChange) {
     var tablist = document.querySelector(tablistSelector);
     if (!tablist) {
@@ -86,6 +199,9 @@
       },
       getTab: function () {
         return active;
+      },
+      select: function (key) {
+        if (panels[key]) switchTab(key);
       },
     };
   }
@@ -713,7 +829,10 @@
     }
 
     var resumeTabs = initHomeTabGroup('[data-home-tablist="resume"]', "resume", function () {
-      if (view === VIEW_RESUME) remeasurePanelInstant(panelResume);
+      if (view === VIEW_RESUME) {
+        remeasurePanelInstant(panelResume);
+        setHash(resumeTabs.getTab() === "studio" ? "studio" : "resume");
+      }
     });
 
     function replayPanelRoll(inner, mode) {
@@ -867,6 +986,9 @@
       if (animating || next === view) return;
       animating = true;
       applyView(next, { animate: true });
+      if (next === VIEW_MAIN) setHash("");
+      else if (next === VIEW_CONTACT) setHash("contact");
+      else if (next === VIEW_RESUME) setHash(resumeTabs.getTab() === "studio" ? "studio" : "resume");
       setTimeout(
         function () {
           animating = false;
@@ -1212,6 +1334,56 @@
 
     initIndexScrollToTop();
     applyView(VIEW_MAIN, { initialLoad: true });
+
+    /* Deep-link landing on the homepage. #resume / #studio open the Resume
+       view and dock on the Resume/My Studio tab row (the switcher), instantly —
+       no smooth scroll, the page opens already at that place. #general /
+       #experience / #skills / #education open the Resume view and jump to that
+       sub-section once the panel has finished unfolding. For #studio, set the
+       My Studio sub-tab first so the panel opens straight on Studio — Resume
+       never flashes in between. */
+    (function landHomeHash() {
+      var key = location.hash.replace(/^#/, "");
+      function landTablist(duration) {
+        var tabs = document.querySelector('[data-home-tablist="resume"]');
+        if (tabs) scrollToAnchor(tabs, duration);
+      }
+      /* Dock at the very top of the page. The hero (name / photo / bio) lives
+         above the panels and stays visible when Resume opens, so #resume
+         landing there is the natural entry point. */
+      function landTop() {
+        var root = document.documentElement;
+        var prevBehavior = root.style.scrollBehavior;
+        root.style.scrollBehavior = "auto";
+        window.scrollTo(0, 0);
+        requestAnimationFrame(function () { root.style.scrollBehavior = prevBehavior; });
+      }
+      if (key === "contact") switchView(VIEW_CONTACT);
+      else if (key === "resume") {
+        switchView(VIEW_RESUME);
+        landTop();
+      } else if (key === "studio") {
+        resumeTabs.select("studio");
+        switchView(VIEW_RESUME);
+        /* select() → switchTab schedules a rAF that restores the scroll
+           position captured before the panel opened, which would undo the
+           dock. Wait two frames so that restore (and its resize dispatch)
+           runs first, then dock on the tab row. */
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            landTablist(900);
+          });
+        });
+      } else if (isResumeSectionHash(key)) {
+        switchView(VIEW_RESUME);
+        setHash(key); /* keep the sub-section hash (switchView would set #resume) */
+        setTimeout(function () {
+          scrollToAnchor(document.getElementById(key));
+        }, reduceMotion ? 0 : 480);
+      }
+    })();
+
+    initResumeSectionAnchors();
 
     function resizeRemeasurePanels() {
       if (videosAnimating) return;

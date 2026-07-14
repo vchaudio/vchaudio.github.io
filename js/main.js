@@ -1,6 +1,69 @@
 (function () {
   "use strict";
 
+  /* Replace the URL hash without adding history entries (so the Back button
+     isn't filled with tab switches). The hash is just a copyable snapshot of
+     the current section/tab/view. */
+  function setHash(hash) {
+    var next = hash ? "#" + hash : "";
+    if (location.hash === next) return;
+    try {
+      history.replaceState(null, "", next || location.pathname + location.search);
+    } catch (e) {}
+  }
+
+  /* Scroll so the top of `el` sits just below the fixed header, with a small
+     extra gap. Uses an explicit offset instead of scrollIntoView so the gap is
+     consistent regardless of scroll-padding. */
+  var ANCHOR_GAP = 24;
+  function scrollToAnchor(el) {
+    if (!el) return;
+    var header = document.querySelector(".site-header");
+    var headerH = header ? header.getBoundingClientRect().height : 72;
+    var top = el.getBoundingClientRect().top + window.scrollY - headerH - ANCHOR_GAP;
+    window.scrollTo(0, Math.max(0, top));
+  }
+  function headerHeight() {
+    var header = document.querySelector(".site-header");
+    return header ? header.getBoundingClientRect().height : 72;
+  }
+
+  /* Copy the current page URL with the given hash to the clipboard, silently
+     (no toast / message). Falls back to a hidden textarea for browsers without
+     the async clipboard API. */
+  function copyLinkToClipboard(hash) {
+    var base = location.href.split("#")[0];
+    var full = base + (hash ? "#" + hash : "");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(full).catch(function () {});
+      return;
+    }
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = full;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch (e) {}
+  }
+
+  /* Brief, subtle opacity dip so the user sees the click registered (not a
+     message — just a faint flash on the heading itself). */
+  function flashCopied(el) {
+    if (!el) return;
+    el.style.transition = "opacity 0.15s ease";
+    el.style.opacity = "0.45";
+    setTimeout(function () {
+      el.style.opacity = "";
+      setTimeout(function () { el.style.transition = ""; }, 170);
+    }, 150);
+  }
+
   function parentWidth(details) {
     var p = details.parentElement;
     return p ? p.clientWidth : 720;
@@ -52,6 +115,12 @@
       if (!body || !inner || !summary) return;
 
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      /* Project / sub-page spoilers live in full-width containers; their
+         summary label doubles as a deep-link anchor (click to copy), so the
+         open/close toggle is restricted to the chevron icon. Home (tile)
+         spoilers keep the whole-summary click to toggle, as before. */
+      var isProjectSpoiler = !!details.closest(".vm-xctrl-spoilers, .project-page-spoilers");
+      var label = details.querySelector(".spoiler-summary-label");
 
       function setHeight(open) {
         if (open) {
@@ -62,7 +131,14 @@
       }
 
       summary.addEventListener("click", function (e) {
-        if (reduceMotion) return;
+        var onChevron = e.target && e.target.closest && e.target.closest(".spoiler-chevron");
+        if (isProjectSpoiler && !onChevron) {
+          /* Clicking the label or summary padding must not toggle — the label
+             copies the deep-link instead. Cancel the native toggle. */
+          e.preventDefault();
+          return;
+        }
+        if (reduceMotion) return; /* let the native toggle happen (chevron only, for project spoilers) */
 
         if (!details.open) {
           e.preventDefault();
@@ -74,6 +150,20 @@
           closeSpoiler(details);
         }
       });
+
+      /* Click the spoiler's name to copy its deep-link (project spoilers that
+         have an anchor id assigned by render.js). Silent copy, faint flash. */
+      if (isProjectSpoiler && details.id && label) {
+        label.style.cursor = "pointer";
+        label.style.userSelect = "none";
+        label.style.webkitUserSelect = "none";
+        label.title = "Copy link to this section";
+        label.addEventListener("click", function (e) {
+          e.preventDefault();
+          copyLinkToClipboard(details.id);
+          flashCopied(label);
+        });
+      }
 
       details.addEventListener("pointerenter", function () {
         if (details.open) return;
@@ -1321,6 +1411,7 @@
           return t.getAttribute("aria-selected") === "true";
         }) || tabs[0];
       var activeKey = active ? active.getAttribute("data-project-tab") : null;
+      var defaultKey = activeKey;
       var panelsWrap = tablist.parentElement
         ? tablist.parentElement.querySelector(".project-portfolio-tab-panels")
         : null;
@@ -1336,14 +1427,26 @@
       }
 
       function clampScrollAfterTabResize() {
+        if (landing) return;
         var maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
         if (window.scrollY > maxScroll) {
           window.scrollTo(0, maxScroll);
         }
       }
 
+      /* Deep-link landing state. While landing we suppress the scroll clamp so
+         it can't yank the scroll back as the active panel's async layout
+         (video scrollers, images) settles. */
+      var landing = false;
+      var landingRO = null;
+      function cancelLanding() {
+        landing = false;
+        if (landingRO) { try { landingRO.disconnect(); } catch (e) {} landingRO = null; }
+      }
+
       function switchTab(next) {
         if (!panels[next] || next === activeKey) return;
+        cancelLanding();
         activeKey = next;
         tabs.forEach(function (tab) {
           var on = tab.getAttribute("data-project-tab") === next;
@@ -1356,10 +1459,13 @@
           var on = key === next;
           panel.classList.toggle("is-tab-inactive", !on);
           panel.setAttribute("aria-hidden", on ? "false" : "true");
+          /* Clear any temporary scroll-room minHeight set by deep-link landing. */
+          panel.style.minHeight = "";
         });
         refreshPanelScrollers(panels[next]);
         clampScrollAfterTabResize();
         requestAnimationFrame(clampScrollAfterTabResize);
+        setHash(next === defaultKey ? "" : next);
       }
 
       if (panelsWrap && activeKey && panels[activeKey]) {
@@ -1397,6 +1503,61 @@
         e.preventDefault();
         tabs[next].focus();
         switchTab(tabs[next].getAttribute("data-project-tab"));
+      });
+
+      /* Deep-link landing: if the URL hash matches a tab key, activate that tab
+         and scroll to its panel (the block) — docked just below the header with
+         a small gap. The default tab still scrolls so every tab link lands
+         consistently. Because inactive panels are absolutely positioned with
+         height:0, a short active panel can leave the page too short to scroll
+         its title to the top — so we give the landed panel temporary
+         scroll-room (cleared on the next tab click). A ResizeObserver keeps
+         re-scrolling as the panel's async layout (video scrollers, images)
+         settles, and the clamp is suppressed meanwhile so it can't fight us. */
+      var hashKey = location.hash.replace(/^#/, "");
+      if (hashKey && panels[hashKey]) {
+        if (hashKey !== activeKey) switchTab(hashKey);
+        var panel = panels[hashKey];
+        landing = true;
+        function landScroll() {
+          var need = window.innerHeight - headerHeight() - ANCHOR_GAP - 64;
+          if (panel.getBoundingClientRect().height < need) {
+            panel.style.minHeight = need + "px";
+          }
+          scrollToAnchor(panel);
+        }
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            landScroll();
+            if (typeof ResizeObserver !== "undefined") {
+              landingRO = new ResizeObserver(function () { landScroll(); });
+              landingRO.observe(panel);
+              setTimeout(cancelLanding, 900);
+            } else {
+              setTimeout(landScroll, 140);
+              setTimeout(landScroll, 380);
+              setTimeout(cancelLanding, 900);
+            }
+          });
+        });
+      }
+
+      /* Click a panel heading -> copy this tab's deep-link to the clipboard
+         (projects only; tabbed project pages are the only ones with a
+         data-project-tablist). Silent copy, faint flash on the heading. */
+      Object.keys(panels).forEach(function (key) {
+        var p = panels[key];
+        if (!p) return;
+        var heading = p.querySelector("h1, h2, h3");
+        if (!heading) return;
+        heading.style.cursor = "pointer";
+        heading.style.userSelect = "none";
+        heading.style.webkitUserSelect = "none";
+        heading.title = "Copy link to this section";
+        heading.addEventListener("click", function () {
+          copyLinkToClipboard(key);
+          flashCopied(heading);
+        });
       });
     });
   }

@@ -529,7 +529,7 @@
     clear(panel);
 
     /* General */
-    var general = h("section", { class: "resume-section reveal" }, [
+    var general = h("section", { class: "resume-section reveal", id: "general" }, [
       h("h2", { class: "resume-section__heading", text: "General" }),
       infoGrid([
         ["First name", resume.general.firstName],
@@ -547,7 +547,7 @@
     /* Experience */
     var expList = h("div", { class: "experience-list" });
     resume.experience.forEach(function (job) { expList.appendChild(buildJobCard(job)); });
-    panel.appendChild(h("section", { class: "resume-section reveal" }, [
+    panel.appendChild(h("section", { class: "resume-section reveal", id: "experience" }, [
       h("h2", { class: "resume-section__heading", text: "Experience" }),
       expList
     ]));
@@ -565,7 +565,7 @@
           e.degree ? h("p", { class: "job-card__role", text: e.degree }) : null
         ]));
       });
-      panel.appendChild(h("section", { class: "resume-section reveal" }, [
+      panel.appendChild(h("section", { class: "resume-section reveal", id: "education" }, [
         h("h2", { class: "resume-section__heading", text: "Education" }),
         eduList
       ]));
@@ -589,7 +589,7 @@
     skillsWrap.appendChild(h("p", { class: "resume-pdf-download" }, [
       h("a", { class: "resume-pdf-download__link", href: site.resumePdf, download: "", type: "application/pdf", text: site.resumePdfLabel })
     ]));
-    panel.appendChild(h("section", { class: "resume-section reveal" }, [
+    panel.appendChild(h("section", { class: "resume-section reveal", id: "skills" }, [
       h("h2", { class: "resume-section__heading", text: "Skills" }),
       skillsWrap
     ]));
@@ -1102,6 +1102,8 @@
       main.parentNode.insertBefore(banner, main);
     }
 
+    assignProjectBlockIds(main);
+
     /* Start entrance in the same turn as DOM insert — first paint is already visible. */
     (function primeProjectEnter() {
       var reduceMotion = false;
@@ -1117,6 +1119,54 @@
       });
     })();
     revealSiteChrome();
+    document.dispatchEvent(new CustomEvent("vch:project-rendered", { detail: { slug: project.slug } }));
+  }
+
+  /* ---------- deep-link anchor ids for project page blocks ----------
+     Each top-level block in #project-main gets a stable id derived from its
+     heading text, so the page can be deep-linked (#<slug>) and scroll-spy can
+     update the URL hash as the user scrolls between blocks. */
+  function slugifyBlock(text) {
+    return String(text == null ? "" : text)
+      .trim()
+      .toLowerCase()
+      .replace(/&[a-z0-9#]+;/gi, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function assignProjectBlockIds(main) {
+    var taken = {};
+    var spoilers = [];
+    [].slice.call(main.children).forEach(function (child) {
+      if (child.id) return;
+      if (child.querySelector("details.spoiler")) {
+        /* Spoiler group: anchor each <details> individually by its summary
+           label, not the wrapper. */
+        [].slice.call(child.querySelectorAll("details.spoiler")).forEach(function (d) {
+          if (d.id) { taken[d.id] = true; return; }
+          spoilers.push(d);
+        });
+        return;
+      }
+      var headingEl = child.querySelector("h1, h2, h3");
+      var slug = slugifyBlock(headingEl ? headingEl.textContent : "");
+      if (!slug) return;
+      var id = slug, n = 1;
+      while (document.getElementById(id) || taken[id]) { n++; id = slug + "-" + n; }
+      taken[id] = true;
+      child.id = id;
+    });
+    spoilers.forEach(function (d) {
+      var label = d.querySelector(".spoiler-summary-label");
+      var slug = slugifyBlock(label ? label.textContent : "");
+      if (!slug) return;
+      var id = slug, n = 1;
+      while (document.getElementById(id) || taken[id]) { n++; id = slug + "-" + n; }
+      taken[id] = true;
+      d.id = id;
+    });
   }
 
   function buildProjectBlock(block, project) {
@@ -1431,11 +1481,11 @@
         var type = pageType();
         if (type === "project") {
           renderProject(data);
-          return loadScript("js/main.js").then(function () { return loadScript("js/audio-player.js"); });
+          return loadScript("js/main.js?v=20260714a").then(function () { return loadScript("js/audio-player.js"); });
         }
         if (type === "home") {
           renderHome(data);
-          return loadScript("js/main.js").then(function () { return loadScript("js/home.js"); });
+          return loadScript("js/main.js?v=20260714a").then(function () { return loadScript("js/home.js?v=20260714a"); });
         }
       })
       .catch(function (err) {

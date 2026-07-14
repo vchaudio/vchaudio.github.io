@@ -41,6 +41,17 @@
       if (pending) sessionStorage.removeItem(STORAGE);
     } catch (e2) {}
 
+    /* A page refresh (F5 / Ctrl+R) keeps document.referrer from the original
+       navigation, so the referrer-based fallback below would replay the brand
+       re-home animation on every refresh. On reload the brand should just sit
+       in its home spot — skip the arrival animation entirely. */
+    var navType = "navigate";
+    try {
+      var nav = performance.getEntriesByType && performance.getEntriesByType("navigation");
+      if (nav && nav[0] && nav[0].type) navType = nav[0].type;
+    } catch (eN) {}
+    if (navType === "reload") return;
+
     if (pending === "to-index" && here === "index") {
       document.documentElement.classList.add("nav-from-sub");
       return;
