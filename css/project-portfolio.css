@@ -4,29 +4,35 @@ main.project-page--hero-glow {
   max-width: min(1200px, 100%);
 }
 
-/* Project overview pages: load entrance (banner + staggered blocks), not scroll reveal */
+/* Project overview pages: load entrance (banner + staggered blocks), not scroll reveal.
+   Start at 10% opacity, not 0 — the banner box otherwise shows a brief dark flash
+   for the first few frames (0% held by the ease-out curve + 0.06s delay) before the
+   image blooms in. 10% is enough to read as "image loading" rather than "black gap",
+   while the full 0.9s ease-out still resolves to 100%. Start at 0.2 (not 0.1)
+   so even the first painted frame reads as image, not a dark flash; delay removed
+   so it blooms immediately (no hold at the start value). */
 .page-overview-banner .page-overview-banner__img {
-  opacity: 0;
+  opacity: 0.2;
   transform: scale(1.08) translateY(8px);
 }
 
 .page-overview-banner.project-enter .page-overview-banner__img {
-  animation: project-banner-in 0.9s var(--ease-out) 0.06s both;
+  animation: project-banner-in 0.9s var(--ease-out) both;
 }
 
 /* VM-XCtrl: composite hero (contain), same entrance as full-bleed banners */
 .page-overview-banner--vm-xctrl-hero .vm-xctrl-hero-banner {
-  opacity: 0;
+  opacity: 0.2;
   transform: scale(1.08) translateY(8px);
 }
 
 .page-overview-banner--vm-xctrl-hero.project-enter .vm-xctrl-hero-banner {
-  animation: project-banner-in 0.9s var(--ease-out) 0.06s both;
+  animation: project-banner-in 0.9s var(--ease-out) both;
 }
 
 @keyframes project-banner-in {
   from {
-    opacity: 0;
+    opacity: 0.2;
     transform: scale(1.08) translateY(8px);
   }
   to {
