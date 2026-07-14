@@ -2,6 +2,16 @@
 <html lang="en" style="background-color:#0a0908;color-scheme:dark">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function () {
+        var h = location.hash;
+        if (!h) return;
+        window.__vchPendingHash = h;
+        if (history.scrollRestoration) history.scrollRestoration = "manual";
+        history.replaceState(null, "", location.pathname + location.search);
+        window.scrollTo(0, 0);
+      })();
+    </script>
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0a0908" />
     <style>
@@ -67,7 +77,7 @@
     <noscript>
       <p style="padding:2rem;text-align:center">This site requires JavaScript to display content.</p>
     </noscript>
-    <script src="js/render.js?v=20260714o" defer></script>
-    <script src="js/deeplink.js?v=20260714l" defer></script>
+    <script src="js/render.js?v=20260714p" defer></script>
+    <script src="js/deeplink.js?v=20260714m" defer></script>
   </body>
 </html>

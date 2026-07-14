@@ -1056,6 +1056,13 @@
 
   /* ---------- project detail rendering ---------- */
   function renderProject(data) {
+    /* Strip the hash before block ids land in the DOM — otherwise the browser
+       scrolls to #anchor natively when assignProjectBlockIds runs, then
+       deeplink.js dockOnce scrolls again (the visible double attach). */
+    if (location.hash) {
+      if (!window.__vchPendingHash) window.__vchPendingHash = location.hash;
+      history.replaceState(null, "", location.pathname + location.search);
+    }
     var params = new URLSearchParams(location.search);
     var slug = params.get("slug");
     var project = null;

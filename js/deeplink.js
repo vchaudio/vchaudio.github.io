@@ -90,6 +90,7 @@
   }
 
   var initialized = false;
+  var globalDocked = false;
   function init() {
     if (initialized) return;
     /* Skip pages that manage their own hash. */
@@ -128,7 +129,8 @@
        has had time to finish. ResizeObserver on the target + <main> re-docks
        through any late shift. Add ?debug=1 to the URL to log every dock. */
     var DEBUG = /[?&]debug=1(?=&|$)/.test(location.search);
-    var key = location.hash.replace(/^#/, "");
+    var pendingHash = window.__vchPendingHash || location.hash;
+    var key = pendingHash.replace(/^#/, "");
     if (key) {
       var hit = blocks.filter(function (b) { return b.anchor === key; })[0];
       var target = hit ? hit.el : document.getElementById(key);
@@ -152,7 +154,8 @@
            already correct. The landing window stays open only to suppress the
            scroll clamp until fonts + min hold elapse. */
         function dockOnce() {
-          if (docked) return;
+          if (globalDocked || docked) return;
+          globalDocked = true;
           docked = true;
           var heading = target.querySelector("h1, h2, h3");
           var anchorEl = heading || target;
@@ -160,6 +163,9 @@
           var cur = anchorEl.getBoundingClientRect().top;
           var delta = cur - want;
           if (Math.abs(delta) >= 0.5) window.scrollBy(0, delta);
+          if (pendingHash && location.hash !== pendingHash) {
+            history.replaceState(null, "", location.pathname + location.search + pendingHash);
+          }
           if (DEBUG) {
             dbg("sync", {
               anchor: key,
