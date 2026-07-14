@@ -1213,21 +1213,40 @@
     initIndexScrollToTop();
     applyView(VIEW_MAIN, { initialLoad: true });
 
-    window.addEventListener(
-      "resize",
-      function () {
-        if (videosAnimating) return;
-        var cols = bestWorksVideoCols();
-        var layoutChanged = cols !== lastVideoLayoutCols;
-        if (layoutChanged) syncVideosPrimaryLayout();
-        if (view === VIEW_MAIN) {
-          setPanelOpen(panelMain, true);
-          if (layoutChanged) remeasurePanelInstant(panelMain);
-        } else if (view === VIEW_RESUME) setPanelOpen(panelResume, true);
-        else if (view === VIEW_CONTACT) setPanelOpen(panelContact, true);
-      },
-      { passive: true }
-    );
+    function resizeRemeasurePanels() {
+      if (videosAnimating) return;
+      var cols = bestWorksVideoCols();
+      var layoutChanged = cols !== lastVideoLayoutCols;
+      if (layoutChanged) syncVideosPrimaryLayout();
+      var panel =
+        view === VIEW_MAIN ? panelMain :
+        view === VIEW_RESUME ? panelResume :
+        view === VIEW_CONTACT ? panelContact : null;
+      if (!panel || !panel.classList.contains("is-visible")) return;
+      /* The main panel in flow mode (max-height: none) auto-adapts to its
+         content — nothing to lock. */
+      if (panel === panelMain && panel.classList.contains("home-panel--flow")) return;
+      var h = measurePanel(panel, { live: true });
+      if (h <= 0) return;
+      /* Only rewrite the locked height when it actually changed. On mobile
+         the URL bar showing/hiding fires resize continuously while the
+         content height stays the same; rewriting the inline height on every
+         one (and especially the scroll-preserve that remeasurePanelInstant
+         does via window.scrollTo) would fight the user's momentum scroll —
+         the footer jumps, the resume view anchors back to the languages
+         graph, and the studio tab flashes. When the height is unchanged we
+         do nothing, so scrolling stays smooth. */
+      if (panel.style.maxHeight === h + "px") return;
+      panel.classList.add("home-panel--instant-height");
+      panel.style.maxHeight = h + "px";
+      /* Force a reflow so the height change is applied while
+         transition: none (--instant-height) is in effect, then drop the
+         class so transitions are restored for later animations. */
+      void panel.offsetWidth;
+      panel.classList.remove("home-panel--instant-height");
+    }
+
+    window.addEventListener("resize", resizeRemeasurePanels, { passive: true });
 
     initContactForm();
     initContactMessageField();

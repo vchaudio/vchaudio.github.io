@@ -40,23 +40,12 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: #0a0908;
+  /* Canvas / page base — matches the bottom of the ambient gradient so the
+     area below the first viewport (and overscroll) is the same dark color,
+     never a stark black gap. */
+  background-color: #080706;
   color-scheme: dark;
   scroll-padding-top: var(--header-h);
-}
-
-html::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(ellipse 115% 80% at 50% -10%, rgba(255, 200, 140, 0.24), transparent 52%),
-    radial-gradient(ellipse 65% 50% at 0% 100%, rgba(228, 160, 74, 0.1), transparent 58%),
-    linear-gradient(160deg, #2e261f 0%, #1a1612 32%, var(--bg) 58%, #080706 100%);
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -76,8 +65,10 @@ body {
   position: relative;
   z-index: 1;
   margin: 0;
+  /* vh (stable large-viewport unit) — dvh would grow as the mobile URL bar
+     hides on scroll, growing the empty space above the footer and revealing
+     a dark band. vh keeps the footer at the bottom without that growth. */
   min-height: 100vh;
-  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   padding-top: var(--header-h);
@@ -86,7 +77,34 @@ body {
   font-size: 1rem;
   line-height: 1.6;
   color: var(--text);
-  background: transparent;
+  /* Ambient gradient — static and viewport-locked (the original look: warm
+     glow at the top, dark at the bottom, and it does NOT move with the page).
+     Implemented on <body> with background-attachment: fixed, NOT as a
+     position:fixed html::before pseudo-element (which detaches from the
+     viewport on mobile during scroll and leaves the black gaps), and NOT
+     scroll-sized (which stretched the gradient over the document height,
+     lightening the background on the short Resume view, moving with Show More,
+     and mismatching the dark gradient on the project banner image).
+     background-attachment: fixed paints the gradient on the viewport canvas,
+     so it is a static background (no positioned element to detach → no black
+     gaps) and is independent of document height. background-size: 100% 100%
+     resolves against the viewport for fixed attachment, so the gradient is
+     identical to the original fixed html::before. html's background-color
+     (#080706) matches the gradient bottom for overscroll. */
+  background-image:
+    radial-gradient(ellipse 115% 80% at 50% -10%, rgba(255, 200, 140, 0.24), transparent 52%),
+    radial-gradient(ellipse 65% 50% at 0% 100%, rgba(228, 160, 74, 0.1), transparent 58%),
+    linear-gradient(160deg, #2e261f 0%, #1a1612 32%, var(--bg) 58%, #080706 100%);
+  background-repeat: no-repeat;
+  /* Height = 100vh (the LARGE viewport, i.e. with the mobile address bar
+     hidden), not 100% of the current viewport. With 100%, the gradient was
+     sized to the small viewport (address bar visible) and when scrolling hid
+     the address bar, the bottom of the page was exposed as a black block
+     (uncovered html base). 100vh always covers the largest viewport, so
+     nothing is exposed during the address-bar show/hide transition. Width
+     stays 100% (unchanged by the address bar). */
+  background-size: 100% 100vh;
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -103,7 +121,10 @@ body > .site-footer {
 
 #project-main {
   flex: 1 0 auto;
-  min-height: calc(100dvh - var(--header-h) - 5rem);
+  /* vh (stable large-viewport unit) so the mobile URL bar showing/hiding
+     mid-scroll doesn't grow this min-height and reveal an empty dark band
+     above the footer. */
+  min-height: calc(100vh - var(--header-h) - 5rem);
 }
 
 a {

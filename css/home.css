@@ -20,8 +20,12 @@ html { overflow-x: clip; }
 main.home-main {
   max-width: min(960px, 100%);
   flex: 1 0 auto;
-  /* Reserve space before JSON fills rows — scrollbar + footer position stay stable. */
-  min-height: calc(100dvh - var(--header-h) + 70vh);
+  /* Floor at one viewport so the footer sits at the bottom before JSON fills
+     in, without reserving extra height that would leave an empty dark band
+     between the content and the footer once the page is loaded. flex:1 0 auto
+     then grows the panel to its real content height. vh (stable large-viewport
+     unit) keeps this constant while the mobile URL bar shows/hides. */
+  min-height: calc(100vh - var(--header-h));
 }
 
 /* Wider breakout only for Best Works; keep Resume / Portfolio / Contact at main width */
@@ -2806,9 +2810,10 @@ a.job-card.job-card--to-project:focus-visible .job-card__project {
   to { opacity: 1; }
 }
 
-/* Fade the incoming tab content in on Resume ↔ My Studio switch. */
+/* Fade the incoming tab content in on Resume ↔ My Studio switch.
+   Gentle opacity-only crossfade — no collapse, no black flash. */
 .home-tab-panel--fade {
-  animation: home-tab-fade-in 0.3s var(--ease-out) both;
+  animation: home-tab-fade-in 0.22s var(--ease-out) both;
 }
 
 .home-tab-studio__lead {

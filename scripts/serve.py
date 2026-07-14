@@ -12,6 +12,7 @@ import http.server
 import socketserver
 import sys
 import os
+import socket
 import urllib.parse
 import posixpath
 
@@ -70,20 +71,43 @@ class Server(socketserver.TCPServer):
     allow_reuse_address = True
 
 
+def lan_address(port):
+    """Best-effort primary LAN IPv4 address (so a phone on the same network
+    can reach the server). Falls back to 127.0.0.1 if none is found."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except OSError:
+        return "127.0.0.1"
+
+
 def main():
     handler = Handler
+    host = "0.0.0.0"
     try:
-        httpd = Server(("127.0.0.1", PORT), handler)
+        httpd = Server((host, PORT), handler)
     except OSError as e:
-        print("Could not bind to 127.0.0.1:%d — %s" % (PORT, e))
+        print("Could not bind to %s:%d — %s" % (host, PORT, e))
         print("Try another port:  python scripts/serve.py 8080")
         sys.exit(1)
     with httpd:
-        url = "http://127.0.0.1:%d/" % PORT
+        local_url = "http://127.0.0.1:%d/" % PORT
+        lan_ip = lan_address(PORT)
+        lan_url = "http://%s:%d/" % (lan_ip, PORT) if lan_ip != "127.0.0.1" else None
         print("Serving %s" % ROOT)
-        print("  Site:    %s" % url)
-        print("  Admin:   %sadmin/" % url)
+        print("  Local:   %s" % local_url)
+        if lan_url:
+            print("  LAN:     %s   (open this on your phone, same Wi-Fi)" % lan_url)
+        print("  Admin:   %sadmin/" % local_url)
         print("  (no-cache headers on — Ctrl+C to stop)")
+        if lan_url:
+            print("")
+            print("  NOTE: bound to 0.0.0.0 so other devices on your LAN can")
+            print("  connect. If your phone can't reach it, allow Python through")
+            print("  the Windows Firewall (Private networks) when prompted.")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
