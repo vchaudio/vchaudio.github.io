@@ -1573,7 +1573,21 @@
           if (panel.getBoundingClientRect().height < need) {
             panel.style.minHeight = need + "px";
           }
+          /* Closed-loop dock: jump near the panel, then measure the heading's
+             ACTUAL viewport position and nudge the scroll so it sits exactly at
+             header + gap. This is robust to entrance/reveal transforms and late
+             layout shifts — it corrects whatever offset is present at the time,
+             rather than trusting the panel's bounding rect to be transform-free.
+             Re-called periodically and on fonts.ready / window.load so it
+             re-settles once animations finish. */
+          var heading = panel.querySelector("h1, h2, h3");
           scrollToAnchor(panel);
+          if (heading) {
+            var want = headerHeight() + ANCHOR_GAP;
+            var cur = heading.getBoundingClientRect().top;
+            var delta = cur - want;
+            if (Math.abs(delta) > 1) window.scrollBy(0, delta);
+          }
         }
         function scheduleLandScroll() {
           if (!landing || landingRaf) return;
