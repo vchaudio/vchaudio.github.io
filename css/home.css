@@ -718,6 +718,17 @@ a.home-recommendations__name--link:focus-visible {
 }
 
 /* Site footer — LinkedIn, Mail above copyright */
+body:has([data-home-root][data-home-view="main"]) {
+  /* Don't force a full viewport on the main home view — margin-top: auto on the
+     footer would absorb the leftover as a visible band between Tools and the
+     footer (especially desktop mode on mobile / zoom-out). */
+  min-height: auto;
+}
+
+body:has([data-home-root][data-home-view="main"]) > .site-footer.site-footer--home {
+  margin-top: clamp(1rem, 2vh, 1.75rem);
+}
+
 .site-footer--home {
   display: flex;
   flex-direction: column;

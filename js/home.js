@@ -928,7 +928,6 @@
       if (next === VIEW_MAIN) {
         if (!videosExpanded) syncVideosPrimaryLayout();
         prepareBestWorksPuzzle();
-        if (enteringMain) unlockPanelMainFlow();
       }
 
       setPanelOpen(panelMain, next === VIEW_MAIN, {
@@ -943,6 +942,13 @@
         rollMode: rollOnOpen && next === VIEW_CONTACT ? "open" : null,
         rollClose: rollOnOpen && prev === VIEW_CONTACT && next !== VIEW_CONTACT,
       });
+
+      /* Main view: height follows content unless the videos block is mid-animation
+         or expanded (Show More locks the panel for the grid transition). A leftover
+         max-height on the panel reads as empty space below Tools. */
+      if (next === VIEW_MAIN && !videosExpanded && !videosAnimating) {
+        unlockPanelMainFlow();
+      }
 
       var onMain = next === VIEW_MAIN;
       var homeBottom = document.getElementById("home-bottom");

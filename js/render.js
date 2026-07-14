@@ -1492,7 +1492,7 @@
         }
         if (type === "home") {
           renderHome(data);
-          return loadScript("js/main.js?v=20260714l").then(function () { return loadScript("js/home.js?v=20260714b"); });
+          return loadScript("js/main.js?v=20260714l").then(function () { return loadScript("js/home.js?v=20260714c"); });
         }
       })
       .catch(function (err) {
