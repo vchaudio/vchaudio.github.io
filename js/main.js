@@ -1453,10 +1453,12 @@
       var landing = false;
       var landingRO = null;
       var landingRaf = 0;
+      var landingAbort = null;
       function cancelLanding() {
         landing = false;
         if (landingRaf) { try { cancelAnimationFrame(landingRaf); } catch (e) {} landingRaf = 0; }
         if (landingRO) { try { landingRO.disconnect(); } catch (e) {} landingRO = null; }
+        if (landingAbort) { try { landingAbort(); } catch (e) {} landingAbort = null; }
         /* Restore the site's smooth scroll-behavior (overridden to "auto" while
            landing so the repeated re-scrolls don't fight each other). */
         document.documentElement.style.scrollBehavior = "";
@@ -1531,13 +1533,17 @@
          its title to the top — so we give the landed panel temporary
          scroll-room (cleared on the next tab click).
 
-         On a first visit, content ABOVE the landed panel (banner, hero, the
-         default tab's videos/images) loads async and shifts the panel's
-         position AFTER our initial scroll — so a single scroll lands wrong.
-         We therefore keep re-scrolling until layout settles: a ResizeObserver
-         watches both the panel and <main> (so above-content growth re-scrolls,
-         not just the panel's own size), rAF-throttled, plus a few periodic
-         re-scrolls as a catch-all. The clamp is suppressed meanwhile. */
+         Layout above the landed panel (banner, hero, tablist, web fonts) can
+         settle at very different times depending on cache state: a cold
+         browser start often never swaps fonts in time (no late shift → lands
+         fine), but a warm/already-open browser fetches the web font and swaps
+         it LATE — after a short landing window would have ended — shifting the
+         panel and making the link "miss" until a reload (cached → swaps early).
+         So we keep re-scrolling until layout is truly settled: a ResizeObserver
+         on the panel and <main>, periodic catch-alls spread over a longer
+         window, plus final re-scrolls on document.fonts.ready and window.load
+         (the real "everything loaded" signals). The clamp is suppressed and
+         re-scrolls are instant meanwhile. */
       var hashKey = location.hash.replace(/^#/, "");
       if (hashKey && panels[hashKey]) {
         if (hashKey !== activeKey) switchTab(hashKey);
@@ -1547,6 +1553,20 @@
            would animate every re-scroll and fight itself). Restored in
            cancelLanding. */
         document.documentElement.style.scrollBehavior = "auto";
+        /* The landing window can run a few seconds (waiting for fonts/images to
+           settle). If the user starts scrolling/interacting meanwhile, abort so
+           we don't yank the scroll back out from under them. Input events only
+           come from the user (our own scrollTo never fires them). */
+        function onUserInput() { if (landing) cancelLanding(); }
+        var inputEvents = ["wheel", "touchstart", "touchmove", "keydown", "mousedown"];
+        inputEvents.forEach(function (type) {
+          window.addEventListener(type, onUserInput, { passive: true, capture: true });
+        });
+        landingAbort = function () {
+          inputEvents.forEach(function (type) {
+            window.removeEventListener(type, onUserInput, { capture: true });
+          });
+        };
         function landScroll() {
           if (!landing) return;
           var need = window.innerHeight - headerHeight() - ANCHOR_GAP - 64;
@@ -1562,6 +1582,7 @@
             landScroll();
           });
         }
+        function finishLanding() { if (landing) cancelLanding(); }
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             landScroll();
@@ -1570,19 +1591,37 @@
               landingRO.observe(panel);
               var mainEl = document.querySelector("main");
               if (mainEl) landingRO.observe(mainEl);
-              /* Catch-all re-scrolls for layout shifts the observer might batch
-                 late (or for browsers without ResizeObserver). */
-              setTimeout(landScroll, 250);
-              setTimeout(landScroll, 600);
-              setTimeout(landScroll, 1000);
-              setTimeout(cancelLanding, 1500);
-            } else {
-              setTimeout(landScroll, 140);
-              setTimeout(landScroll, 380);
-              setTimeout(landScroll, 800);
-              setTimeout(landScroll, 1200);
-              setTimeout(cancelLanding, 1500);
             }
+            /* Periodic catch-alls spread over a longer window for late image /
+               font loads that settle after the initial burst. */
+            setTimeout(landScroll, 250);
+            setTimeout(landScroll, 600);
+            setTimeout(landScroll, 1000);
+            setTimeout(landScroll, 1600);
+            setTimeout(landScroll, 2400);
+            /* Web fonts: a late font swap reflows the tablist/hero above the
+               panel and shifts it. Re-scroll once fonts are ready. */
+            try {
+              if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(function () { landScroll(); });
+              }
+            } catch (eF) {}
+            /* window.load fires when all sub-resources are loaded — the true
+               "layout settled" moment. Do a final re-scroll then end. If the
+               page is already complete (fast/cached), run it now. */
+            if (document.readyState === "complete") {
+              landScroll();
+              setTimeout(finishLanding, 500);
+            } else {
+              window.addEventListener("load", function () {
+                landScroll();
+                setTimeout(landScroll, 150);
+                setTimeout(finishLanding, 600);
+              });
+            }
+            /* Hard cap so we never hold the clamp / scroll-behavior override
+               forever (e.g. a hanging resource delaying window.load). */
+            setTimeout(finishLanding, 4500);
           });
         });
       }
