@@ -12,8 +12,8 @@
   "items": [
     {
       "name": "Mac Raynolds",
-      "nameLink": false,
-      "nameHref": "",
+      "nameLink": true,
+      "nameHref": "https://www.linkedin.com/in/mac-reynolds-8369454/",
       "role": "CEO",
       "company": "Night Street Games",
       "year": "2026",
@@ -23,13 +23,24 @@
     },
     {
       "name": "Tim Blueris",
-      "nameLink": false,
-      "nameHref": "",
+      "nameLink": true,
+      "nameHref": "https://www.linkedin.com/in/timblueris/",
       "role": "Gameplay Animator",
       "company": "Moonray PBC",
       "year": "2025",
       "quote": "Working with Valentyn Chumachenko was an absolute pleasure. As a Sound Designer and Music Composer on our project, he brought a unique emotional layer to the experience that elevated everything from gameplay moments to cinematic sequences.\nValentyn is incredibly versatile: he can design impactful SFX that hit just right in combat, then shift gears to compose a dynamic combat track. He has a strong sense of pacing and knows exactly how audio supports narrative, tension, and player immersion.\nHe’s collaborative, open to feedback, fast when needed, and detail-oriented when it counts. If you need someone to bring your game world to life through sound, Valentyn is that person",
       "avatar": "https://media.licdn.com/dms/image/v2/D4D03AQFBCmS1mpsbig/profile-displayphoto-scale_400_400/B4DZzSxRO4I4Ak-/0/1773062661020?e=1785369600&v=beta&t=NQux2BRT9ZrmaOaXOx99s_KDBzMNb8r2NI84hQHJZCw",
+      "hidden": false
+    },
+    {
+      "name": "Matthew Berger",
+      "nameLink": true,
+      "nameHref": "https://www.linkedin.com/in/matthew-berger-a3131b/",
+      "role": "Game Director",
+      "company": "Night Street Games",
+      "year": "2026",
+      "quote": "I had the pleasure of working directly with Valentyn on Last Flag which was a 5v5 hero shooter. Last Flag was a tricky project from an audio perspective with big over the top characters, quirky abilities and gameplay elements that needed a lot of feedback provided to players. All of this and more often made finding the correct sound tricky but Valentyn was always up to the task. Throughout the whole process he maintains a positive attitude, a quiet determination to find the correct sound. Always willing to try something different, something new, accepting any odd reference or piece of feedback (\"make it sound more golden\") and translating that into audio. He also brought new and interesting ideas to the audio landscape that really improved the joy which sound brought to players. Valentyn proved himself an integral part of the team and for large parts of the process was the only audio designer meaning he had a lot of terrain to cover but he did so admirably.",
+      "avatar": "https://media.licdn.com/dms/image/v2/C5603AQHIJNaqbsUWMg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1562255126618?e=1785974400&v=beta&t=MsYHRMSmWoFyWATXGfs2DVIIfCDVxD61M_gX7cQU3qo",
       "hidden": false
     }
   ]
