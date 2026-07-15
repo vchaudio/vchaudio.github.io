@@ -1693,11 +1693,19 @@
         data.quotePreviewChars = v == null || v === "" ? 280 : v;
         if (data.quotePreviewWords != null) delete data.quotePreviewWords;
         dirty();
+      }),
+      fieldNumber("Quote expand animation (ms)", data.quoteExpandMs, function (v) {
+        data.quoteExpandMs = v == null || v === "" ? 320 : v;
+        dirty();
+      }),
+      fieldNumber("Quote collapse animation (ms)", data.quoteCollapseMs, function (v) {
+        data.quoteCollapseMs = v == null || v === "" ? 520 : v;
+        dirty();
       })
     ]));
     root.appendChild(el("p", {
       class: "admin-empty",
-      text: "Visible recommendations rotate at a random interval between min and max. Longer quotes collapse after N characters with gray “read more” / “show less”. Arrows appear when there are 2+ visible items."
+      text: "Visible recommendations rotate at a random interval between min and max. Longer quotes collapse after N characters with gray “read more” / “show less” (expand/collapse speeds configurable above). Arrows appear when there are 2+ visible items."
     }));
 
     renderLists();

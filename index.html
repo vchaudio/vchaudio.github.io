@@ -19,7 +19,7 @@
     />
     <link rel="preload" as="image" href="assets/vch-mark-transparent.png" fetchpriority="high" />
     <link rel="stylesheet" href="css/styles.css?v=20260714m" />
-    <link rel="stylesheet" href="css/home.css?v=20260714d" />
+    <link rel="stylesheet" href="css/home.css?v=20260716f" />
     <link rel="stylesheet" href="css/audio-player.css?v=20260713c" />
     <script src="js/nav-arrival.js?v=20260714a"></script>
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
@@ -87,7 +87,13 @@
                 </button>
                 <div class="home-recommendations__stage">
                   <article class="home-recommendations__card">
-                    <img class="home-recommendations__avatar" alt="" width="96" height="96" decoding="async" hidden />
+                    <div class="home-recommendations__avatar-wrap" hidden>
+                      <div class="home-recommendations__avatar-ring">
+                        <div class="home-recommendations__avatar-crop">
+                          <img class="home-recommendations__avatar" alt="" width="96" height="96" decoding="async" />
+                        </div>
+                      </div>
+                    </div>
                     <div class="home-recommendations__name-wrap">
                       <p class="home-recommendations__name"></p>
                     </div>
@@ -243,6 +249,6 @@
     <noscript>
       <p style="padding:2rem;text-align:center">This site requires JavaScript to display content.</p>
     </noscript>
-    <script src="js/render.js?v=20260714p" defer></script>
+    <script src="js/render.js?v=20260716g" defer></script>
   </body>
 </html>

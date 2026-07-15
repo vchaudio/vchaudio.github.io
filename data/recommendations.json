@@ -8,6 +8,8 @@
   "autoplayMaxSec": 10,
   "quoteFontSize": "1rem",
   "animMs": 1000,
+  "quoteExpandMs": 320,
+  "quoteCollapseMs": 520,
   "quotePreviewChars": 280,
   "items": [
     {

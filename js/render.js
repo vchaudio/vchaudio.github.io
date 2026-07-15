@@ -731,9 +731,12 @@
     root.removeAttribute("aria-hidden");
 
     var offsetTop = (cfg.offsetTop && String(cfg.offsetTop).trim()) || "1.25rem";
-    var offsetBottom = (cfg.offsetBottom && String(cfg.offsetBottom).trim()) || "1.5rem";
+    var offsetBottom = (cfg.offsetBottom != null && String(cfg.offsetBottom).trim() !== "")
+      ? String(cfg.offsetBottom).trim()
+      : "0";
     root.style.setProperty("--rec-offset-top", offsetTop);
     root.style.setProperty("--rec-offset-bottom", offsetBottom);
+    document.body.classList.add("has-home-recommendations");
 
     var heading = root.querySelector(".home-recommendations__heading");
     if (heading) {
@@ -748,13 +751,26 @@
 
     var stage = root.querySelector(".home-recommendations__stage");
     var card = root.querySelector(".home-recommendations__card");
+    var avatarWrap = root.querySelector(".home-recommendations__avatar-wrap");
+    var avatarRing = root.querySelector(".home-recommendations__avatar-ring");
+    var avatarCrop = root.querySelector(".home-recommendations__avatar-crop");
     var avatar = root.querySelector(".home-recommendations__avatar");
     var nameWrap = root.querySelector(".home-recommendations__name-wrap");
     var metaEl = root.querySelector(".home-recommendations__meta");
     var yearEl = root.querySelector(".home-recommendations__year");
     var quoteEl = root.querySelector(".home-recommendations__quote");
     var carousel = root.querySelector(".home-recommendations__carousel");
-    if (!stage || !card || !avatar || !nameWrap || !metaEl || !yearEl || !quoteEl || !carousel) return;
+    if (!stage || !card || !avatarWrap || !avatar || !nameWrap || !metaEl || !yearEl || !quoteEl || !carousel) return;
+
+    var quoteBody = quoteEl.querySelector(".home-recommendations__quote-body");
+    var quoteContent = quoteEl.querySelector(".home-recommendations__quote-content");
+    if (!quoteBody || !quoteContent) {
+      clear(quoteEl);
+      quoteContent = h("div", { class: "home-recommendations__quote-content" });
+      quoteBody = h("div", { class: "home-recommendations__quote-body" });
+      quoteBody.appendChild(quoteContent);
+      quoteEl.appendChild(quoteBody);
+    }
 
     var minSec = Number(cfg.autoplayMinSec);
     var maxSec = Number(cfg.autoplayMaxSec);
@@ -781,10 +797,23 @@
     }
     if (!(previewChars > 0)) previewChars = 280;
 
+    var quoteExpandMs = Number(cfg.quoteExpandMs);
+    if (!(quoteExpandMs > 0)) quoteExpandMs = 320;
+    quoteExpandMs = Math.max(80, Math.min(2000, quoteExpandMs));
+
+    var quoteCollapseMs = Number(cfg.quoteCollapseMs);
+    if (!(quoteCollapseMs > 0)) quoteCollapseMs = 520;
+    quoteCollapseMs = Math.max(80, Math.min(3000, quoteCollapseMs));
+
+    root.style.setProperty("--rec-quote-expand-ms", quoteExpandMs + "ms");
+    root.style.setProperty("--rec-quote-collapse-ms", quoteCollapseMs + "ms");
+
     var index = Math.floor(Math.random() * items.length);
     var timer = null;
     var transitioning = false;
+    var quoteAnimating = false;
     var quoteExpanded = false;
+    var previewSlotH = 0;
     var arrowPreviewY = null;
     var reduceMotion = false;
     try {
@@ -838,59 +867,240 @@
       }
     }
 
-    function paintQuote(it, expanded, followScroll) {
-      clear(quoteEl);
-      var full = String(it.quote || "").trim();
-      if (!full) {
-        quoteEl.hidden = true;
-        afterQuoteLayout(false);
-        return;
-      }
-      quoteEl.hidden = false;
-      var needsClamp = full.length > previewChars;
+    function quoteNeedsClamp(full) {
+      return full.length > previewChars;
+    }
 
+    function quotePreviewText(full) {
+      var clipped = full.slice(0, previewChars).replace(/\s+\S*$/, "");
+      if (!clipped) clipped = full.slice(0, previewChars);
+      return clipped + "…";
+    }
+
+    function fillQuoteContent(target, it, expanded, withHandlers) {
+      clear(target);
+      var full = String(it.quote || "").trim();
+      if (!full) return false;
+
+      var needsClamp = quoteNeedsClamp(full);
       if (expanded && needsClamp) {
-        quoteEl.appendChild(document.createTextNode(full + " "));
+        target.appendChild(document.createTextNode(full + " "));
         var less = h("button", {
           type: "button",
           class: "home-recommendations__more",
           text: "show less"
         });
-        less.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          quoteExpanded = false;
-          paintQuote(it, false, false);
-          scheduleAutoplay();
-        });
-        quoteEl.appendChild(less);
-        afterQuoteLayout(!!followScroll);
-        return;
+        if (withHandlers) {
+          less.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (quoteAnimating || transitioning) return;
+            quoteExpanded = false;
+            animateQuoteTo(it, false, false, scheduleAutoplay);
+          });
+        }
+        target.appendChild(less);
+        return true;
       }
 
       if (!needsClamp) {
-        quoteEl.appendChild(document.createTextNode(full));
-        afterQuoteLayout(false);
-        return;
+        target.appendChild(document.createTextNode(full));
+        return true;
       }
 
-      var clipped = full.slice(0, previewChars).replace(/\s+\S*$/, "");
-      if (!clipped) clipped = full.slice(0, previewChars);
-      quoteEl.appendChild(document.createTextNode(clipped + "… "));
+      target.appendChild(document.createTextNode(quotePreviewText(full) + " "));
       var more = h("button", {
         type: "button",
         class: "home-recommendations__more",
         text: "read more"
       });
-      more.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        quoteExpanded = true;
-        paintQuote(it, true, true);
-        clearTimer();
-      });
-      quoteEl.appendChild(more);
+      if (withHandlers) {
+        more.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (quoteAnimating || transitioning) return;
+          quoteExpanded = true;
+          animateQuoteTo(it, true, true, clearTimer);
+        });
+      }
+      target.appendChild(more);
+      return true;
+    }
+
+    function buildQuoteContent(it, expanded) {
+      return fillQuoteContent(quoteContent, it, expanded, true);
+    }
+
+    function quoteMeasureWidth() {
+      var w = quoteBody.getBoundingClientRect().width;
+      if (w > 8) return w;
+      w = quoteEl.getBoundingClientRect().width;
+      if (w > 8) return w;
+      var stageW = stage.getBoundingClientRect().width;
+      if (stageW > 8) return Math.min(stageW, 576);
+      return Math.min(560, root.getBoundingClientRect().width || 560);
+    }
+
+    function previewSlotSampleText() {
+      var unit = "The quick brown fox jumps over the lazy dog. ";
+      var raw = "";
+      while (raw.length < previewChars + 24) raw += unit;
+      return quotePreviewText(raw);
+    }
+
+    function measurePreviewSlotHeight(width) {
+      var probe = h("blockquote", { class: "home-recommendations__quote" });
+      probe.style.cssText =
+        "position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;width:" +
+        width +
+        "px;margin:0;height:auto;min-height:0;max-height:none;overflow:visible";
+      var probeBody = h("div", { class: "home-recommendations__quote-body" });
+      probeBody.style.cssText = "height:auto;min-height:0;overflow:visible";
+      var probeContent = h("div", { class: "home-recommendations__quote-content" });
+      probeBody.appendChild(probeContent);
+      probe.appendChild(probeBody);
+      probeContent.appendChild(document.createTextNode(previewSlotSampleText() + " "));
+      probeContent.appendChild(h("button", {
+        type: "button",
+        class: "home-recommendations__more",
+        text: "read more"
+      }));
+      quoteEl.appendChild(probe);
+      var height = probeBody.offsetHeight;
+      quoteEl.removeChild(probe);
+      return height;
+    }
+
+    function syncPreviewSlotHeight() {
+      var width = quoteMeasureWidth();
+      previewSlotH = measurePreviewSlotHeight(width);
+      root.style.setProperty("--rec-quote-slot-h", previewSlotH + "px");
+    }
+
+    function ensurePreviewSlotMeasured(done) {
+      function attempt() {
+        var width = quoteMeasureWidth();
+        if (width <= 8) {
+          window.requestAnimationFrame(attempt);
+          return;
+        }
+        syncPreviewSlotHeight();
+        if (done) done();
+      }
+      attempt();
+    }
+
+    function applyQuoteSlotLayout(expanded) {
+      if (!previewSlotH && quoteMeasureWidth() > 8) syncPreviewSlotHeight();
+      if (!previewSlotH) return;
+      if (expanded) {
+        quoteBody.style.height = "";
+        quoteBody.style.minHeight = "";
+        quoteBody.style.overflow = "";
+      } else {
+        quoteBody.style.height = previewSlotH + "px";
+        quoteBody.style.minHeight = "";
+        quoteBody.style.overflow = "hidden";
+      }
+    }
+
+    function measureQuoteBodyHeight(it, expanded) {
+      var width = quoteMeasureWidth();
+      var probe = h("blockquote", { class: "home-recommendations__quote" });
+      probe.style.cssText =
+        "position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;width:" +
+        width +
+        "px;margin:0;height:auto;min-height:0;overflow:visible";
+      var probeBody = h("div", { class: "home-recommendations__quote-body" });
+      probeBody.style.cssText = "height:auto;min-height:0;overflow:visible";
+      var probeContent = h("div", { class: "home-recommendations__quote-content" });
+      probeBody.appendChild(probeContent);
+      probe.appendChild(probeBody);
+      quoteEl.appendChild(probe);
+      fillQuoteContent(probeContent, it, expanded, false);
+      var height = probeBody.offsetHeight;
+      quoteEl.removeChild(probe);
+      return height;
+    }
+
+    function resetQuoteMotionStyles() {
+      quoteBody.style.height = "";
+      quoteBody.style.overflow = "";
+      quoteBody.style.transition = "";
+      stage.style.minHeight = "";
+      stage.style.transition = "";
+    }
+
+    function paintQuoteInstant(it, expanded) {
+      resetQuoteMotionStyles();
+      var full = String(it.quote || "").trim();
+      if (!full) {
+        quoteEl.hidden = true;
+        clear(quoteContent);
+        quoteBody.style.minHeight = "";
+        quoteBody.style.height = "";
+        afterQuoteLayout(false);
+        return;
+      }
+      quoteEl.hidden = false;
+      buildQuoteContent(it, expanded);
+      applyQuoteSlotLayout(expanded);
       afterQuoteLayout(false);
+    }
+
+    function animateQuoteTo(it, expanded, followScroll, onDone) {
+      var full = String(it.quote || "").trim();
+      if (!full || !quoteNeedsClamp(full) || reduceMotion) {
+        paintQuoteInstant(it, expanded);
+        afterQuoteLayout(!!followScroll);
+        if (onDone) onDone();
+        return;
+      }
+
+      quoteAnimating = true;
+      var done = false;
+
+      function finish() {
+        if (done) return;
+        done = true;
+        quoteBody.removeEventListener("transitionend", onEnd);
+        resetQuoteMotionStyles();
+        applyQuoteSlotLayout(expanded);
+        quoteAnimating = false;
+        afterQuoteLayout(!!followScroll);
+        if (onDone) onDone();
+      }
+
+      function onEnd(e) {
+        if (e.target !== quoteBody || e.propertyName !== "height") return;
+        finish();
+      }
+
+      ensurePreviewSlotMeasured(function () {
+        var startBodyH = quoteBody.offsetHeight;
+        var startStageH = stage.offsetHeight;
+        var ms = expanded ? quoteExpandMs : quoteCollapseMs;
+        var easing = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+        quoteBody.style.height = startBodyH + "px";
+        quoteBody.style.overflow = "hidden";
+        quoteBody.style.minHeight = "";
+        stage.style.minHeight = startStageH + "px";
+
+        buildQuoteContent(it, expanded);
+        var endBodyH = expanded ? measureQuoteBodyHeight(it, true) : previewSlotH;
+        var endStageH = startStageH + (endBodyH - startBodyH);
+
+        window.requestAnimationFrame(function () {
+          quoteBody.style.transition = "height " + ms + "ms " + easing;
+          quoteBody.style.height = endBodyH + "px";
+          stage.style.transition = "min-height " + ms + "ms " + easing;
+          stage.style.minHeight = Math.max(endStageH, 0) + "px";
+        });
+
+        quoteBody.addEventListener("transitionend", onEnd);
+        window.setTimeout(finish, ms + 80);
+      });
     }
 
     function paintName(it) {
@@ -915,20 +1125,21 @@
       quoteExpanded = false;
       arrowPreviewY = null;
       if (it.avatar) {
-        avatar.hidden = false;
+        avatarWrap.hidden = false;
         avatar.setAttribute("src", it.avatar);
         avatar.setAttribute("alt", it.name || "");
       } else {
         avatar.removeAttribute("src");
-        avatar.hidden = true;
+        avatarWrap.hidden = true;
         avatar.setAttribute("alt", "");
       }
+      if (avatarCrop) avatarCrop.style.transform = "";
       paintName(it);
       metaEl.textContent = metaLine(it);
       metaEl.hidden = !metaEl.textContent;
       yearEl.textContent = it.year || "";
       yearEl.hidden = !yearEl.textContent;
-      paintQuote(it, false, false);
+      paintQuoteInstant(it, false);
     }
 
     function pickNext(dir) {
@@ -959,11 +1170,7 @@
       }, delay);
     }
 
-    function showAt(nextIndex, dir) {
-      if (transitioning || nextIndex === index) {
-        scheduleAutoplay();
-        return;
-      }
+    function runCarousel(nextIndex) {
       var nextItem = items[nextIndex];
       if (!nextItem) return;
 
@@ -977,15 +1184,14 @@
       transitioning = true;
       clearTimer();
       carousel.classList.add("is-animating");
-      card.classList.remove("is-enter", "is-enter-from-left", "is-enter-active");
-      card.classList.add(dir < 0 ? "is-leave-right" : "is-leave-left");
+      card.classList.remove("is-enter", "is-enter-from-left", "is-enter-active", "is-leave-left", "is-leave-right");
+      card.classList.add("is-leave-left");
 
       window.setTimeout(function () {
         index = nextIndex;
         paint(nextItem);
-        card.classList.remove("is-leave-left", "is-leave-right");
+        card.classList.remove("is-leave-left");
         card.classList.add("is-enter");
-        if (dir < 0) card.classList.add("is-enter-from-left");
         void card.offsetWidth;
         card.classList.add("is-enter-active");
         window.setTimeout(function () {
@@ -997,6 +1203,24 @@
           scheduleAutoplay();
         }, animMs);
       }, animMs);
+    }
+
+    function showAt(nextIndex, dir) {
+      if (transitioning || nextIndex === index) {
+        scheduleAutoplay();
+        return;
+      }
+      var nextItem = items[nextIndex];
+      if (!nextItem) return;
+
+      if (quoteExpanded) {
+        quoteExpanded = false;
+        animateQuoteTo(items[index], false, false, null);
+        runCarousel(nextIndex);
+        return;
+      }
+
+      runCarousel(nextIndex);
     }
 
     /* Arrows — same chevron style as project carousels; only when 2+ items. */
@@ -1018,8 +1242,56 @@
       };
     }
 
-    paint(items[index]);
-    scheduleAutoplay();
+    if (avatarWrap && avatarCrop && !reduceMotion) {
+      var parallaxRaf = 0;
+      var parallaxX = 0;
+      var parallaxY = 0;
+
+      function applyRecParallax() {
+        parallaxRaf = 0;
+        var rect = avatarWrap.getBoundingClientRect();
+        var cx = rect.left + rect.width / 2;
+        var cy = rect.top + rect.height / 2;
+        var dx = (parallaxX - cx) / (rect.width / 2);
+        var dy = (parallaxY - cy) / (rect.height / 2);
+        avatarCrop.style.transform =
+          "perspective(800px) rotateY(" + dx * 8 + "deg) rotateX(" + -dy * 6 + "deg)";
+      }
+
+      avatarWrap.addEventListener(
+        "mousemove",
+        function (e) {
+          parallaxX = e.clientX;
+          parallaxY = e.clientY;
+          if (parallaxRaf) return;
+          parallaxRaf = window.requestAnimationFrame(applyRecParallax);
+        },
+        { passive: true }
+      );
+
+      avatarWrap.addEventListener(
+        "mouseleave",
+        function () {
+          if (parallaxRaf) {
+            window.cancelAnimationFrame(parallaxRaf);
+            parallaxRaf = 0;
+          }
+          avatarCrop.style.transform = "";
+        },
+        { passive: true }
+      );
+    }
+
+    ensurePreviewSlotMeasured(function () {
+      paint(items[index]);
+      scheduleAutoplay();
+    });
+
+    window.addEventListener("resize", function onRecResize() {
+      syncPreviewSlotHeight();
+      applyQuoteSlotLayout(quoteExpanded);
+      syncArrowPosition();
+    });
 
     document.addEventListener("visibilitychange", function onVis() {
       if (document.hidden) clearTimer();
