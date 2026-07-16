@@ -485,8 +485,9 @@
     return null;
   }
 
-  function blurActiveAdminFocus() {
+  function blurActiveAdminFocus(exceptWithin) {
     var active = document.activeElement;
+    if (exceptWithin && active && exceptWithin.contains(active)) return;
     if (active && active !== document.body && active !== document.documentElement && active.blur) {
       active.blur();
     }
@@ -1647,13 +1648,39 @@
 
     function dirty() { markDirty("recommendations"); }
 
+    function updateActiveListRow(it) {
+      var idx = arr.indexOf(it);
+      if (idx < 0 || !list.children[idx]) return;
+      var row = list.children[idx];
+      row.classList.toggle("is-hidden", !!it.hidden);
+      var label = row.querySelector(".admin-item-row__label");
+      if (!label) return;
+      if (label.firstChild && label.firstChild.nodeType === 3) {
+        label.firstChild.nodeValue = it.name || "(unnamed)";
+      }
+      var badge = label.querySelector(".admin-item-row__badge");
+      if (it.hidden && !badge) {
+        var small = label.querySelector("small");
+        label.insertBefore(el("span", { class: "admin-item-row__badge", text: "hidden" }), small || null);
+      } else if (!it.hidden && badge) {
+        badge.remove();
+      }
+      var small = label.querySelector("small");
+      if (small) small.textContent = [it.role, it.company, it.year].filter(Boolean).join(" · ");
+      var hideBtn = row.querySelector(".admin-item-row__btns button:nth-child(3)");
+      if (hideBtn) {
+        hideBtn.textContent = it.hidden ? "Show" : "Hide";
+        hideBtn.title = it.hidden ? "Show on the site" : "Hide from the site (without deleting)";
+      }
+    }
+
     function renderLists(anchorIndex) {
       var anchorTop =
         anchorIndex != null && list.children[anchorIndex]
           ? list.children[anchorIndex].getBoundingClientRect().top
           : null;
       var scrollPos = readAdminScrollPos();
-      blurActiveAdminFocus();
+      if (anchorIndex != null) blurActiveAdminFocus(detail);
       clear(list);
       arr.forEach(function (it, i) {
         var row = el("div", { class: "admin-item-row" + (state.selectedObj === it ? " is-active" : "") + (it.hidden ? " is-hidden" : "") }, [
@@ -1706,8 +1733,13 @@
       var card = el("div", { class: "admin-obj-card" }, [
         el("div", { class: "admin-obj-card__head" }, [el("strong", { text: it.name || "Recommendation" })])
       ]);
+      var headStrong = card.querySelector(".admin-obj-card__head strong");
+      function syncListLabels() {
+        if (headStrong) headStrong.textContent = it.name || "Recommendation";
+        updateActiveListRow(it);
+      }
       card.appendChild(fieldImage("Avatar", it.avatar, function (v) { it.avatar = v; dirty(); }));
-      card.appendChild(fieldText("Name", it.name, function (v) { it.name = v; dirty(); renderLists(); }, { full: true }));
+      card.appendChild(fieldText("Name", it.name, function (v) { it.name = v; dirty(); syncListLabels(); }, { full: true }));
       card.appendChild(fieldBool("Make name a clickable link (profile / LinkedIn / site)", it.nameLink, function (v) {
         it.nameLink = v;
         dirty();
@@ -1716,11 +1748,11 @@
       if (it.nameLink) {
         card.appendChild(fieldText("Name link URL", it.nameHref, function (v) { it.nameHref = v; dirty(); }, { type: "url", full: true }));
       }
-      card.appendChild(fieldText("Role / title", it.role, function (v) { it.role = v; dirty(); renderLists(); }, { full: true }));
-      card.appendChild(fieldText("Company", it.company, function (v) { it.company = v; dirty(); renderLists(); }, { full: true }));
-      card.appendChild(fieldText("Year", it.year, function (v) { it.year = v; dirty(); renderLists(); }));
+      card.appendChild(fieldText("Role / title", it.role, function (v) { it.role = v; dirty(); syncListLabels(); }, { full: true }));
+      card.appendChild(fieldText("Company", it.company, function (v) { it.company = v; dirty(); syncListLabels(); }, { full: true }));
+      card.appendChild(fieldText("Year", it.year, function (v) { it.year = v; dirty(); syncListLabels(); }));
       card.appendChild(fieldTextarea("Quote / recommendation", it.quote, function (v) { it.quote = v; dirty(); }));
-      card.appendChild(fieldBool("Hide this recommendation", it.hidden, function (v) { it.hidden = v; dirty(); renderLists(); }));
+      card.appendChild(fieldBool("Hide this recommendation", it.hidden, function (v) { it.hidden = v; dirty(); syncListLabels(); }));
       detail.appendChild(card);
     }
 
