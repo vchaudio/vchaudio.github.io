@@ -862,20 +862,29 @@
     }
 
     function quotePreviewText(full) {
-      if (full.length <= previewChars) return full;
+      if (full.length <= previewChars) return full.replace(/\s+$/, "");
       var clipped = full.slice(0, previewChars);
       var next = full.charAt(previewChars);
       /* Drop a trailing word fragment only when the cut lands mid-word; keep spaces and newlines. */
       if (next && /\S/.test(next) && /\S$/.test(clipped)) {
         clipped = clipped.replace(/\S+$/, "");
       }
+      /* Trailing blank lines push “read more” below the fixed slot — trim only the tail. */
+      clipped = clipped.replace(/\s+$/, "");
       return clipped + "…";
     }
 
     function previewSlotRawText() {
       var chunk = "The quick brown fox jumps over the lazy dog. ";
       var raw = "";
-      while (raw.length < previewChars + 32) raw += chunk;
+      var nextBreak = 150;
+      while (raw.length < previewChars + 32) {
+        raw += chunk;
+        if (raw.length >= nextBreak && nextBreak <= previewChars + 16) {
+          raw += "\n\n";
+          nextBreak += 150;
+        }
+      }
       return raw;
     }
 
@@ -986,6 +995,14 @@
     function syncPreviewSlotHeight() {
       var width = quoteMeasureWidth();
       var nextH = measurePreviewSlotHeight(width);
+      items.forEach(function (it) {
+        var full = String(it.quote || "").trim();
+        if (!full || !quoteNeedsClamp(full)) return;
+        var sample = createQuoteProbe(width);
+        fillQuoteContent(sample.content, it, false, false);
+        nextH = Math.max(nextH, Math.ceil(sample.content.offsetHeight));
+        sample.remove();
+      });
       if (previewSlotH === nextH) return;
       previewSlotH = nextH;
       root.style.setProperty("--rec-quote-slot-h", previewSlotH + "px");
