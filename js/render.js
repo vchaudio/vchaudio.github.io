@@ -864,21 +864,53 @@
     function quotePreviewText(full) {
       if (full.length <= previewChars) return full.replace(/\s+$/, "");
       var clipped = full.slice(0, previewChars);
-      var next = full.charAt(previewChars);
-      /* Drop a trailing word fragment only when the cut lands mid-word; keep spaces and newlines. */
-      if (next && /\S/.test(next) && /\S$/.test(clipped)) {
-        clipped = clipped.replace(/\S+$/, "");
+      /* End at the last paragraph break in the window so “read more” stays on
+         the same line as the visible text instead of after a forced \n. */
+      var breakIdx = clipped.lastIndexOf("\n");
+      if (breakIdx > 0 && breakIdx >= Math.min(80, Math.floor(previewChars * 0.25))) {
+        clipped = clipped.slice(0, breakIdx);
+      } else {
+        var next = full.charAt(previewChars);
+        if (next && /\S/.test(next) && /\S$/.test(clipped)) {
+          clipped = clipped.replace(/\S+$/, "");
+        }
       }
-      /* Trailing blank lines push “read more” below the fixed slot — trim only the tail. */
       clipped = clipped.replace(/\s+$/, "");
       return clipped + "…";
     }
 
-    function previewSlotRawText() {
+    function previewSlotRawText(withBreak) {
       var chunk = "The quick brown fox jumps over the lazy dog. ";
       var raw = "";
-      while (raw.length < previewChars + 32) raw += chunk;
+      var breakAt = Math.floor(previewChars * 0.88);
+      while (raw.length < (withBreak ? breakAt : previewChars + 32)) raw += chunk;
+      if (withBreak) {
+        raw += "\n";
+        while (raw.length < previewChars + 32) raw += chunk;
+      }
       return raw;
+    }
+
+    function appendQuoteControl(target, it, expanded, withHandlers) {
+      var btn = h("button", {
+        type: "button",
+        class: "home-recommendations__more",
+        text: expanded ? "show less" : "read more"
+      });
+      if (withHandlers) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (quoteAnimating || transitioning) return;
+          quoteExpanded = !expanded;
+          if (quoteExpanded) {
+            animateQuoteTo(it, true, clearTimer);
+          } else {
+            animateQuoteTo(it, false, scheduleAutoplay);
+          }
+        });
+      }
+      target.appendChild(btn);
     }
 
     function fillQuoteContent(target, it, expanded, withHandlers) {
@@ -889,21 +921,7 @@
       var needsClamp = quoteNeedsClamp(full);
       if (expanded && needsClamp) {
         target.appendChild(document.createTextNode(full + " "));
-        var less = h("button", {
-          type: "button",
-          class: "home-recommendations__more",
-          text: "show less"
-        });
-        if (withHandlers) {
-          less.addEventListener("click", function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (quoteAnimating || transitioning) return;
-            quoteExpanded = false;
-            animateQuoteTo(it, false, scheduleAutoplay);
-          });
-        }
-        target.appendChild(less);
+        appendQuoteControl(target, it, true, withHandlers);
         return true;
       }
 
@@ -913,21 +931,7 @@
       }
 
       target.appendChild(document.createTextNode(quotePreviewText(full) + " "));
-      var more = h("button", {
-        type: "button",
-        class: "home-recommendations__more",
-        text: "read more"
-      });
-      if (withHandlers) {
-        more.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          if (quoteAnimating || transitioning) return;
-          quoteExpanded = true;
-          animateQuoteTo(it, true, clearTimer);
-        });
-      }
-      target.appendChild(more);
+      appendQuoteControl(target, it, false, withHandlers);
       return true;
     }
 
@@ -977,12 +981,19 @@
       };
     }
 
-    function measurePreviewSlotHeight(width) {
+    function measureCollapsedPreviewHeight(width, rawText) {
       var sample = createQuoteProbe(width);
-      fillQuoteContent(sample.content, { quote: previewSlotRawText() }, false, false);
+      fillQuoteContent(sample.content, { quote: rawText }, false, false);
       var height = sample.content.offsetHeight;
       sample.remove();
       return Math.max(1, Math.ceil(height));
+    }
+
+    function measurePreviewSlotHeight(width) {
+      return Math.max(
+        measureCollapsedPreviewHeight(width, previewSlotRawText(false)),
+        measureCollapsedPreviewHeight(width, previewSlotRawText(true))
+      );
     }
 
     function syncPreviewSlotHeight() {
@@ -1006,6 +1017,20 @@
       attempt();
     }
 
+    function measureCurrentCollapsedHeight() {
+      quoteBody.style.height = "auto";
+      quoteBody.style.minHeight = "0";
+      quoteBody.style.maxHeight = "none";
+      quoteBody.style.overflow = "visible";
+      var h = quoteContent.offsetHeight;
+      return Math.max(1, Math.ceil(h));
+    }
+
+    function collapsedSlotHeight() {
+      syncPreviewSlotHeight();
+      return Math.max(previewSlotH, measureCurrentCollapsedHeight());
+    }
+
     function applyQuoteSlotLayout(expanded) {
       if (expanded) {
         quoteBody.style.height = "";
@@ -1014,10 +1039,11 @@
         return;
       }
       if (quoteMeasureWidth() <= 8) return;
-      syncPreviewSlotHeight();
-      quoteBody.style.height = previewSlotH + "px";
+      var slotH = collapsedSlotHeight();
+      quoteBody.style.height = slotH + "px";
       quoteBody.style.minHeight = "";
       quoteBody.style.overflow = "hidden";
+      root.style.setProperty("--rec-quote-slot-h", slotH + "px");
     }
 
     function measureQuoteBodyHeight(it, expanded) {
@@ -1094,7 +1120,7 @@
         stage.style.minHeight = startStageH + "px";
 
         buildQuoteContent(it, expanded);
-        var endBodyH = expanded ? measureQuoteBodyHeight(it, true) : previewSlotH;
+        var endBodyH = expanded ? measureQuoteBodyHeight(it, true) : collapsedSlotHeight();
         var endStageH = startStageH + (endBodyH - startBodyH);
 
         window.requestAnimationFrame(function () {
