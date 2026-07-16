@@ -6,7 +6,7 @@
   "offsetBottom": "0rem",
   "autoplayMinSec": 10,
   "autoplayMaxSec": 10,
-  "quoteFontSize": "1rem",
+  "quoteFontSize": "0.98rem",
   "animMs": 1000,
   "quoteExpandMs": 500,
   "quoteCollapseMs": 800,
