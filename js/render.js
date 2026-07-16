@@ -852,19 +852,9 @@
       carousel.style.setProperty("--rec-arrow-y", y + "px");
     }
 
-    function afterQuoteLayout(followScroll) {
+    function afterQuoteLayout() {
       syncPanelHeight();
       syncArrowPosition();
-      if (!followScroll || !quoteEl) return;
-      var rect = quoteEl.getBoundingClientRect();
-      var pad = 40;
-      var overflow = rect.bottom - (window.innerHeight - pad);
-      if (overflow > 8) {
-        window.scrollBy({
-          top: overflow,
-          behavior: reduceMotion ? "auto" : "smooth"
-        });
-      }
     }
 
     function quoteNeedsClamp(full) {
@@ -872,9 +862,29 @@
     }
 
     function quotePreviewText(full) {
-      var clipped = full.slice(0, previewChars).replace(/\s+\S*$/, "");
-      if (!clipped) clipped = full.slice(0, previewChars);
+      if (full.length <= previewChars) return full;
+      var clipped = full.slice(0, previewChars);
+      var next = full.charAt(previewChars);
+      /* Drop a trailing word fragment only when the cut lands mid-word; keep spaces and newlines. */
+      if (next && /\S/.test(next) && /\S$/.test(clipped)) {
+        clipped = clipped.replace(/\S+$/, "");
+      }
       return clipped + "…";
+    }
+
+    function previewSlotRawText() {
+      var sentence = "The quick brown fox jumps over the lazy dog. ";
+      var raw = "";
+      var lineLen = 0;
+      while (raw.length < previewChars + 48) {
+        if (lineLen >= 88) {
+          raw += "\n";
+          lineLen = 0;
+        }
+        raw += sentence;
+        lineLen += sentence.length;
+      }
+      return raw;
     }
 
     function fillQuoteContent(target, it, expanded, withHandlers) {
@@ -896,7 +906,7 @@
             e.stopPropagation();
             if (quoteAnimating || transitioning) return;
             quoteExpanded = false;
-            animateQuoteTo(it, false, false, scheduleAutoplay);
+            animateQuoteTo(it, false, scheduleAutoplay);
           });
         }
         target.appendChild(less);
@@ -920,7 +930,7 @@
           e.stopPropagation();
           if (quoteAnimating || transitioning) return;
           quoteExpanded = true;
-          animateQuoteTo(it, true, true, clearTimer);
+          animateQuoteTo(it, true, clearTimer);
         });
       }
       target.appendChild(more);
@@ -941,13 +951,6 @@
       return Math.min(560, root.getBoundingClientRect().width || 560);
     }
 
-    function previewSlotSampleText() {
-      var unit = "The quick brown fox jumps over the lazy dog. ";
-      var raw = "";
-      while (raw.length < previewChars + 24) raw += unit;
-      return quotePreviewText(raw);
-    }
-
     function measurePreviewSlotHeight(width) {
       var probe = h("blockquote", { class: "home-recommendations__quote" });
       probe.style.cssText =
@@ -959,12 +962,7 @@
       var probeContent = h("div", { class: "home-recommendations__quote-content" });
       probeBody.appendChild(probeContent);
       probe.appendChild(probeBody);
-      probeContent.appendChild(document.createTextNode(previewSlotSampleText() + " "));
-      probeContent.appendChild(h("button", {
-        type: "button",
-        class: "home-recommendations__more",
-        text: "read more"
-      }));
+      fillQuoteContent(probeContent, { quote: previewSlotRawText() }, false, false);
       quoteEl.appendChild(probe);
       var height = probeBody.offsetHeight;
       quoteEl.removeChild(probe);
@@ -1039,20 +1037,20 @@
         clear(quoteContent);
         quoteBody.style.minHeight = "";
         quoteBody.style.height = "";
-        afterQuoteLayout(false);
+        afterQuoteLayout();
         return;
       }
       quoteEl.hidden = false;
       buildQuoteContent(it, expanded);
       applyQuoteSlotLayout(expanded);
-      afterQuoteLayout(false);
+      afterQuoteLayout();
     }
 
-    function animateQuoteTo(it, expanded, followScroll, onDone) {
+    function animateQuoteTo(it, expanded, onDone) {
       var full = String(it.quote || "").trim();
       if (!full || !quoteNeedsClamp(full) || reduceMotion) {
         paintQuoteInstant(it, expanded);
-        afterQuoteLayout(!!followScroll);
+        afterQuoteLayout();
         if (onDone) onDone();
         return;
       }
@@ -1067,7 +1065,7 @@
         resetQuoteMotionStyles();
         applyQuoteSlotLayout(expanded);
         quoteAnimating = false;
-        afterQuoteLayout(!!followScroll);
+        afterQuoteLayout();
         if (onDone) onDone();
       }
 
@@ -1215,7 +1213,7 @@
 
       if (quoteExpanded) {
         quoteExpanded = false;
-        animateQuoteTo(items[index], false, false, null);
+        animateQuoteTo(items[index], false, null);
         runCarousel(nextIndex);
         return;
       }

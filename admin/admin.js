@@ -1592,6 +1592,9 @@
     function dirty() { markDirty("recommendations"); }
 
     function renderLists() {
+      var editor = root.closest(".admin-editor") || document.querySelector(".admin-editor");
+      var scrollTop = editor ? editor.scrollTop : window.scrollY;
+      var scrollLeft = editor ? editor.scrollLeft : window.scrollX;
       clear(list);
       arr.forEach(function (it, i) {
         var row = el("div", { class: "admin-item-row" + (state.selectedObj === it ? " is-active" : "") + (it.hidden ? " is-hidden" : "") }, [
@@ -1630,6 +1633,14 @@
           renderDetail();
         };
         list.appendChild(row);
+      });
+      window.requestAnimationFrame(function () {
+        if (editor) {
+          editor.scrollTop = scrollTop;
+          editor.scrollLeft = scrollLeft;
+        } else {
+          window.scrollTo(scrollLeft, scrollTop);
+        }
       });
     }
 

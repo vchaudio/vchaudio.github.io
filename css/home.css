@@ -682,6 +682,7 @@ a.home-recommendations__name--link:focus-visible {
   line-height: 1.55;
   color: rgba(245, 239, 232, 0.88);
   text-align: center;
+  white-space: pre-line;
 }
 
 .home-recommendations__more {
