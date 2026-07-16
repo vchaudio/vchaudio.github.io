@@ -877,14 +877,7 @@
     function previewSlotRawText() {
       var chunk = "The quick brown fox jumps over the lazy dog. ";
       var raw = "";
-      var nextBreak = 150;
-      while (raw.length < previewChars + 32) {
-        raw += chunk;
-        if (raw.length >= nextBreak && nextBreak <= previewChars + 16) {
-          raw += "\n\n";
-          nextBreak += 150;
-        }
-      }
+      while (raw.length < previewChars + 32) raw += chunk;
       return raw;
     }
 
@@ -995,14 +988,6 @@
     function syncPreviewSlotHeight() {
       var width = quoteMeasureWidth();
       var nextH = measurePreviewSlotHeight(width);
-      items.forEach(function (it) {
-        var full = String(it.quote || "").trim();
-        if (!full || !quoteNeedsClamp(full)) return;
-        var sample = createQuoteProbe(width);
-        fillQuoteContent(sample.content, it, false, false);
-        nextH = Math.max(nextH, Math.ceil(sample.content.offsetHeight));
-        sample.remove();
-      });
       if (previewSlotH === nextH) return;
       previewSlotH = nextH;
       root.style.setProperty("--rec-quote-slot-h", previewSlotH + "px");
