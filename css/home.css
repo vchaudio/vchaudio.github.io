@@ -716,6 +716,7 @@ main.home-main {
   color: var(--text-muted, #9c948a);
   cursor: pointer;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .home-recommendations__more:hover,

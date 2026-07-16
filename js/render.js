@@ -879,6 +879,49 @@
       return clipped + "…";
     }
 
+    function readMoreFallsToNextLine(contentEl, btnEl) {
+      var btnRect = btnEl.getBoundingClientRect();
+      var walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
+      var lastText = null;
+      var node;
+      while ((node = walker.nextNode())) lastText = node;
+      if (!lastText) return false;
+      var range = document.createRange();
+      range.setStart(lastText, Math.max(0, lastText.length - 1));
+      range.setEnd(lastText, lastText.length);
+      var endRect = range.getBoundingClientRect();
+      if (!endRect.height && !btnRect.height) return false;
+      return btnRect.top > endRect.top + Math.max(2, endRect.height * 0.45);
+    }
+
+    /* Trim the preview until “… read more” fits on the same line (avoids an extra
+       wrapped line that would change the fixed slot height between slides). */
+    function quotePreviewTextInline(full, width) {
+      var text = quotePreviewText(full);
+      if (width <= 8) return text;
+      var minCore = Math.min(80, Math.floor(previewChars * 0.25));
+      var sample = createQuoteProbe(width);
+      var btn = h("button", { type: "button", class: "home-recommendations__more", text: "read more" });
+      sample.content.appendChild(btn);
+
+      function fits(preview) {
+        while (sample.content.firstChild !== btn) {
+          sample.content.removeChild(sample.content.firstChild);
+        }
+        sample.content.insertBefore(document.createTextNode(preview + " "), btn);
+        void sample.probe.offsetHeight;
+        return !readMoreFallsToNextLine(sample.content, btn);
+      }
+
+      while (text.length > minCore + 1 && !fits(text)) {
+        var core = text.slice(0, -1).replace(/\s+\S*\s*$/, "").replace(/\s+$/, "");
+        if (core.length < minCore) break;
+        text = core + "…";
+      }
+      sample.remove();
+      return text;
+    }
+
     function previewSlotRawText(withBreak) {
       var chunk = "The quick brown fox jumps over the lazy dog. ";
       var raw = "";
@@ -930,7 +973,7 @@
         return true;
       }
 
-      target.appendChild(document.createTextNode(quotePreviewText(full) + " "));
+      target.appendChild(document.createTextNode(quotePreviewTextInline(full, quoteMeasureWidth()) + " "));
       appendQuoteControl(target, it, false, withHandlers);
       return true;
     }
@@ -982,8 +1025,11 @@
     }
 
     function measureCollapsedPreviewHeight(width, rawText) {
+      var full = String(rawText || "").trim();
       var sample = createQuoteProbe(width);
-      fillQuoteContent(sample.content, { quote: rawText }, false, false);
+      var preview = quotePreviewTextInline(full, width);
+      sample.content.appendChild(document.createTextNode(preview + " "));
+      sample.content.appendChild(h("button", { type: "button", class: "home-recommendations__more", text: "read more" }));
       var height = sample.content.offsetHeight;
       sample.remove();
       return Math.max(1, Math.ceil(height));
@@ -1017,18 +1063,9 @@
       attempt();
     }
 
-    function measureCurrentCollapsedHeight() {
-      quoteBody.style.height = "auto";
-      quoteBody.style.minHeight = "0";
-      quoteBody.style.maxHeight = "none";
-      quoteBody.style.overflow = "visible";
-      var h = quoteContent.offsetHeight;
-      return Math.max(1, Math.ceil(h));
-    }
-
     function collapsedSlotHeight() {
       syncPreviewSlotHeight();
-      return Math.max(previewSlotH, measureCurrentCollapsedHeight());
+      return previewSlotH;
     }
 
     function applyQuoteSlotLayout(expanded) {
