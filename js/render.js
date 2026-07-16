@@ -1106,16 +1106,16 @@
       var label = it.name || "";
       var href = (it.nameHref && String(it.nameHref).trim()) || "";
       var linkable = !!it.nameLink && !!href;
+      var nameEl = h("span", { class: "home-recommendations__name", text: label });
       if (linkable) {
         nameWrap.appendChild(h("a", {
-          class: "home-recommendations__name home-recommendations__name--link",
+          class: "home-recommendations__name-link",
           href: href,
           rel: "noopener noreferrer",
-          target: "_blank",
-          text: label
-        }));
+          target: "_blank"
+        }, [nameEl]));
       } else {
-        nameWrap.appendChild(h("p", { class: "home-recommendations__name", text: label }));
+        nameWrap.appendChild(nameEl);
       }
     }
 
