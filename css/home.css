@@ -632,6 +632,11 @@ main.home-main {
   overflow: hidden;
 }
 
+.home-recommendations__quote-body,
+.home-recommendations__quote-content {
+  font: inherit;
+}
+
 .home-recommendations__name-wrap {
   margin: 0;
   display: flex;

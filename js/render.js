@@ -873,17 +873,9 @@
     }
 
     function previewSlotRawText() {
-      var sentence = "The quick brown fox jumps over the lazy dog. ";
+      var chunk = "The quick brown fox jumps over the lazy dog. ";
       var raw = "";
-      var lineLen = 0;
-      while (raw.length < previewChars + 48) {
-        if (lineLen >= 88) {
-          raw += "\n";
-          lineLen = 0;
-        }
-        raw += sentence;
-        lineLen += sentence.length;
-      }
+      while (raw.length < previewChars + 32) raw += chunk;
       return raw;
     }
 
@@ -951,27 +943,51 @@
       return Math.min(560, root.getBoundingClientRect().width || 560);
     }
 
-    function measurePreviewSlotHeight(width) {
+    function copyQuoteTypography(node) {
+      var ref = window.getComputedStyle(quoteEl);
+      node.style.fontSize = ref.fontSize;
+      node.style.lineHeight = ref.lineHeight;
+      node.style.fontFamily = ref.fontFamily;
+      node.style.fontWeight = ref.fontWeight;
+      node.style.letterSpacing = ref.letterSpacing;
+      node.style.whiteSpace = ref.whiteSpace;
+    }
+
+    function createQuoteProbe(width) {
       var probe = h("blockquote", { class: "home-recommendations__quote" });
       probe.style.cssText =
-        "position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;width:" +
-        width +
-        "px;margin:0;height:auto;min-height:0;max-height:none;overflow:visible";
+        "position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;" +
+        "width:" + width + "px;max-width:36rem;margin:0;height:auto;min-height:0;max-height:none;overflow:visible";
+      copyQuoteTypography(probe);
       var probeBody = h("div", { class: "home-recommendations__quote-body" });
       probeBody.style.cssText = "height:auto;min-height:0;overflow:visible";
       var probeContent = h("div", { class: "home-recommendations__quote-content" });
       probeBody.appendChild(probeContent);
       probe.appendChild(probeBody);
-      fillQuoteContent(probeContent, { quote: previewSlotRawText() }, false, false);
-      quoteEl.appendChild(probe);
-      var height = probeBody.offsetHeight;
-      quoteEl.removeChild(probe);
-      return height;
+      stage.appendChild(probe);
+      return {
+        probe: probe,
+        body: probeBody,
+        content: probeContent,
+        remove: function () {
+          if (probe.parentNode) probe.parentNode.removeChild(probe);
+        }
+      };
+    }
+
+    function measurePreviewSlotHeight(width) {
+      var sample = createQuoteProbe(width);
+      fillQuoteContent(sample.content, { quote: previewSlotRawText() }, false, false);
+      var height = sample.content.offsetHeight;
+      sample.remove();
+      return Math.max(1, Math.ceil(height));
     }
 
     function syncPreviewSlotHeight() {
       var width = quoteMeasureWidth();
-      previewSlotH = measurePreviewSlotHeight(width);
+      var nextH = measurePreviewSlotHeight(width);
+      if (previewSlotH === nextH) return;
+      previewSlotH = nextH;
       root.style.setProperty("--rec-quote-slot-h", previewSlotH + "px");
     }
 
@@ -989,35 +1005,25 @@
     }
 
     function applyQuoteSlotLayout(expanded) {
-      if (!previewSlotH && quoteMeasureWidth() > 8) syncPreviewSlotHeight();
-      if (!previewSlotH) return;
       if (expanded) {
         quoteBody.style.height = "";
         quoteBody.style.minHeight = "";
         quoteBody.style.overflow = "";
-      } else {
-        quoteBody.style.height = previewSlotH + "px";
-        quoteBody.style.minHeight = "";
-        quoteBody.style.overflow = "hidden";
+        return;
       }
+      if (quoteMeasureWidth() <= 8) return;
+      syncPreviewSlotHeight();
+      quoteBody.style.height = previewSlotH + "px";
+      quoteBody.style.minHeight = "";
+      quoteBody.style.overflow = "hidden";
     }
 
     function measureQuoteBodyHeight(it, expanded) {
       var width = quoteMeasureWidth();
-      var probe = h("blockquote", { class: "home-recommendations__quote" });
-      probe.style.cssText =
-        "position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;width:" +
-        width +
-        "px;margin:0;height:auto;min-height:0;overflow:visible";
-      var probeBody = h("div", { class: "home-recommendations__quote-body" });
-      probeBody.style.cssText = "height:auto;min-height:0;overflow:visible";
-      var probeContent = h("div", { class: "home-recommendations__quote-content" });
-      probeBody.appendChild(probeContent);
-      probe.appendChild(probeBody);
-      quoteEl.appendChild(probe);
-      fillQuoteContent(probeContent, it, expanded, false);
-      var height = probeBody.offsetHeight;
-      quoteEl.removeChild(probe);
+      var sample = createQuoteProbe(width);
+      fillQuoteContent(sample.content, it, expanded, false);
+      var height = sample.body.offsetHeight;
+      sample.remove();
       return height;
     }
 
