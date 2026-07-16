@@ -238,6 +238,8 @@ main.admin-editor,
   min-width: 0;
   padding: 1.5rem var(--admin-pad) 6rem;
   overflow: auto;
+  max-height: calc(100vh - var(--header-h));
+  max-height: calc(100dvh - var(--header-h));
 }
 .admin-editor__header {
   display: flex;

@@ -476,6 +476,62 @@
     return el("label", { class: "admin-field" }, [el("span", { text: label }), sel]);
   }
 
+  /* Keep list scroll position when a row button rebuilds the list (Hide/Show/etc.).
+     The editor often grows unbounded so window scrollY is what actually moves; after
+     re-render, focus must be cleared or the browser jumps to the first row button. */
+  function adminScrollContainer() {
+    var editor = document.getElementById("admin-editor");
+    if (editor && editor.scrollHeight > editor.clientHeight + 1) return editor;
+    return null;
+  }
+
+  function blurActiveAdminFocus() {
+    var active = document.activeElement;
+    if (active && active !== document.body && active !== document.documentElement && active.blur) {
+      active.blur();
+    }
+  }
+
+  function readAdminScrollPos() {
+    var editor = adminScrollContainer();
+    return {
+      editor: editor,
+      y: editor ? editor.scrollTop : window.scrollY,
+      x: editor ? editor.scrollLeft : window.scrollX
+    };
+  }
+
+  function writeAdminScrollPos(pos) {
+    if (!pos) return;
+    if (pos.editor) {
+      pos.editor.scrollTop = pos.y;
+      pos.editor.scrollLeft = pos.x;
+    } else {
+      window.scrollTo(pos.x, pos.y);
+    }
+  }
+
+  function fixAdminScrollAnchor(anchorTop, anchorEl) {
+    if (anchorTop == null || !anchorEl) return;
+    var delta = anchorEl.getBoundingClientRect().top - anchorTop;
+    if (Math.abs(delta) < 0.5) return;
+    var editor = adminScrollContainer();
+    if (editor) editor.scrollTop += delta;
+    else window.scrollBy(0, delta);
+  }
+
+  function restoreAdminListScroll(anchorIndex, listEl, scrollPos, anchorTop) {
+    function restore() {
+      if (anchorTop != null && anchorIndex != null && listEl && listEl.children[anchorIndex]) {
+        fixAdminScrollAnchor(anchorTop, listEl.children[anchorIndex]);
+      } else {
+        writeAdminScrollPos(scrollPos);
+      }
+    }
+    restore();
+    window.requestAnimationFrame(restore);
+  }
+
   /* Lightbox aspect ratio: 16:9 (default) / Ultrawide 2.37 / Custom. The exact
      ratio is stored in v.ratio ("" = 16:9, "2.37", or a custom "W:H"/decimal like
      "2560:1080"). The lightbox sets the frame to this ratio BEFORE the video loads,
@@ -1591,10 +1647,13 @@
 
     function dirty() { markDirty("recommendations"); }
 
-    function renderLists() {
-      var editor = root.closest(".admin-editor") || document.querySelector(".admin-editor");
-      var scrollTop = editor ? editor.scrollTop : window.scrollY;
-      var scrollLeft = editor ? editor.scrollLeft : window.scrollX;
+    function renderLists(anchorIndex) {
+      var anchorTop =
+        anchorIndex != null && list.children[anchorIndex]
+          ? list.children[anchorIndex].getBoundingClientRect().top
+          : null;
+      var scrollPos = readAdminScrollPos();
+      blurActiveAdminFocus();
       clear(list);
       arr.forEach(function (it, i) {
         var row = el("div", { class: "admin-item-row" + (state.selectedObj === it ? " is-active" : "") + (it.hidden ? " is-hidden" : "") }, [
@@ -1612,12 +1671,12 @@
         ]);
         var btns = row.querySelectorAll("button");
         btns[0].onclick = function () {
-          if (i > 0) { var t = arr[i - 1]; arr[i - 1] = arr[i]; arr[i] = t; dirty(); renderLists(); }
+          if (i > 0) { var t = arr[i - 1]; arr[i - 1] = arr[i]; arr[i] = t; dirty(); renderLists(i - 1); }
         };
         btns[1].onclick = function () {
-          if (i < arr.length - 1) { var t = arr[i + 1]; arr[i + 1] = arr[i]; arr[i] = t; dirty(); renderLists(); }
+          if (i < arr.length - 1) { var t = arr[i + 1]; arr[i + 1] = arr[i]; arr[i] = t; dirty(); renderLists(i + 1); }
         };
-        btns[2].onclick = function () { it.hidden = !it.hidden; dirty(); renderLists(); };
+        btns[2].onclick = function () { it.hidden = !it.hidden; dirty(); renderLists(i); };
         btns[3].onclick = function () {
           if (confirm("Delete this recommendation?")) {
             if (state.selectedObj === it) state.selectedObj = null;
@@ -1629,19 +1688,12 @@
         };
         row.querySelector(".admin-item-row__label").onclick = function () {
           state.selectedObj = it;
-          renderLists();
+          renderLists(i);
           renderDetail();
         };
         list.appendChild(row);
       });
-      window.requestAnimationFrame(function () {
-        if (editor) {
-          editor.scrollTop = scrollTop;
-          editor.scrollLeft = scrollLeft;
-        } else {
-          window.scrollTo(scrollLeft, scrollTop);
-        }
-      });
+      restoreAdminListScroll(anchorIndex, list, scrollPos, anchorTop);
     }
 
     function renderDetail() {
