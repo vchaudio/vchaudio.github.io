@@ -880,18 +880,28 @@
     }
 
     function readMoreFallsToNextLine(contentEl, btnEl) {
-      var btnRect = btnEl.getBoundingClientRect();
+      if (!contentEl || !btnEl) return false;
       var walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
       var lastText = null;
       var node;
       while ((node = walker.nextNode())) lastText = node;
-      if (!lastText) return false;
+      if (!lastText || !lastText.length) return false;
+
+      var btnRect = btnEl.getBoundingClientRect();
       var range = document.createRange();
       range.setStart(lastText, Math.max(0, lastText.length - 1));
       range.setEnd(lastText, lastText.length);
       var endRect = range.getBoundingClientRect();
-      if (!endRect.height && !btnRect.height) return false;
-      return btnRect.top > endRect.top + Math.max(2, endRect.height * 0.45);
+      if (endRect.height > 0 && btnRect.height > 0) {
+        return btnRect.top > endRect.top + Math.max(2, endRect.height * 0.45);
+      }
+
+      /* Off-screen / zero-rect probes: offsetTop still reflects line breaks. */
+      var textTop = contentEl.offsetTop;
+      var textBottom = textTop + contentEl.offsetHeight;
+      var btnTop = btnEl.offsetTop;
+      var btnBottom = btnTop + btnEl.offsetHeight;
+      return btnTop + 1 >= textBottom && btnBottom > textBottom + 1;
     }
 
     /* Trim the preview until “… read more” fits on the same line (avoids an extra
@@ -1005,7 +1015,7 @@
     function createQuoteProbe(width) {
       var probe = h("blockquote", { class: "home-recommendations__quote" });
       probe.style.cssText =
-        "position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;" +
+        "position:fixed;left:-100000px;top:0;z-index:-1;pointer-events:none;" +
         "width:" + width + "px;max-width:36rem;margin:0;height:auto;min-height:0;max-height:none;overflow:visible";
       copyQuoteTypography(probe);
       var probeBody = h("div", { class: "home-recommendations__quote-body" });
@@ -1077,10 +1087,11 @@
       }
       if (quoteMeasureWidth() <= 8) return;
       var slotH = collapsedSlotHeight();
-      quoteBody.style.height = slotH + "px";
+      var contentH = Math.max(1, Math.ceil(quoteContent.offsetHeight));
+      quoteBody.style.height = Math.max(slotH, contentH) + "px";
       quoteBody.style.minHeight = "";
       quoteBody.style.overflow = "hidden";
-      root.style.setProperty("--rec-quote-slot-h", slotH + "px");
+      root.style.setProperty("--rec-quote-slot-h", Math.max(slotH, contentH) + "px");
     }
 
     function measureQuoteBodyHeight(it, expanded) {
@@ -1190,18 +1201,74 @@
       }
     }
 
-    function paint(it) {
-      quoteExpanded = false;
-      arrowPreviewY = null;
-      if (it.avatar) {
-        avatarWrap.hidden = false;
-        avatar.setAttribute("src", it.avatar);
-        avatar.setAttribute("alt", it.name || "");
-      } else {
+    var avatarLoadGen = 0;
+    var avatarReadyUrl = "";
+
+    function preloadRecommendationAvatar(url) {
+      if (!url) return Promise.resolve(false);
+      return new Promise(function (resolve) {
+        var img = new Image();
+        function done(ok) { resolve(!!ok); }
+        img.onload = function () { done(img.naturalWidth > 0); };
+        img.onerror = function () { done(false); };
+        img.src = url;
+        if (img.complete) done(img.naturalWidth > 0);
+      });
+    }
+
+    items.forEach(function (it) {
+      if (it.avatar) preloadRecommendationAvatar(it.avatar);
+    });
+
+    function paintAvatar(it, gen) {
+      if (!it.avatar) {
         avatar.removeAttribute("src");
         avatarWrap.hidden = true;
         avatar.setAttribute("alt", "");
+        avatarReadyUrl = "";
+        if (avatarCrop) avatarCrop.style.opacity = "";
+        return;
       }
+
+      avatarWrap.hidden = false;
+      avatar.setAttribute("alt", it.name || "");
+      var url = it.avatar;
+      if (avatarReadyUrl === url && avatar.getAttribute("src") === url) {
+        if (avatarCrop) avatarCrop.style.opacity = "1";
+        return;
+      }
+
+      function showLoaded() {
+        if (gen !== avatarLoadGen || items[index] !== it) return;
+        avatar.setAttribute("src", url);
+        avatarReadyUrl = url;
+        if (avatarCrop) avatarCrop.style.opacity = "1";
+      }
+
+      var probe = new Image();
+      probe.src = url;
+      if (probe.complete && probe.naturalWidth > 0) {
+        showLoaded();
+        return;
+      }
+
+      if (avatarCrop) avatarCrop.style.opacity = "0";
+      preloadRecommendationAvatar(url).then(function (ok) {
+        if (gen !== avatarLoadGen || items[index] !== it) return;
+        if (ok) showLoaded();
+        else {
+          avatar.removeAttribute("src");
+          avatarReadyUrl = "";
+          if (avatarCrop) avatarCrop.style.opacity = "1";
+        }
+      });
+    }
+
+    function paint(it) {
+      quoteExpanded = false;
+      arrowPreviewY = null;
+      avatarLoadGen += 1;
+      paintAvatar(it, avatarLoadGen);
       if (avatarCrop) avatarCrop.style.transform = "";
       paintName(it);
       metaEl.textContent = metaLine(it);
@@ -1358,6 +1425,7 @@
 
     window.addEventListener("resize", function onRecResize() {
       syncPreviewSlotHeight();
+      if (!quoteExpanded && items[index]) buildQuoteContent(items[index], false);
       applyQuoteSlotLayout(quoteExpanded);
       syncArrowPosition();
     });
