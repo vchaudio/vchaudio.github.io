@@ -381,6 +381,17 @@ main.project-page--hero-glow .project-portfolio-block--presentation {
   margin-right: auto;
 }
 
+/* Match width of 2 fit-all grid thumbs + gap (same side inset as Marketing 4-up). */
+.project-portfolio-block--presentation.project-portfolio-block--presentation-wide {
+  --portfolio-grid-gap: 0.5rem;
+  --portfolio-thumb-scale: 0.97;
+  width: calc(
+    (100% - var(--portfolio-grid-gap)) * var(--portfolio-thumb-scale)
+    + var(--portfolio-grid-gap)
+  );
+  max-width: 100%;
+}
+
 .project-portfolio-block--presentation .project-about {
   text-align: center;
 }
@@ -810,15 +821,26 @@ main.project-page--hero-glow .project-about--gameplay-intro {
 }
 
 .project-portfolio-block--showreel .project-showreel-feature {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: clamp(1rem, 3vw, 1.5rem);
+  --portfolio-grid-gap: 0.5rem;
+  --portfolio-thumb-scale: 0.97;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--portfolio-grid-gap);
+  /* Same outer width as 2 columns in a fit-all video grid row. */
+  width: calc(
+    (100% - var(--portfolio-grid-gap)) * var(--portfolio-thumb-scale)
+    + var(--portfolio-grid-gap)
+  );
+  max-width: 100%;
+  margin-inline: auto;
+  justify-content: stretch;
+  align-items: start;
 }
 
 .project-portfolio-block--showreel .video-thumb-wrap {
-  width: min(100%, 420px);
-  flex: 0 1 420px;
+  width: auto;
+  min-width: 0;
+  flex: none;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;

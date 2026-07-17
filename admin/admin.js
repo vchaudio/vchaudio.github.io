@@ -1155,7 +1155,7 @@
     { label: "Hero", type: "hero", make: function () { return { type: "hero", title: "", platform: "", company: "", lead: "", steam: { label: "View on Steam", href: "" } }; } },
     { label: "About", type: "about", make: function () { return { type: "about", heading: "About", html: "" }; } },
     { label: "Responsibilities", type: "responsibilities", make: function () { return { type: "responsibilities", heading: "Responsibilities & Contributions", items: [] }; } },
-      { label: "Video (single)", type: "video-single", make: function () { return { type: "video-single", heading: "", intro: "", video: { id: "", heading: "", sub: "", poster: false, thumb: null, thumbClass: "", thumbW: 1280, thumbH: 720, ratio: "" }, captionTitle: "" }; } },
+      { label: "Video (single)", type: "video-single", make: function () { return { type: "video-single", heading: "", intro: "", stretchPreview: false, video: { id: "", heading: "", sub: "", poster: false, thumb: null, thumbClass: "", thumbW: 1280, thumbH: 720, ratio: "" }, captionTitle: "" }; } },
     { label: "Showreel (2-up)", type: "video-showreel", make: function () { return { type: "video-showreel", heading: "ShowReels", videos: [] }; } },
     { label: "Video grid", type: "video-grid", make: function () { return { type: "video-grid", heading: "", date: "", rows: 2, noNav: true, videos: [] }; } },
     { label: "Releases / downloads (versioned)", type: "releases", make: function () { return { type: "releases", heading: "Download", open: true, wrapClass: "vm-xctrl-spoilers", lead: "", items: [] }; } },
@@ -1207,6 +1207,7 @@
     } else if (b.type === "video-single") {
       out.push(fieldText("Heading", b.heading, function (v) { b.heading = v; dirty(); onChange(); }, { full: true }));
       out.push(fieldTextarea("Intro (HTML)", b.intro, function (v) { b.intro = v; dirty(); }));
+      out.push(fieldBool("Stretch preview to block width", b.stretchPreview, function (v) { b.stretchPreview = v; dirty(); }));
       out.push(fieldText("Video ID", b.video && b.video.id, function (v) { ensure(b, "video").id = v; dirty(); onChange(); }));
       out.push(fieldText("Heading (lightbox)", b.video && b.video.heading, function (v) { ensure(b, "video").heading = v; dirty(); }));
       out.push(fieldText("Sub (lightbox)", b.video && b.video.sub, function (v) { ensure(b, "video").sub = v; dirty(); }));

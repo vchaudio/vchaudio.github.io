@@ -1927,7 +1927,9 @@
   }
 
   function buildVideoSingleBlock(block) {
-    var wrap = h("div", { class: "project-portfolio-block project-portfolio-block--presentation" });
+    var wrapClass = "project-portfolio-block project-portfolio-block--presentation";
+    if (block.stretchPreview) wrapClass += " project-portfolio-block--presentation-wide";
+    var wrap = h("div", { class: wrapClass });
     if (block.intro) wrap.appendChild(h("p", { class: "project-about", html: block.intro }));
     wrap.appendChild(h("div", { class: "ratio-embed" }, [projectVideoButton(block.video, "maxresdefault")]));
     if (block.captionHtml) {
