@@ -3,7 +3,12 @@
 /* The Best Works row breaks out full-bleed for 4+ tiles; clip horizontal
    overflow at the viewport so it never causes a page scrollbar (the 5th+ tiles
    stay hidden inside the carousel's own scroll). */
-html { overflow-x: clip; }
+html {
+  overflow-x: clip;
+  /* Reserve scrollbar space from first paint so late content growth doesn't
+     shove the layout left when the vertical bar appears. */
+  scrollbar-gutter: stable;
+}
 
 .visually-hidden {
   position: absolute;
