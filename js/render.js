@@ -963,9 +963,14 @@
         text: expanded ? "show less" : "read more"
       });
       if (withHandlers) {
-        btn.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
+        var touchArmed = false;
+        var lastTouchActivate = 0;
+
+        function activate(e) {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
           if (quoteAnimating || transitioning) return;
           quoteExpanded = !expanded;
           if (quoteExpanded) {
@@ -973,6 +978,58 @@
           } else {
             animateQuoteTo(it, false, scheduleAutoplay);
           }
+        }
+
+        function clearTextSelection() {
+          try {
+            var sel = window.getSelection();
+            if (sel && sel.removeAllRanges) sel.removeAllRanges();
+          } catch (err0) {}
+        }
+
+        function armTouch(e) {
+          touchArmed = true;
+          /* Stop the browser from treating the first tap as text selection
+             inside the selectable quote (which eats the click on mobile). */
+          e.preventDefault();
+          e.stopPropagation();
+          clearTextSelection();
+        }
+
+        function fireTouch(e) {
+          if (!touchArmed) return;
+          touchArmed = false;
+          lastTouchActivate = Date.now();
+          activate(e);
+        }
+
+        if (window.PointerEvent) {
+          btn.addEventListener("pointerdown", function (e) {
+            if (e.pointerType === "mouse") return;
+            armTouch(e);
+          });
+          btn.addEventListener("pointerup", function (e) {
+            if (e.pointerType === "mouse") return;
+            fireTouch(e);
+          });
+          btn.addEventListener("pointercancel", function () {
+            touchArmed = false;
+          });
+        } else {
+          btn.addEventListener("touchstart", armTouch, { passive: false });
+          btn.addEventListener("touchend", fireTouch, { passive: false });
+          btn.addEventListener("touchcancel", function () {
+            touchArmed = false;
+          });
+        }
+
+        btn.addEventListener("click", function (e) {
+          if (Date.now() - lastTouchActivate < 500) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          activate(e);
         });
       }
       target.appendChild(btn);
