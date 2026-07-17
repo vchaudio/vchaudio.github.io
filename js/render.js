@@ -889,33 +889,33 @@
 
     function readMoreFallsToNextLine(contentEl, btnEl) {
       if (!contentEl || !btnEl) return true;
-      var walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
-      var lastText = null;
-      var node;
-      while ((node = walker.nextNode())) lastText = node;
-      if (!lastText || !lastText.length) return true;
+      var textEl = contentEl.querySelector(".home-recommendations__quote-text");
+      var textNode = textEl && textEl.firstChild;
+      if (!textNode || textNode.nodeType !== 3 || !textNode.length) {
+        var walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
+        textNode = null;
+        var node;
+        while ((node = walker.nextNode())) textNode = node;
+        if (!textNode || !textNode.length) return true;
+      }
+
+      var end = textNode.length;
+      while (end > 1 && /\s/.test(textNode.data.charAt(end - 1))) end -= 1;
 
       var range = document.createRange();
-      range.setStart(lastText, Math.max(0, lastText.length - 1));
-      range.setEnd(lastText, lastText.length);
-      var endRect = range.getBoundingClientRect();
+      range.setStart(textNode, Math.max(0, end - 1));
+      range.setEnd(textNode, end);
+
       var btnRect = btnEl.getBoundingClientRect();
-      if (endRect.height > 0 && btnRect.height > 0) {
-        return btnRect.top > endRect.top + Math.max(2, endRect.height * 0.45);
-      }
-
       var lineRects = range.getClientRects();
-      if (lineRects.length) {
-        var lastLine = lineRects[lineRects.length - 1];
-        return btnRect.top > lastLine.top + Math.max(2, lastLine.height * 0.45);
-      }
+      var endRect = lineRects.length ? lineRects[lineRects.length - 1] : range.getBoundingClientRect();
+      if (!(btnRect.height > 0) || !(endRect.height > 0)) return true;
 
-      return true;
+      /* Same line when tops are within ~half a line; otherwise it wrapped. */
+      return btnRect.top > endRect.top + Math.max(4, endRect.height * 0.5);
     }
 
     function quoteMeasureWidth() {
-      /* Prefer content-box width used for wrapping (getBoundingClientRect can
-         include padding / be stale while the panel is settling). */
       var w = quoteContent.clientWidth || 0;
       if (w > 8) return w;
       w = quoteBody.clientWidth || 0;
@@ -935,12 +935,15 @@
       node.style.fontWeight = ref.fontWeight;
       node.style.letterSpacing = ref.letterSpacing;
       node.style.whiteSpace = ref.whiteSpace;
+      node.style.textAlign = ref.textAlign;
     }
 
     function createQuoteProbe(width) {
       var probe = h("blockquote", { class: "home-recommendations__quote" });
+      /* In-stage + visibility:hidden — iOS often returns empty rects for
+         left:-100000px probes, which made “fits” always succeed. */
       probe.style.cssText =
-        "position:fixed;left:-100000px;top:0;z-index:-1;pointer-events:none;" +
+        "position:absolute;left:0;top:0;visibility:hidden;pointer-events:none;z-index:-1;" +
         "width:" + width + "px;max-width:none;margin:0;height:auto;min-height:0;max-height:none;overflow:visible;" +
         "box-sizing:border-box";
       copyQuoteTypography(probe);
@@ -960,6 +963,16 @@
       };
     }
 
+    function shortenPreviewOnce(text) {
+      var core = String(text || "").replace(/…$/, "").replace(/\s+$/g, "");
+      if (!core) return "…";
+      var byWord = core.replace(/\s+\S*$/, "").replace(/\s+$/g, "");
+      var minCore = Math.min(64, Math.floor(quoteTextCharBudget() * 0.25));
+      if (byWord.length >= minCore && byWord !== core) return byWord + "…";
+      if (core.length <= minCore) return core + "…";
+      return core.slice(0, -1).replace(/\s+$/g, "") + "…";
+    }
+
     /* Trim preview until “… read more” sits on the same line — never grow the slot. */
     function quotePreviewTextInline(full, width) {
       var text = quotePreviewText(full);
@@ -977,18 +990,12 @@
         return !readMoreFallsToNextLine(sample.content, btn);
       }
 
-      while (text.length > minCore + 1 && !fits(text)) {
-        var core = text.slice(0, -1);
-        if (core.slice(-1) === "…") core = core.slice(0, -1);
-        core = core.replace(/\s+\S*\s*$/, "").replace(/\s+$/, "");
-        if (core.length < minCore) {
-          /* Last resort: shave characters so the control still fits. */
-          core = text.replace(/…$/, "").replace(/\s+$/, "");
-          if (core.length <= minCore) break;
-          core = core.slice(0, -1).replace(/\s+$/, "");
-          if (core.length < minCore) break;
-        }
-        text = core + "…";
+      var guard = 0;
+      while (text.length > minCore + 1 && !fits(text) && guard < 100) {
+        guard += 1;
+        var next = shortenPreviewOnce(text);
+        if (next === text) break;
+        text = next;
       }
       sample.remove();
       return text;
@@ -1125,38 +1132,68 @@
       root.style.setProperty("--rec-quote-slot-h", slotH + "px");
     }
 
-    /* After real layout: if “read more” wrapped, shorten the preview (never grow slot). */
+    /* Live DOM trim: shorten characters until “read more” shares the last line.
+       Never grows the quote slot. */
+    function trimCollapsedQuoteLive() {
+      var textEl = quoteContent.querySelector(".home-recommendations__quote-text");
+      var btn = quoteContent.querySelector(".home-recommendations__more");
+      if (!textEl || !btn) return;
+
+      var minCore = Math.min(64, Math.floor(quoteTextCharBudget() * 0.25));
+      var savedHeight = quoteBody.style.height;
+      var savedOverflow = quoteBody.style.overflow;
+      quoteBody.style.height = "auto";
+      quoteBody.style.overflow = "visible";
+
+      var guard = 0;
+      while (guard < 120) {
+        guard += 1;
+        void quoteContent.offsetHeight;
+        if (!readMoreFallsToNextLine(quoteContent, btn)) break;
+        var cur = String(textEl.textContent || "").replace(/\s+$/g, "");
+        var core = cur.replace(/…$/g, "").replace(/\s+$/g, "");
+        if (core.length <= minCore) break;
+        var next = shortenPreviewOnce(cur);
+        if (next === cur) {
+          core = core.slice(0, -1).replace(/\s+$/g, "");
+          if (core.length < minCore) break;
+          next = core + "…";
+        }
+        textEl.textContent = next + " ";
+      }
+
+      quoteBody.style.height = savedHeight;
+      quoteBody.style.overflow = savedOverflow;
+
+      /* If the fixed slot still clips the control, shave more while locked. */
+      guard = 0;
+      while (guard < 60) {
+        guard += 1;
+        void quoteContent.offsetHeight;
+        var bodyRect = quoteBody.getBoundingClientRect();
+        var btnRect = btn.getBoundingClientRect();
+        var wrapped = readMoreFallsToNextLine(quoteContent, btn);
+        var clipped = btnRect.height > 0 && bodyRect.height > 0 && btnRect.bottom > bodyRect.bottom + 1;
+        if (!wrapped && !clipped) break;
+        var cur2 = String(textEl.textContent || "").replace(/\s+$/g, "");
+        var core2 = cur2.replace(/…$/g, "").replace(/\s+$/g, "");
+        if (core2.length <= minCore) break;
+        var next2 = shortenPreviewOnce(cur2);
+        if (next2 === cur2) {
+          core2 = core2.slice(0, -1).replace(/\s+$/g, "");
+          if (core2.length < minCore) break;
+          next2 = core2 + "…";
+        }
+        textEl.textContent = next2 + " ";
+      }
+    }
+
     function refitCollapsedQuote(it) {
       if (quoteExpanded || !it) return;
       var full = String(it.quote || "").trim();
       if (!quoteNeedsClamp(full)) return;
-      var btn = quoteContent.querySelector(".home-recommendations__more");
-      if (!btn) return;
-      if (!readMoreFallsToNextLine(quoteContent, btn)) return;
-      buildQuoteContent(it, false);
-      applyQuoteSlotLayout(false);
-      btn = quoteContent.querySelector(".home-recommendations__more");
-      if (!btn || !readMoreFallsToNextLine(quoteContent, btn)) return;
-      /* Live trim against the painted node if the probe still missed. */
-      var textEl = quoteContent.querySelector(".home-recommendations__quote-text");
-      if (!textEl) return;
-      var minCore = Math.min(64, Math.floor(quoteTextCharBudget() * 0.25));
-      var text = String(textEl.textContent || "").replace(/\s+$/, "");
-      var guard = 0;
-      while (text.length > minCore + 1 && readMoreFallsToNextLine(quoteContent, btn) && guard < 80) {
-        guard += 1;
-        var core = text.replace(/…$/, "").replace(/\s+$/, "");
-        core = core.replace(/\s+\S*\s*$/, "").replace(/\s+$/, "");
-        if (core.length < minCore) {
-          core = text.replace(/…$/, "").replace(/\s+$/, "");
-          if (core.length <= minCore) break;
-          core = core.slice(0, -1).replace(/\s+$/, "");
-          if (core.length < minCore) break;
-        }
-        text = core + "…";
-        textEl.textContent = text + " ";
-        void quoteContent.offsetHeight;
-      }
+      if (!quoteContent.querySelector(".home-recommendations__more")) return;
+      trimCollapsedQuoteLive();
     }
 
     function measureQuoteBodyHeight(it, expanded) {
@@ -1190,7 +1227,15 @@
       quoteEl.hidden = false;
       buildQuoteContent(it, expanded);
       applyQuoteSlotLayout(expanded);
-      if (!expanded) refitCollapsedQuote(it);
+      if (!expanded) {
+        refitCollapsedQuote(it);
+        /* Second pass after layout settles (iOS width/font often lag one frame). */
+        window.requestAnimationFrame(function () {
+          if (quoteExpanded || items[index] !== it) return;
+          refitCollapsedQuote(it);
+          afterQuoteLayout();
+        });
+      }
       afterQuoteLayout();
     }
 

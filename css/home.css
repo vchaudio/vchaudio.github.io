@@ -519,6 +519,7 @@ main.home-main {
 }
 
 .home-recommendations__stage {
+  position: relative;
   max-width: var(--work-row-w);
   margin-inline: auto;
   overflow: visible;
