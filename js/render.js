@@ -1998,6 +1998,65 @@
     return p;
   }
 
+  function collectProjectBannerUrls(data) {
+    var urls = [];
+    var seen = Object.create(null);
+    function add(url) {
+      if (!url || seen[url]) return;
+      seen[url] = true;
+      urls.push(url);
+    }
+    var list =
+      data && data.projects && Array.isArray(data.projects.projects)
+        ? data.projects.projects
+        : Array.isArray(data && data.projects)
+          ? data.projects
+          : [];
+    list.forEach(function (project) {
+      (project.blocks || []).forEach(function (block) {
+        if (block.type === "banner" && block.src) {
+          add(block.src);
+          return;
+        }
+        if (block.type === "raw-banner" && block.html) {
+          var match = String(block.html).match(/\bsrc=["']([^"']+)["']/i);
+          if (match) add(match[1]);
+        }
+      });
+    });
+    return urls;
+  }
+
+  /* After home is interactive, warm the HTTP cache with project-page HQ banners
+     (different files from Best Works card thumbs) so the first project open is snappy. */
+  function scheduleProjectBannerPrefetch(data) {
+    try {
+      var conn = typeof navigator !== "undefined" ? navigator.connection : null;
+      if (conn) {
+        if (conn.saveData) return;
+        if (conn.effectiveType === "slow-2g" || conn.effectiveType === "2g") return;
+      }
+      var urls = collectProjectBannerUrls(data);
+      if (!urls.length) return;
+
+      function prefetch() {
+        urls.forEach(function (url) {
+          var img = new Image();
+          img.decoding = "async";
+          img.src = url;
+        });
+      }
+
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(prefetch, { timeout: 2500 });
+      } else {
+        setTimeout(prefetch, 1200);
+      }
+    } catch (ePrefetch) {
+      /* Prefetch must never break homepage render. */
+    }
+  }
+
   function readPreviewData() {
     /* One-shot preview data set by the admin panel (admin/admin.js). */
     if (location.search.indexOf("preview=1") < 0) return null;
@@ -2024,7 +2083,9 @@
         }
         if (type === "home") {
           renderHome(data);
-          return loadScript("js/main.js?v=20260717e").then(function () { return loadScript("js/home.js?v=20260714c"); });
+          return loadScript("js/main.js?v=20260717e")
+            .then(function () { return loadScript("js/home.js?v=20260714c"); })
+            .then(function () { scheduleProjectBannerPrefetch(data); });
         }
       })
       .catch(function (err) {
