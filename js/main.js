@@ -1721,6 +1721,64 @@
     }
   }
 
+  function initTextSelectionDismiss() {
+    function isFormField(node) {
+      return node && node.closest && node.closest("input, textarea, select, [contenteditable=''], [contenteditable='true']");
+    }
+
+    function isTextTarget(node) {
+      if (!node || !node.closest) return false;
+      if (isFormField(node)) return true;
+      var el = node.nodeType === 3 ? node.parentElement : node;
+      while (el && el !== document.documentElement) {
+        var style = window.getComputedStyle(el);
+        if (style.userSelect === "text" || style.webkitUserSelect === "text") return true;
+        el = el.parentElement;
+      }
+      return false;
+    }
+
+    function caretRangeAt(x, y) {
+      if (document.caretRangeFromPoint) return document.caretRangeFromPoint(x, y);
+      if (document.caretPositionFromPoint) {
+        var pos = document.caretPositionFromPoint(x, y);
+        if (!pos) return null;
+        var range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+        range.collapse(true);
+        return range;
+      }
+      return null;
+    }
+
+    document.addEventListener("mousedown", function (e) {
+      if (e.button !== 0) return;
+      if (isFormField(e.target)) return;
+
+      var sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+
+      if (isTextTarget(e.target)) return;
+
+      if (!sel.isCollapsed) {
+        var clickRange = caretRangeAt(e.clientX, e.clientY);
+        if (clickRange) {
+          try {
+            var active = sel.getRangeAt(0);
+            if (
+              active.compareBoundaryPoints(Range.END_TO_START, clickRange) <= 0 &&
+              active.compareBoundaryPoints(Range.START_TO_END, clickRange) >= 0
+            ) {
+              return;
+            }
+          } catch (err0) {}
+        }
+      }
+
+      sel.removeAllRanges();
+    });
+  }
+
   function initScrollToTop() {
     if (document.querySelector("[data-home-root]")) return;
 
@@ -1772,6 +1830,7 @@
       initVideoLightbox();
       initImageLightbox();
       initAvatarParallax();
+      initTextSelectionDismiss();
       initScrollToTop();
     });
   } else {
@@ -1783,6 +1842,7 @@
     initVideoLightbox();
     initImageLightbox();
     initAvatarParallax();
+    initTextSelectionDismiss();
     initScrollToTop();
   }
 })();

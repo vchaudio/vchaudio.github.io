@@ -112,6 +112,26 @@ body {
   color: var(--text);
   background: transparent;
   -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Copyable body copy only — keeps UI/cards from showing a sticky text caret. */
+:where(p, blockquote, li, dd, figcaption) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.intro-bio,
+.home-recommendations__quote-content,
+.project-about,
+.home-contact__lead,
+.job-card p,
+.spoiler-inner p,
+.spoiler-inner blockquote,
+.spoiler-inner li {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* Keep footer at the bottom while #project-main is still empty (pre-JSON). */
