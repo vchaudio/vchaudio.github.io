@@ -419,7 +419,7 @@
         {
           "type": "raw-banner",
           "class": "page-overview-banner--vm-xctrl page-overview-banner--vm-xctrl-hero",
-          "html": "<img class=\"page-overview-banner__img vm-xctrl-hero-banner\" src=\"assets/vm-xctrl-hero-banner.webp\" alt=\"Behringer X-Touch universal control surface and Voicemeeter Potato mixer\" width=\"4096\" height=\"1104\" loading=\"eager\" decoding=\"async\" draggable=\"false\">"
+          "html": "<img class=\"page-overview-banner__img vm-xctrl-hero-banner\" src=\"assets/vm-xctrl-hero-banner_comp.webp\" alt=\"Behringer X-Touch universal control surface and Voicemeeter Potato mixer\" width=\"4096\" height=\"1104\" loading=\"eager\" decoding=\"async\" draggable=\"false\">"
         },
         {
           "type": "hero",
