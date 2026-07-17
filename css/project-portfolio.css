@@ -379,6 +379,9 @@ main.project-page--hero-glow .project-portfolio-block--presentation {
   width: min(100%, 560px);
   margin-left: auto;
   margin-right: auto;
+  padding: 1rem 0.85rem 1.2rem;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 /* Match width of 2 fit-all grid thumbs + gap (same side inset as Marketing 4-up). */
@@ -412,6 +415,9 @@ main.project-page--hero-glow .project-about--gameplay-intro {
 .project-portfolio-block .video-scroller__viewport {
   container-type: inline-size;
   container-name: portfolio-viewport;
+  /* Beat base .video-scroller__viewport { overflow-y: hidden } — room for gold shine */
+  padding: 1rem 0.85rem 1.2rem;
+  box-sizing: border-box;
 }
 
 .project-portfolio-block .video-scroller__strip--grid-2 {
@@ -425,7 +431,8 @@ main.project-page--hero-glow .project-about--gameplay-intro {
 }
 
 .project-portfolio-block [data-portfolio-fit-all="true"] .video-scroller__viewport {
-  overflow-x: hidden;
+  /* No scroll on fit-all — allow hover glow to paint outside the strip */
+  overflow: visible;
 }
 
 .project-portfolio-block [data-portfolio-fit-all="true"] .video-scroller__strip--grid-2 {
@@ -436,7 +443,7 @@ main.project-page--hero-glow .project-about--gameplay-intro {
 .project-portfolio-block [data-portfolio-centered="true"] .video-scroller__viewport {
   display: flex;
   justify-content: center;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .project-portfolio-block [data-portfolio-centered="true"] .video-scroller__strip--grid-2 {
@@ -459,12 +466,13 @@ main.project-page--hero-glow .project-about--gameplay-intro {
 .project-portfolio-block .video-scroller--fit-all,
 .project-portfolio-block .video-scroller--no-nav.video-scroller--fit-all {
   gap: 0;
+  overflow: visible;
 }
 
 .project-portfolio-block .video-scroller--no-nav.video-scroller--fit-all .video-scroller__viewport {
   flex: 1 1 100%;
   width: 100%;
-  overflow-x: hidden;
+  overflow: visible;
 }
 
 .project-portfolio-block [data-portfolio-fit-all="true"] .video-scroller__strip--grid-2,
@@ -563,20 +571,158 @@ main.project-page--hero-glow .project-about--gameplay-intro {
   aspect-ratio: 16 / 9;
 }
 
-/* Hover zoom on project-page video thumbnails — mirrors the homepage best-works
-   zoom (scale 1 -> 1.02). The .video-thumb button already clips
-   (overflow: hidden), so the scaled image stays inside the tile and the
-   play-button overlay (::after) stays put. transform-origin: bottom center
-   grows the image upward, matching the button's hover lift. */
+/* Frame + hover ring — match homepage Best Works video cards
+   (.best-works .video-thumb--card). Play icon stays on ::after; ring uses ::before. */
+.project-portfolio-block .video-thumb {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  isolation: isolate;
+  transition:
+    transform 0.3s var(--ease-out),
+    border-color 0.25s,
+    box-shadow 0.3s var(--ease-out);
+}
+
+.project-portfolio-block .video-thumb::before {
+  content: "";
+  position: absolute;
+  /* Inside the thumb so fit-all / overflow-x parents never clip the ring */
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    var(--accent-dim) 0%,
+    var(--accent) 42%,
+    rgba(240, 215, 140, 0.85) 58%,
+    var(--accent-dim) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.project-portfolio-block .video-thumb:hover,
+.project-portfolio-block .video-thumb:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(228, 160, 74, 0.65);
+  /* Shine via box-shadow (survives overflow:hidden on the thumb); parent padding keeps it visible */
+  box-shadow:
+    var(--shadow-hover),
+    0 0 0 1px rgba(228, 160, 74, 0.22),
+    0 0 12px rgba(228, 160, 74, 0.16),
+    0 0 22px rgba(228, 160, 74, 0.08);
+}
+
+.project-portfolio-block .video-thumb:hover::before,
+.project-portfolio-block .video-thumb:focus-visible::before {
+  opacity: 1;
+}
+
+.project-portfolio-block .video-thumb:focus-visible {
+  outline: none;
+}
+
+.project-portfolio-block .ratio-embed {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  isolation: isolate;
+  /* Let hover shine paint outside; image/iframe still clipped by inner thumb */
+  overflow: visible;
+  transition:
+    transform 0.3s var(--ease-out),
+    border-color 0.25s,
+    box-shadow 0.3s var(--ease-out);
+}
+
+.project-portfolio-block .ratio-embed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    var(--accent-dim) 0%,
+    var(--accent) 42%,
+    rgba(240, 215, 140, 0.85) 58%,
+    var(--accent-dim) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.project-portfolio-block .ratio-embed:has(.video-thumb:hover),
+.project-portfolio-block .ratio-embed:has(.video-thumb:focus-visible) {
+  transform: translateY(-3px);
+  border-color: rgba(228, 160, 74, 0.65);
+  box-shadow:
+    var(--shadow-hover),
+    0 0 0 1px rgba(228, 160, 74, 0.22),
+    0 0 12px rgba(228, 160, 74, 0.16),
+    0 0 22px rgba(228, 160, 74, 0.08);
+}
+
+.project-portfolio-block .ratio-embed:has(.video-thumb:hover)::before,
+.project-portfolio-block .ratio-embed:has(.video-thumb:focus-visible)::before {
+  opacity: 1;
+}
+
+.project-portfolio-block .ratio-embed > .video-thumb {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  transform: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.project-portfolio-block .ratio-embed > .video-thumb:hover,
+.project-portfolio-block .ratio-embed > .video-thumb:focus-visible {
+  transform: none;
+  border: none;
+  box-shadow: none;
+}
+
+.project-portfolio-block .ratio-embed > .video-thumb::before {
+  content: none;
+}
+
+.project-portfolio-block .ratio-embed iframe {
+  border-radius: inherit;
+}
+
+/* Hover zoom on project-page previews — softer/slower than homepage. */
 .project-portfolio-block .video-thumb img {
   transform: scale(1);
   transform-origin: bottom center;
   will-change: transform;
-  transition: transform 0.3s var(--ease-out);
+  transition: transform 0.48s var(--ease-out);
 }
 .project-portfolio-block .video-thumb:hover img,
 .project-portfolio-block .video-thumb:focus-visible img {
-  transform: scale(1.02);
+  transform: scale(1.006);
 }
 
 @supports not (container-type: inline-size) {
@@ -666,6 +812,9 @@ main.project-page--hero-glow .project-about--gameplay-intro {
   gap: clamp(1.25rem, 4vw, 2.5rem);
   justify-content: center;
   align-items: start;
+  padding: 1rem 0.85rem 0.75rem;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 .project-portfolio-block--comic .project-comic-trailers {
@@ -757,7 +906,25 @@ main.project-page--hero-glow .project-about--gameplay-intro {
   width: 100%;
   aspect-ratio: 2 / 3;
   height: auto;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow);
+  isolation: isolate;
+  transition:
+    transform 0.3s var(--ease-out),
+    border-color 0.25s,
+    box-shadow 0.3s var(--ease-out);
+}
+
+.project-portfolio-block--comic .comic-poster-reflect > .video-thumb--poster-portrait:hover,
+.project-portfolio-block--comic .comic-poster-reflect > .video-thumb--poster-portrait:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(228, 160, 74, 0.65);
+  box-shadow:
+    var(--shadow-hover),
+    0 0 0 1px rgba(228, 160, 74, 0.22),
+    0 0 12px rgba(228, 160, 74, 0.16),
+    0 0 22px rgba(228, 160, 74, 0.08);
 }
 
 .project-portfolio-block--comic .video-thumb--poster-portrait img {
@@ -835,6 +1002,9 @@ main.project-page--hero-glow .project-about--gameplay-intro {
   margin-inline: auto;
   justify-content: stretch;
   align-items: start;
+  padding: 1rem 0.85rem 1.2rem;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 .project-portfolio-block--showreel .video-thumb-wrap {
