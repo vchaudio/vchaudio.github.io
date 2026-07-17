@@ -159,10 +159,12 @@
 
     /* hero */
     var logo = document.querySelector(".brand-logo");
-    if (logo) {
-      logo.setAttribute("src", site.brand.logo);
-      logo.setAttribute("width", site.brand.logoWidth);
-      logo.setAttribute("height", site.brand.logoHeight);
+    if (logo && site.brand) {
+      if (site.brand.logo && logo.getAttribute("src") !== site.brand.logo) {
+        logo.setAttribute("src", site.brand.logo);
+      }
+      if (site.brand.logoWidth) logo.setAttribute("width", site.brand.logoWidth);
+      if (site.brand.logoHeight) logo.setAttribute("height", site.brand.logoHeight);
     }
     /* Hide the hero logo (and its wrapper/spacing) entirely when configured.
        Inline style is used (not the `hidden` attribute) so no CSS rule — not

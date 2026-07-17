@@ -509,7 +509,7 @@ main.page-other-projects {
   justify-content: center;
   align-items: center;
   margin: 0.5rem 0 1.1rem;
-  animation: fade-up 0.75s var(--ease-out) both;
+  animation: hero-in 0.9s var(--ease-out) 0.08s both;
 }
 
 /* When the admin hides the hero logo, the wrapper must collapse (removing the
@@ -525,6 +525,7 @@ main.page-other-projects {
   width: min(100%, 720px);
   height: auto;
   max-height: min(32vw, 200px);
+  aspect-ratio: 917 / 239;
   object-fit: contain;
   animation: logo-breathe 2s ease-in-out 0.85s infinite;
   -webkit-user-select: none;
@@ -3715,3 +3716,4 @@ a.job-card.job-card--to-project:focus-visible {
     transform: translateX(0) scale(1);
   }
 }
+
