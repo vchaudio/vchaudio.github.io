@@ -861,16 +861,22 @@
       return full.length > previewChars;
     }
 
+    /* Visible preview budget: quote text + ellipsis + inline “read more”. */
+    function quoteTextCharBudget() {
+      return Math.max(64, previewChars - "… read more".length);
+    }
+
     function quotePreviewText(full) {
-      if (full.length <= previewChars) return full.replace(/\s+$/, "");
-      var clipped = full.slice(0, previewChars);
+      var budget = quoteTextCharBudget();
+      if (full.length <= budget) return full.replace(/\s+$/, "");
+      var clipped = full.slice(0, budget);
       /* End at the last paragraph break in the window so “read more” stays on
          the same line as the visible text instead of after a forced \n. */
       var breakIdx = clipped.lastIndexOf("\n");
-      if (breakIdx > 0 && breakIdx >= Math.min(80, Math.floor(previewChars * 0.25))) {
+      if (breakIdx > 0 && breakIdx >= Math.min(64, Math.floor(budget * 0.25))) {
         clipped = clipped.slice(0, breakIdx);
       } else {
-        var next = full.charAt(previewChars);
+        var next = full.charAt(budget);
         if (next && /\S/.test(next) && /\S$/.test(clipped)) {
           clipped = clipped.replace(/\S+$/, "");
         }
@@ -880,28 +886,29 @@
     }
 
     function readMoreFallsToNextLine(contentEl, btnEl) {
-      if (!contentEl || !btnEl) return false;
+      if (!contentEl || !btnEl) return true;
       var walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
       var lastText = null;
       var node;
       while ((node = walker.nextNode())) lastText = node;
-      if (!lastText || !lastText.length) return false;
+      if (!lastText || !lastText.length) return true;
 
-      var btnRect = btnEl.getBoundingClientRect();
       var range = document.createRange();
       range.setStart(lastText, Math.max(0, lastText.length - 1));
       range.setEnd(lastText, lastText.length);
       var endRect = range.getBoundingClientRect();
+      var btnRect = btnEl.getBoundingClientRect();
       if (endRect.height > 0 && btnRect.height > 0) {
         return btnRect.top > endRect.top + Math.max(2, endRect.height * 0.45);
       }
 
-      /* Off-screen / zero-rect probes: offsetTop still reflects line breaks. */
-      var textTop = contentEl.offsetTop;
-      var textBottom = textTop + contentEl.offsetHeight;
-      var btnTop = btnEl.offsetTop;
-      var btnBottom = btnTop + btnEl.offsetHeight;
-      return btnTop + 1 >= textBottom && btnBottom > textBottom + 1;
+      var lineRects = range.getClientRects();
+      if (lineRects.length) {
+        var lastLine = lineRects[lineRects.length - 1];
+        return btnRect.top > lastLine.top + Math.max(2, lastLine.height * 0.45);
+      }
+
+      return true;
     }
 
     /* Trim the preview until “… read more” fits on the same line (avoids an extra
@@ -909,7 +916,7 @@
     function quotePreviewTextInline(full, width) {
       var text = quotePreviewText(full);
       if (width <= 8) return text;
-      var minCore = Math.min(80, Math.floor(previewChars * 0.25));
+      var minCore = Math.min(64, Math.floor(quoteTextCharBudget() * 0.25));
       var sample = createQuoteProbe(width);
       var btn = h("button", { type: "button", class: "home-recommendations__more", text: "read more" });
       sample.content.appendChild(btn);
@@ -924,7 +931,9 @@
       }
 
       while (text.length > minCore + 1 && !fits(text)) {
-        var core = text.slice(0, -1).replace(/\s+\S*\s*$/, "").replace(/\s+$/, "");
+        var core = text.slice(0, -1);
+        if (core.slice(-1) === "…") core = core.slice(0, -1);
+        core = core.replace(/\s+\S*\s*$/, "").replace(/\s+$/, "");
         if (core.length < minCore) break;
         text = core + "…";
       }
@@ -935,11 +944,12 @@
     function previewSlotRawText(withBreak) {
       var chunk = "The quick brown fox jumps over the lazy dog. ";
       var raw = "";
-      var breakAt = Math.floor(previewChars * 0.88);
-      while (raw.length < (withBreak ? breakAt : previewChars + 32)) raw += chunk;
+      var budget = quoteTextCharBudget();
+      var breakAt = Math.floor(budget * 0.88);
+      while (raw.length < (withBreak ? breakAt : budget + 16)) raw += chunk;
       if (withBreak) {
         raw += "\n";
-        while (raw.length < previewChars + 32) raw += chunk;
+        while (raw.length < budget + 16) raw += chunk;
       }
       return raw;
     }
@@ -1087,11 +1097,10 @@
       }
       if (quoteMeasureWidth() <= 8) return;
       var slotH = collapsedSlotHeight();
-      var contentH = Math.max(1, Math.ceil(quoteContent.offsetHeight));
-      quoteBody.style.height = Math.max(slotH, contentH) + "px";
+      quoteBody.style.height = slotH + "px";
       quoteBody.style.minHeight = "";
       quoteBody.style.overflow = "hidden";
-      root.style.setProperty("--rec-quote-slot-h", Math.max(slotH, contentH) + "px");
+      root.style.setProperty("--rec-quote-slot-h", slotH + "px");
     }
 
     function measureQuoteBodyHeight(it, expanded) {
