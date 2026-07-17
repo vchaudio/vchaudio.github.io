@@ -116,22 +116,62 @@ body {
   user-select: none;
 }
 
-/* Copyable body copy only — keeps UI/cards from showing a sticky text caret. */
-:where(p, blockquote, li, dd, figcaption) {
-  -webkit-user-select: text;
-  user-select: text;
-}
-
+/* Copyable content — headings, labels, and body text. */
+:where(h1, h2, h3, h4, h5, h6, p, blockquote, li, dd, figcaption),
+.intro-name,
+.intro-role,
 .intro-bio,
+.home-recommendations__name,
+.home-recommendations__meta,
+.home-recommendations__year,
 .home-recommendations__quote-content,
+.info-label,
+.info-value,
+.info-value__link,
+.job-meta,
+.job-card h3,
+.job-card__project,
+.job-card__awards-title,
+.skills-heading,
+.course-line,
 .project-about,
+.project-section__date,
 .home-contact__lead,
-.job-card p,
+.page-hero-title-stack,
+.page-hero-company,
+.page-hero-platform,
+.lead,
 .spoiler-inner p,
 .spoiler-inner blockquote,
 .spoiler-inner li {
   -webkit-user-select: text;
   user-select: text;
+}
+
+/* Section headings (copy-link UI) — no text caret on click. */
+.resume-section__heading,
+.spoiler-summary-label {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  cursor: pointer;
+}
+
+/* Interactive UI — no text-selection caret. */
+:where(
+  button,
+  label,
+  .home-action-btn,
+  .home-social-btn,
+  .best-works__carousel-arrow,
+  .home-recommendations__more,
+  .home-tab,
+  .scroll-to-top,
+  .resume-pdf-download,
+  .resume-pdf-download__link,
+  .spoiler-chevron
+) {
+  -webkit-user-select: none !important;
+  user-select: none !important;
 }
 
 /* Keep footer at the bottom while #project-main is still empty (pre-JSON). */

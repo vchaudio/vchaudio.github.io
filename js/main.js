@@ -164,19 +164,11 @@
          have an anchor id assigned by render.js). Silent copy, faint flash. */
       if (isProjectSpoiler && details.id && label) {
         label.style.cursor = "pointer";
-        label.style.userSelect = "none";
-        label.style.webkitUserSelect = "none";
         label.style.webkitTouchCallout = "none";
         label.style.webkitTapHighlightColor = "transparent";
         label.title = "Copy link to this section";
-        /* Neutralise selection on the whole summary top too — on touch devices
-           a tap-and-hold on the label otherwise highlights the entire card top
-           (the <summary>), not just the label. The summary has no selectable
-           body text (label + chevron only), so this is safe. */
         var summaryEl = details.querySelector("summary");
         if (summaryEl) {
-          summaryEl.style.userSelect = "none";
-          summaryEl.style.webkitUserSelect = "none";
           summaryEl.style.webkitTouchCallout = "none";
           summaryEl.style.webkitTapHighlightColor = "transparent";
         }
@@ -1673,8 +1665,6 @@
         var heading = p.querySelector("h1, h2, h3");
         if (!heading) return;
         heading.style.cursor = "pointer";
-        heading.style.userSelect = "none";
-        heading.style.webkitUserSelect = "none";
         heading.style.webkitTouchCallout = "none";
         heading.style.webkitTapHighlightColor = "transparent";
         heading.title = "Copy link to this section";
@@ -1732,23 +1722,24 @@
       var el = node.nodeType === 3 ? node.parentElement : node;
       while (el && el !== document.documentElement) {
         var style = window.getComputedStyle(el);
-        if (style.userSelect === "text" || style.webkitUserSelect === "text") return true;
+        var us = style.userSelect || style.webkitUserSelect;
+        if (us === "none") return false;
+        if (us === "text" || us === "all") return true;
         el = el.parentElement;
       }
       return false;
     }
 
-    function caretRangeAt(x, y) {
-      if (document.caretRangeFromPoint) return document.caretRangeFromPoint(x, y);
-      if (document.caretPositionFromPoint) {
-        var pos = document.caretPositionFromPoint(x, y);
-        if (!pos) return null;
-        var range = document.createRange();
-        range.setStart(pos.offsetNode, pos.offset);
-        range.collapse(true);
-        return range;
-      }
-      return null;
+    function selectionScope() {
+      var sel = window.getSelection();
+      if (!sel || !sel.rangeCount || sel.isCollapsed) return null;
+      var node = sel.anchorNode;
+      if (!node) return null;
+      var el = node.nodeType === 3 ? node.parentElement : node;
+      if (!el || !el.closest) return null;
+      return el.closest(
+        "#home-panel-resume, #home-panel-contact, #home-panel-main, #project-main, main"
+      );
     }
 
     document.addEventListener("mousedown", function (e) {
@@ -1756,27 +1747,18 @@
       if (isFormField(e.target)) return;
 
       var sel = window.getSelection();
-      if (!sel || !sel.rangeCount) return;
+      if (!sel || !sel.rangeCount || sel.isCollapsed) return;
+
+      var scope = selectionScope();
+      if (scope && !scope.contains(e.target)) {
+        sel.removeAllRanges();
+        return;
+      }
 
       if (isTextTarget(e.target)) return;
 
-      if (!sel.isCollapsed) {
-        var clickRange = caretRangeAt(e.clientX, e.clientY);
-        if (clickRange) {
-          try {
-            var active = sel.getRangeAt(0);
-            if (
-              active.compareBoundaryPoints(Range.END_TO_START, clickRange) <= 0 &&
-              active.compareBoundaryPoints(Range.START_TO_END, clickRange) >= 0
-            ) {
-              return;
-            }
-          } catch (err0) {}
-        }
-      }
-
       sel.removeAllRanges();
-    });
+    }, true);
   }
 
   function initScrollToTop() {

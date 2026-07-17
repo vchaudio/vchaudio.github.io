@@ -241,8 +241,6 @@
         var heading = b.el.querySelector("h1, h2, h3");
         if (!heading) return;
         heading.style.cursor = "pointer";
-        heading.style.userSelect = "none";
-        heading.style.webkitUserSelect = "none";
         heading.style.webkitTouchCallout = "none";
         heading.style.webkitTapHighlightColor = "transparent";
         heading.title = "Copy link to this section";

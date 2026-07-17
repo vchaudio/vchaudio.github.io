@@ -1906,11 +1906,11 @@
         var type = pageType();
         if (type === "project") {
           renderProject(data);
-          return loadScript("js/main.js?v=20260717c").then(function () { return loadScript("js/audio-player.js"); });
+          return loadScript("js/main.js?v=20260717e").then(function () { return loadScript("js/audio-player.js"); });
         }
         if (type === "home") {
           renderHome(data);
-          return loadScript("js/main.js?v=20260717c").then(function () { return loadScript("js/home.js?v=20260714c"); });
+          return loadScript("js/main.js?v=20260717e").then(function () { return loadScript("js/home.js?v=20260714c"); });
         }
       })
       .catch(function (err) {
