@@ -963,14 +963,12 @@
         text: expanded ? "show less" : "read more"
       });
       if (withHandlers) {
-        var touchArmed = false;
-        var lastTouchActivate = 0;
-
-        function activate(e) {
-          if (e) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          try {
+            btn.blur();
+          } catch (errBlur) {}
           if (quoteAnimating || transitioning) return;
           quoteExpanded = !expanded;
           if (quoteExpanded) {
@@ -978,61 +976,15 @@
           } else {
             animateQuoteTo(it, false, scheduleAutoplay);
           }
-        }
-
-        function clearTextSelection() {
-          try {
-            var sel = window.getSelection();
-            if (sel && sel.removeAllRanges) sel.removeAllRanges();
-          } catch (err0) {}
-        }
-
-        function armTouch(e) {
-          touchArmed = true;
-          /* Stop the browser from treating the first tap as text selection
-             inside the selectable quote (which eats the click on mobile). */
-          e.preventDefault();
-          e.stopPropagation();
-          clearTextSelection();
-        }
-
-        function fireTouch(e) {
-          if (!touchArmed) return;
-          touchArmed = false;
-          lastTouchActivate = Date.now();
-          activate(e);
-        }
-
-        if (window.PointerEvent) {
-          btn.addEventListener("pointerdown", function (e) {
-            if (e.pointerType === "mouse") return;
-            armTouch(e);
-          });
-          btn.addEventListener("pointerup", function (e) {
-            if (e.pointerType === "mouse") return;
-            fireTouch(e);
-          });
-          btn.addEventListener("pointercancel", function () {
-            touchArmed = false;
-          });
-        } else {
-          btn.addEventListener("touchstart", armTouch, { passive: false });
-          btn.addEventListener("touchend", fireTouch, { passive: false });
-          btn.addEventListener("touchcancel", function () {
-            touchArmed = false;
-          });
-        }
-
-        btn.addEventListener("click", function (e) {
-          if (Date.now() - lastTouchActivate < 500) {
-            e.preventDefault();
-            e.stopPropagation();
-            return;
-          }
-          activate(e);
         });
       }
       target.appendChild(btn);
+    }
+
+    function appendQuoteText(target, text) {
+      var span = h("span", { class: "home-recommendations__quote-text" });
+      span.textContent = text;
+      target.appendChild(span);
     }
 
     function fillQuoteContent(target, it, expanded, withHandlers) {
@@ -1042,17 +994,17 @@
 
       var needsClamp = quoteNeedsClamp(full);
       if (expanded && needsClamp) {
-        target.appendChild(document.createTextNode(full + " "));
+        appendQuoteText(target, full + " ");
         appendQuoteControl(target, it, true, withHandlers);
         return true;
       }
 
       if (!needsClamp) {
-        target.appendChild(document.createTextNode(full));
+        appendQuoteText(target, full);
         return true;
       }
 
-      target.appendChild(document.createTextNode(quotePreviewTextInline(full, quoteMeasureWidth()) + " "));
+      appendQuoteText(target, quotePreviewTextInline(full, quoteMeasureWidth()) + " ");
       appendQuoteControl(target, it, false, withHandlers);
       return true;
     }
@@ -1156,10 +1108,34 @@
       }
       if (quoteMeasureWidth() <= 8) return;
       var slotH = collapsedSlotHeight();
+      /* Grow the slot if this slide's preview + “read more” is taller than the
+         synthetic probe (common on narrow phones — otherwise the control is
+         clipped by overflow:hidden and looks missing). */
+      var actual = Math.ceil(quoteContent.scrollHeight || quoteContent.offsetHeight || 0);
+      if (actual > slotH) {
+        slotH = actual;
+        previewSlotH = Math.max(previewSlotH, slotH);
+        root.style.setProperty("--rec-quote-slot-h", previewSlotH + "px");
+      }
       quoteBody.style.height = slotH + "px";
       quoteBody.style.minHeight = "";
       quoteBody.style.overflow = "hidden";
       root.style.setProperty("--rec-quote-slot-h", slotH + "px");
+    }
+
+    function ensureReadMoreInView() {
+      if (quoteExpanded) return;
+      var btn = quoteContent.querySelector(".home-recommendations__more");
+      if (!btn || quoteEl.hidden) return;
+      var bodyRect = quoteBody.getBoundingClientRect();
+      var btnRect = btn.getBoundingClientRect();
+      if (!bodyRect.height || !btnRect.height) return;
+      if (btnRect.bottom <= bodyRect.bottom + 1) return;
+      var extra = Math.ceil(btnRect.bottom - bodyRect.bottom) + 2;
+      var nextH = quoteBody.offsetHeight + extra;
+      quoteBody.style.height = nextH + "px";
+      previewSlotH = Math.max(previewSlotH, nextH);
+      root.style.setProperty("--rec-quote-slot-h", previewSlotH + "px");
     }
 
     function measureQuoteBodyHeight(it, expanded) {
@@ -1193,6 +1169,7 @@
       quoteEl.hidden = false;
       buildQuoteContent(it, expanded);
       applyQuoteSlotLayout(expanded);
+      ensureReadMoreInView();
       afterQuoteLayout();
     }
 
@@ -1214,6 +1191,7 @@
         quoteBody.removeEventListener("transitionend", onEnd);
         resetQuoteMotionStyles();
         applyQuoteSlotLayout(expanded);
+        ensureReadMoreInView();
         quoteAnimating = false;
         afterQuoteLayout();
         if (onDone) onDone();
@@ -1433,14 +1411,18 @@
     var showArrows = items.length > 1;
     if (prev) {
       prev.hidden = !showArrows;
-      prev.onclick = function () {
+      prev.onclick = function (e) {
+        if (e) e.preventDefault();
+        try { prev.blur(); } catch (errPrev) {}
         if (!showArrows || transitioning) return;
         showAt(pickNext(-1), -1);
       };
     }
     if (next) {
       next.hidden = !showArrows;
-      next.onclick = function () {
+      next.onclick = function (e) {
+        if (e) e.preventDefault();
+        try { next.blur(); } catch (errNext) {}
         if (!showArrows || transitioning) return;
         showAt(pickNext(1), 1);
       };
@@ -1495,6 +1477,7 @@
       syncPreviewSlotHeight();
       if (!quoteExpanded && items[index]) buildQuoteContent(items[index], false);
       applyQuoteSlotLayout(quoteExpanded);
+      ensureReadMoreInView();
       syncArrowPosition();
     });
 

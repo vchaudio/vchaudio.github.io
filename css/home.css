@@ -639,6 +639,17 @@ main.home-main {
   font: inherit;
 }
 
+/* Selectable quote copy only — not the inline control. */
+.home-recommendations__quote-content {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.home-recommendations__quote-text {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .home-recommendations__name-wrap {
   margin: 0;
   display: flex;
@@ -707,7 +718,7 @@ main.home-main {
 .home-recommendations__more {
   display: inline-block;
   margin: 0;
-  padding: 0;
+  padding: 0.15em 0.1em;
   border: none;
   background: none;
   font: inherit;
@@ -717,18 +728,31 @@ main.home-main {
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
-  -webkit-user-select: none;
-  user-select: none;
+  vertical-align: baseline;
+  -webkit-user-select: none !important;
+  user-select: none !important;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-.home-recommendations__more:hover,
+/* Avoid iOS sticky-hover: first tap only underlines, second tap activates. */
+@media (hover: hover) and (pointer: fine) {
+  .home-recommendations__more:hover {
+    color: #c4b6a4;
+    text-decoration: underline;
+  }
+}
+
+.home-recommendations__more:focus {
+  outline: none;
+  color: var(--text-muted, #9c948a);
+  text-decoration: none;
+}
+
 .home-recommendations__more:focus-visible {
   color: #c4b6a4;
   text-decoration: underline;
-  outline: none;
 }
 
 .home-recommendations__arrow.best-works__carousel-arrow {
@@ -762,12 +786,20 @@ main.home-main {
   }
 }
 
+.home-recommendations__arrow.best-works__carousel-arrow:focus {
+  outline: none;
+  opacity: 0.88;
+  color: rgba(58, 52, 46, 0.82);
+  transform: translateY(-50%);
+}
+
 .home-recommendations__arrow.best-works__carousel-arrow:focus-visible {
   opacity: 1;
   color: rgba(74, 68, 60, 0.92);
   transform: translateY(-50%);
   animation: none;
-  outline-color: rgba(74, 68, 60, 0.45);
+  outline: 2px solid rgba(74, 68, 60, 0.45);
+  outline-offset: 2px;
 }
 
 .home-recommendations__arrow.best-works__carousel-arrow:active {
