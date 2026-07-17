@@ -913,21 +913,66 @@
       return true;
     }
 
-    /* Trim the preview until “… read more” fits on the same line (avoids an extra
-       wrapped line that would change the fixed slot height between slides). */
+    function quoteMeasureWidth() {
+      /* Prefer content-box width used for wrapping (getBoundingClientRect can
+         include padding / be stale while the panel is settling). */
+      var w = quoteContent.clientWidth || 0;
+      if (w > 8) return w;
+      w = quoteBody.clientWidth || 0;
+      if (w > 8) return w;
+      w = quoteEl.clientWidth || 0;
+      if (w > 8) return w;
+      var stageW = stage.clientWidth || 0;
+      if (stageW > 8) return Math.min(stageW, 576);
+      return Math.min(560, root.clientWidth || 560);
+    }
+
+    function copyQuoteTypography(node) {
+      var ref = window.getComputedStyle(quoteEl);
+      node.style.fontSize = ref.fontSize;
+      node.style.lineHeight = ref.lineHeight;
+      node.style.fontFamily = ref.fontFamily;
+      node.style.fontWeight = ref.fontWeight;
+      node.style.letterSpacing = ref.letterSpacing;
+      node.style.whiteSpace = ref.whiteSpace;
+    }
+
+    function createQuoteProbe(width) {
+      var probe = h("blockquote", { class: "home-recommendations__quote" });
+      probe.style.cssText =
+        "position:fixed;left:-100000px;top:0;z-index:-1;pointer-events:none;" +
+        "width:" + width + "px;max-width:none;margin:0;height:auto;min-height:0;max-height:none;overflow:visible;" +
+        "box-sizing:border-box";
+      copyQuoteTypography(probe);
+      var probeBody = h("div", { class: "home-recommendations__quote-body" });
+      probeBody.style.cssText = "height:auto;min-height:0;overflow:visible";
+      var probeContent = h("div", { class: "home-recommendations__quote-content" });
+      probeBody.appendChild(probeContent);
+      probe.appendChild(probeBody);
+      stage.appendChild(probe);
+      return {
+        probe: probe,
+        body: probeBody,
+        content: probeContent,
+        remove: function () {
+          if (probe.parentNode) probe.parentNode.removeChild(probe);
+        }
+      };
+    }
+
+    /* Trim preview until “… read more” sits on the same line — never grow the slot. */
     function quotePreviewTextInline(full, width) {
       var text = quotePreviewText(full);
       if (width <= 8) return text;
       var minCore = Math.min(64, Math.floor(quoteTextCharBudget() * 0.25));
       var sample = createQuoteProbe(width);
+      var textEl = h("span", { class: "home-recommendations__quote-text" });
       var btn = h("button", { type: "button", class: "home-recommendations__more", text: "read more" });
+      sample.content.appendChild(textEl);
       sample.content.appendChild(btn);
 
       function fits(preview) {
-        while (sample.content.firstChild !== btn) {
-          sample.content.removeChild(sample.content.firstChild);
-        }
-        sample.content.insertBefore(document.createTextNode(preview + " "), btn);
+        textEl.textContent = preview + " ";
         void sample.probe.offsetHeight;
         return !readMoreFallsToNextLine(sample.content, btn);
       }
@@ -936,7 +981,13 @@
         var core = text.slice(0, -1);
         if (core.slice(-1) === "…") core = core.slice(0, -1);
         core = core.replace(/\s+\S*\s*$/, "").replace(/\s+$/, "");
-        if (core.length < minCore) break;
+        if (core.length < minCore) {
+          /* Last resort: shave characters so the control still fits. */
+          core = text.replace(/…$/, "").replace(/\s+$/, "");
+          if (core.length <= minCore) break;
+          core = core.slice(0, -1).replace(/\s+$/, "");
+          if (core.length < minCore) break;
+        }
         text = core + "…";
       }
       sample.remove();
@@ -1013,53 +1064,13 @@
       return fillQuoteContent(quoteContent, it, expanded, true);
     }
 
-    function quoteMeasureWidth() {
-      var w = quoteBody.getBoundingClientRect().width;
-      if (w > 8) return w;
-      w = quoteEl.getBoundingClientRect().width;
-      if (w > 8) return w;
-      var stageW = stage.getBoundingClientRect().width;
-      if (stageW > 8) return Math.min(stageW, 576);
-      return Math.min(560, root.getBoundingClientRect().width || 560);
-    }
-
-    function copyQuoteTypography(node) {
-      var ref = window.getComputedStyle(quoteEl);
-      node.style.fontSize = ref.fontSize;
-      node.style.lineHeight = ref.lineHeight;
-      node.style.fontFamily = ref.fontFamily;
-      node.style.fontWeight = ref.fontWeight;
-      node.style.letterSpacing = ref.letterSpacing;
-      node.style.whiteSpace = ref.whiteSpace;
-    }
-
-    function createQuoteProbe(width) {
-      var probe = h("blockquote", { class: "home-recommendations__quote" });
-      probe.style.cssText =
-        "position:fixed;left:-100000px;top:0;z-index:-1;pointer-events:none;" +
-        "width:" + width + "px;max-width:36rem;margin:0;height:auto;min-height:0;max-height:none;overflow:visible";
-      copyQuoteTypography(probe);
-      var probeBody = h("div", { class: "home-recommendations__quote-body" });
-      probeBody.style.cssText = "height:auto;min-height:0;overflow:visible";
-      var probeContent = h("div", { class: "home-recommendations__quote-content" });
-      probeBody.appendChild(probeContent);
-      probe.appendChild(probeBody);
-      stage.appendChild(probe);
-      return {
-        probe: probe,
-        body: probeBody,
-        content: probeContent,
-        remove: function () {
-          if (probe.parentNode) probe.parentNode.removeChild(probe);
-        }
-      };
-    }
-
     function measureCollapsedPreviewHeight(width, rawText) {
       var full = String(rawText || "").trim();
       var sample = createQuoteProbe(width);
       var preview = quotePreviewTextInline(full, width);
-      sample.content.appendChild(document.createTextNode(preview + " "));
+      var textEl = h("span", { class: "home-recommendations__quote-text" });
+      textEl.textContent = preview + " ";
+      sample.content.appendChild(textEl);
       sample.content.appendChild(h("button", { type: "button", class: "home-recommendations__more", text: "read more" }));
       var height = sample.content.offsetHeight;
       sample.remove();
@@ -1108,34 +1119,44 @@
       }
       if (quoteMeasureWidth() <= 8) return;
       var slotH = collapsedSlotHeight();
-      /* Grow the slot if this slide's preview + “read more” is taller than the
-         synthetic probe (common on narrow phones — otherwise the control is
-         clipped by overflow:hidden and looks missing). */
-      var actual = Math.ceil(quoteContent.scrollHeight || quoteContent.offsetHeight || 0);
-      if (actual > slotH) {
-        slotH = actual;
-        previewSlotH = Math.max(previewSlotH, slotH);
-        root.style.setProperty("--rec-quote-slot-h", previewSlotH + "px");
-      }
       quoteBody.style.height = slotH + "px";
       quoteBody.style.minHeight = "";
       quoteBody.style.overflow = "hidden";
       root.style.setProperty("--rec-quote-slot-h", slotH + "px");
     }
 
-    function ensureReadMoreInView() {
-      if (quoteExpanded) return;
+    /* After real layout: if “read more” wrapped, shorten the preview (never grow slot). */
+    function refitCollapsedQuote(it) {
+      if (quoteExpanded || !it) return;
+      var full = String(it.quote || "").trim();
+      if (!quoteNeedsClamp(full)) return;
       var btn = quoteContent.querySelector(".home-recommendations__more");
-      if (!btn || quoteEl.hidden) return;
-      var bodyRect = quoteBody.getBoundingClientRect();
-      var btnRect = btn.getBoundingClientRect();
-      if (!bodyRect.height || !btnRect.height) return;
-      if (btnRect.bottom <= bodyRect.bottom + 1) return;
-      var extra = Math.ceil(btnRect.bottom - bodyRect.bottom) + 2;
-      var nextH = quoteBody.offsetHeight + extra;
-      quoteBody.style.height = nextH + "px";
-      previewSlotH = Math.max(previewSlotH, nextH);
-      root.style.setProperty("--rec-quote-slot-h", previewSlotH + "px");
+      if (!btn) return;
+      if (!readMoreFallsToNextLine(quoteContent, btn)) return;
+      buildQuoteContent(it, false);
+      applyQuoteSlotLayout(false);
+      btn = quoteContent.querySelector(".home-recommendations__more");
+      if (!btn || !readMoreFallsToNextLine(quoteContent, btn)) return;
+      /* Live trim against the painted node if the probe still missed. */
+      var textEl = quoteContent.querySelector(".home-recommendations__quote-text");
+      if (!textEl) return;
+      var minCore = Math.min(64, Math.floor(quoteTextCharBudget() * 0.25));
+      var text = String(textEl.textContent || "").replace(/\s+$/, "");
+      var guard = 0;
+      while (text.length > minCore + 1 && readMoreFallsToNextLine(quoteContent, btn) && guard < 80) {
+        guard += 1;
+        var core = text.replace(/…$/, "").replace(/\s+$/, "");
+        core = core.replace(/\s+\S*\s*$/, "").replace(/\s+$/, "");
+        if (core.length < minCore) {
+          core = text.replace(/…$/, "").replace(/\s+$/, "");
+          if (core.length <= minCore) break;
+          core = core.slice(0, -1).replace(/\s+$/, "");
+          if (core.length < minCore) break;
+        }
+        text = core + "…";
+        textEl.textContent = text + " ";
+        void quoteContent.offsetHeight;
+      }
     }
 
     function measureQuoteBodyHeight(it, expanded) {
@@ -1169,7 +1190,7 @@
       quoteEl.hidden = false;
       buildQuoteContent(it, expanded);
       applyQuoteSlotLayout(expanded);
-      ensureReadMoreInView();
+      if (!expanded) refitCollapsedQuote(it);
       afterQuoteLayout();
     }
 
@@ -1191,7 +1212,7 @@
         quoteBody.removeEventListener("transitionend", onEnd);
         resetQuoteMotionStyles();
         applyQuoteSlotLayout(expanded);
-        ensureReadMoreInView();
+        if (!expanded) refitCollapsedQuote(it);
         quoteAnimating = false;
         afterQuoteLayout();
         if (onDone) onDone();
@@ -1475,9 +1496,13 @@
 
     window.addEventListener("resize", function onRecResize() {
       syncPreviewSlotHeight();
-      if (!quoteExpanded && items[index]) buildQuoteContent(items[index], false);
-      applyQuoteSlotLayout(quoteExpanded);
-      ensureReadMoreInView();
+      if (!quoteExpanded && items[index]) {
+        buildQuoteContent(items[index], false);
+        applyQuoteSlotLayout(false);
+        refitCollapsedQuote(items[index]);
+      } else {
+        applyQuoteSlotLayout(quoteExpanded);
+      }
       syncArrowPosition();
     });
 
