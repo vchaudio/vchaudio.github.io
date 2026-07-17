@@ -1315,22 +1315,91 @@
 
     var avatarLoadGen = 0;
     var avatarReadyUrl = "";
+    var avatarCache = Object.create(null);
+    var upcoming = [];
+    var warmStarted = false;
 
     function preloadRecommendationAvatar(url) {
       if (!url) return Promise.resolve(false);
-      return new Promise(function (resolve) {
+      if (avatarCache[url]) return avatarCache[url];
+      avatarCache[url] = new Promise(function (resolve) {
         var img = new Image();
         function done(ok) { resolve(!!ok); }
         img.onload = function () { done(img.naturalWidth > 0); };
         img.onerror = function () { done(false); };
+        img.decoding = "async";
         img.src = url;
         if (img.complete) done(img.naturalWidth > 0);
       });
+      return avatarCache[url];
     }
 
-    items.forEach(function (it) {
-      if (it.avatar) preloadRecommendationAvatar(it.avatar);
-    });
+    function refillUpcoming(need) {
+      need = need || 2;
+      if (items.length < 2) {
+        upcoming = [];
+        return;
+      }
+      var used = Object.create(null);
+      used[index] = true;
+      upcoming.forEach(function (i) { used[i] = true; });
+      var guard = 0;
+      while (upcoming.length < need && guard++ < 48) {
+        var n = Math.floor(Math.random() * items.length);
+        if (used[n]) {
+          if (Object.keys(used).length >= items.length) {
+            if (n === index) continue;
+          } else {
+            continue;
+          }
+        }
+        used[n] = true;
+        upcoming.push(n);
+      }
+    }
+
+    function prefetchLookahead() {
+      if (items.length < 2) return;
+      var urls = [];
+      var seen = Object.create(null);
+      function addIndex(i) {
+        var it = items[i];
+        if (!it || !it.avatar || seen[it.avatar]) return;
+        seen[it.avatar] = true;
+        urls.push(it.avatar);
+      }
+      /* Arrow neighbors — sequential ±1 / ±2 */
+      addIndex((index + 1) % items.length);
+      addIndex((index + 2) % items.length);
+      addIndex((index - 1 + items.length) % items.length);
+      addIndex((index - 2 + items.length) % items.length);
+      /* Autoplay — planned random steps */
+      refillUpcoming(2);
+      upcoming.forEach(addIndex);
+      urls.forEach(function (url) { preloadRecommendationAvatar(url); });
+    }
+
+    function prefetchAllRemainingIdle() {
+      function run() {
+        items.forEach(function (it) {
+          if (it.avatar) preloadRecommendationAvatar(it.avatar);
+        });
+      }
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(run, { timeout: 4000 });
+      } else {
+        setTimeout(run, 1500);
+      }
+    }
+
+    /* After the first visible recommendation photo is ready: warm neighbors /
+       2-step autoplay queue, then idle-prefetch the rest. */
+    function afterFirstAvatarReady() {
+      if (warmStarted) return;
+      warmStarted = true;
+      prefetchLookahead();
+      prefetchAllRemainingIdle();
+    }
 
     function paintAvatar(it, gen) {
       if (!it.avatar) {
@@ -1339,6 +1408,7 @@
         avatar.setAttribute("alt", "");
         avatarReadyUrl = "";
         if (avatarCrop) avatarCrop.style.opacity = "";
+        afterFirstAvatarReady();
         return;
       }
 
@@ -1347,6 +1417,7 @@
       var url = it.avatar;
       if (avatarReadyUrl === url && avatar.getAttribute("src") === url) {
         if (avatarCrop) avatarCrop.style.opacity = "1";
+        afterFirstAvatarReady();
         return;
       }
 
@@ -1355,6 +1426,7 @@
         avatar.setAttribute("src", url);
         avatarReadyUrl = url;
         if (avatarCrop) avatarCrop.style.opacity = "1";
+        afterFirstAvatarReady();
       }
 
       var probe = new Image();
@@ -1372,6 +1444,7 @@
           avatar.removeAttribute("src");
           avatarReadyUrl = "";
           if (avatarCrop) avatarCrop.style.opacity = "1";
+          afterFirstAvatarReady();
         }
       });
     }
@@ -1393,11 +1466,16 @@
     function pickNext(dir) {
       if (items.length < 2) return index;
       if (dir === 1 || dir === -1) {
+        /* Manual arrows: drop random autoplay queue and use neighbors. */
+        upcoming = [];
         return (index + dir + items.length) % items.length;
       }
-      if (items.length === 2) return index === 0 ? 1 : 0;
-      var next = index;
-      while (next === index) next = Math.floor(Math.random() * items.length);
+      refillUpcoming(1);
+      var next = upcoming.shift();
+      if (next == null || next === index) {
+        next = index;
+        while (next === index) next = Math.floor(Math.random() * items.length);
+      }
       return next;
     }
 
@@ -1425,6 +1503,7 @@
       if (reduceMotion) {
         index = nextIndex;
         paint(nextItem);
+        prefetchLookahead();
         scheduleAutoplay();
         return;
       }
@@ -1438,6 +1517,7 @@
       window.setTimeout(function () {
         index = nextIndex;
         paint(nextItem);
+        prefetchLookahead();
         card.classList.remove("is-leave-left");
         card.classList.add("is-enter");
         void card.offsetWidth;
