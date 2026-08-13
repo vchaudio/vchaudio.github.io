@@ -20,6 +20,7 @@
       "type": "studio",
       "title": "VCHAudio — Individual Entrepreneur",
       "meta": "Sep 2017 — Oct 2021 · Remote, contracts, freelance",
+      "role": "",
       "description": "Operated an independent music studio, delivering end-to-end audio solutions for individual contract projects across TV, live shows, advertising, and the game industry",
       "highlights": [
         "Music Composing",
@@ -46,7 +47,8 @@
       "title": "Argentics / Night Street Games",
       "project": "Last Flag",
       "meta": "July 2025 — July 2026 · USA, remote",
-      "description": "Senior Sound Designer → Lead Audio Designer | Technical Sound Designer ",
+      "role": "Senior Sound Designer → Lead Audio Designer | Technical Sound Designer",
+      "description": "",
       "highlights": [
         "Designed and implemented gameplay audio for heroes, abilities, weapons, UI, finishers, and gameplay feedback using Wwise and Unreal Engine 5",
         "Created sound design for 10+ hero abilities, 20+ finishers, 3 weapons, 11 MVP screens, gameplay UI, and four marketing videos, including the project's official gameplay trailer",
@@ -63,7 +65,8 @@
       "title": "Moonray PBC",
       "project": "Moonray: Battle Lands",
       "meta": "Nov 2021 — June 2025 · USA, remote",
-      "description": "Principal Sound Designer | Audio Producer | Technical Sound Designer | Audio Developer | Music Composer",
+      "role": "Principal Sound Designer | Audio Producer | Technical Sound Designer | Audio Developer | Music Composer",
+      "description": "",
       "highlights": [
         "Sole Audio Designer for a 30-person development team, responsible for the project's complete audio vision, production, technical implementation, optimization, and voice direction",
         "Owned the complete audio production pipeline, delivering 1,000+ sound assets for melee combat, ranged weapons, UI, movement, voice reactions, gameplay feedback, interactive music, and marketing content across PC, Android, PlayStation 5, and iOS",
@@ -79,7 +82,8 @@
       "type": "plain",
       "title": "Broadcast TV channel",
       "meta": "Sep 2020 — Sep 2021 · Odesa, on-site part-time",
-      "description": "Live Broadcast Audio Engineer",
+      "role": "Live Broadcast Audio Engineer",
+      "description": "",
       "highlights": [
         "Operated live audio for weekly full-day television broadcasts, managing microphones, live mixing, and real-time audio quality throughout production",
         "Mixed live performances, television programs, hosts, and guest musicians in a fast-paced broadcast environment",
@@ -92,7 +96,8 @@
       "type": "plain",
       "title": "NLO TV",
       "meta": "Jan 2019 — May 2021 · Kyiv, remote part-time contract",
-      "description": "Audio Post Production Engineer | Sound Designer | Foley Artist",
+      "role": "Audio Post Production Engineer | Sound Designer | Foley Artist",
+      "description": "",
       "highlights": [
         "Owned the complete audio post-production pipeline for 10 broadcast episodes of the animated TV series Chortoviyki, delivering final masters for national television broadcast",
         "Created complete sound design, Foley, dialogue editing, mixing, mastering, and broadcast delivery for 22–25 minute episodes over a two-year production cycle",

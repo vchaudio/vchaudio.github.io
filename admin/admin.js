@@ -1437,6 +1437,7 @@
         fieldSelect("Type", job.type, [{ value: "studio", label: "Studio (with awards)" }, { value: "project", label: "Project (links to page)" }, { value: "plain", label: "Plain" }], function (v) { job.type = v; d(); }),
         fieldText("Title", job.title, function (v) { job.title = v; d(); }, { full: true }),
         fieldText("Meta (dates · location)", job.meta, function (v) { job.meta = v; d(); }, { full: true }),
+        fieldText("Role", job.role, function (v) { job.role = v; d(); }, { full: true }),
         fieldTextarea("Description", job.description, function (v) { job.description = v; d(); })
       ];
       if (job.type === "project") {
@@ -1457,7 +1458,7 @@
       label: function (j) { return j.title || "(untitled)"; },
       sub: function (j) { return j.meta; },
       addLabel: "+ Add experience",
-      makeNew: function () { return { type: "plain", title: "New role", meta: "", description: "" }; }
+      makeNew: function () { return { type: "plain", title: "New role", meta: "", role: "", description: "" }; }
     })));
 
     var eduFields = function (e, d) {

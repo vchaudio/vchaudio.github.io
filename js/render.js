@@ -648,7 +648,12 @@
       " " + job.project
     ]));
     kids.push(h("div", { class: "job-meta", text: job.meta }));
-    kids.push(h("p", { text: job.description }));
+    if (job.role && String(job.role).trim()) {
+      kids.push(h("p", { class: "job-card__role", text: String(job.role).trim() }));
+    }
+    if (job.description && String(job.description).trim()) {
+      kids.push(h("p", { class: "job-card__desc", text: String(job.description).trim() }));
+    }
     var hv = job.highlightsVisibility || "cv";
     if (job.highlights && job.highlights.length && (hv === "site" || hv === "both")) {
       kids.push(h("ul", { class: "job-card__highlights" },

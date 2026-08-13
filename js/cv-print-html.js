@@ -77,8 +77,10 @@ function buildCvPrintHtml(r, site, assetBase, opts) {
       if (job.type === "project" && job.project) body += '<p class="job-sub"><span class="job-sub-label">Project:</span> ' + esc(job.project) + "</p>";
       var hv = job.highlightsVisibility || "cv";
       var showHl = job.highlights && job.highlights.length && (hv === "cv" || hv === "both");
-      /* Role line duplicates highlight content — omit when bullets are shown. */
-      if (job.description && !showHl) body += '<p class="job-role">' + esc(job.description) + "</p>";
+      var roleText = job.role != null ? String(job.role).trim() : "";
+      var descText = job.description != null ? String(job.description).trim() : "";
+      if (roleText) body += '<p class="job-role">' + esc(roleText) + "</p>";
+      if (descText) body += '<p class="job-desc">' + esc(descText) + "</p>";
       if (job.type === "studio" && job.awards && job.awards.length) {
         body += '<p class="job-awards"><span class="aw-label">Awards</span>' + job.awards.map(function (a) {
           var label = a.kind === "winner" ? "Winner" : (a.kind === "nominee" ? "Nominated" : (a.kind || ""));
@@ -160,7 +162,8 @@ function buildCvPrintHtml(r, site, assetBase, opts) {
       ".job-meta{margin-top:0;font-size:7.5pt;color:var(--muted)}",
       ".job-sub{margin:0.02rem 0 0;font-size:7.9pt;font-weight:600;color:var(--ink)}",
       ".job-sub-label{color:var(--accent);font-weight:700;letter-spacing:normal;margin-right:0.2rem}",
-      ".job-role{margin:0.01rem 0 0;font-size:7.6pt;color:var(--muted);line-height:1.15}",
+      ".job-role{margin:0.01rem 0 0;font-size:7.7pt;font-weight:600;color:var(--ink);line-height:1.15}",
+      ".job-desc{margin:0.02rem 0 0;font-size:7.5pt;color:var(--muted);line-height:1.18}",
       ".job-awards{margin:0.04rem 0 0;font-size:7.4pt;color:var(--accent)}",
       ".job-awards .aw-label{font-size:6.8pt;font-weight:700;letter-spacing:normal;text-transform:uppercase;color:var(--accent);margin-right:0.25rem}",
       ".job-awards .sep{color:var(--line);margin:0 0.1rem}",

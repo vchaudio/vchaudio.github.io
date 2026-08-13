@@ -131,6 +131,8 @@ body {
 .job-meta,
 .job-card h3,
 .job-card__project,
+.job-card__role,
+.job-card__desc,
 .job-card__awards-title,
 .skills-heading,
 .course-line,
@@ -1080,7 +1082,9 @@ a.job-card.job-card--to-project {
 
 a.job-card.job-card--to-project h3,
 a.job-card.job-card--to-project .job-meta,
-a.job-card.job-card--to-project p {
+a.job-card.job-card--to-project .job-card__role,
+a.job-card.job-card--to-project .job-card__desc,
+a.job-card.job-card--to-project .job-card__project {
   transition: color 0.2s var(--ease-out);
 }
 
@@ -1102,8 +1106,12 @@ a.job-card.job-card--to-project:focus-visible .job-meta {
   color: var(--accent-dim);
 }
 
-a.job-card.job-card--to-project:hover p,
-a.job-card.job-card--to-project:focus-visible p {
+a.job-card.job-card--to-project:hover .job-card__role,
+a.job-card.job-card--to-project:focus-visible .job-card__role,
+a.job-card.job-card--to-project:hover .job-card__desc,
+a.job-card.job-card--to-project:focus-visible .job-card__desc,
+a.job-card.job-card--to-project:hover .job-card__project,
+a.job-card.job-card--to-project:focus-visible .job-card__project {
   color: var(--text);
 }
 
@@ -1140,6 +1148,21 @@ a.job-card.job-card--to-project:focus-visible {
   margin: 0;
   font-size: 0.9rem;
   color: var(--text-muted);
+}
+
+.job-card p.job-card__role {
+  margin: 0 0 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.job-card p.job-card__desc {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.45;
 }
 
 /* ——— Skills spoiler (home) ——— */
