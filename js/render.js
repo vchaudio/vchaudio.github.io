@@ -2161,7 +2161,7 @@
     if (older.length) {
       var nested = h("div", { class: "vm-xctrl-releases vm-xctrl-releases--nested", role: "list" });
       older.forEach(function (it) { nested.appendChild(buildReleaseArticle(it)); });
-      releases.appendChild(h("details", { class: "vm-xctrl-older-versions", open: "" }, [
+      releases.appendChild(h("details", { class: "vm-xctrl-older-versions" }, [
         h("summary", { text: "Older Versions (" + older.length + ")" }),
         nested
       ]));
