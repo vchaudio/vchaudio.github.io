@@ -435,70 +435,7 @@
           "heading": "Download",
           "open": true,
           "wrapClass": "vm-xctrl-spoilers",
-          "lead": "Builds and release notes on <a href=\"https://github.com/vchaudio/VM-Xctrl/releases\" rel=\"noopener noreferrer\" target=\"_blank\">GitHub Releases</a>.",
-          "items": [
-            {
-              "version": "v.1.0.0.6 — API handling rework",
-              "date": "17 Jan 2026",
-              "badge": "latest",
-              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.6/VM-Xctrl_v1.0.0.6.exe",
-              "changes": [
-                "Reworked startup flow for loading the Voicemeeter API.",
-                "Scans the default Voicemeeter install folder (<code>C:\\Program Files (x86)\\VB\\Voicemeeter</code>) and locates required DLLs automatically — independent of a specific Voicemeeter version; tested with 3.1.1.9, 3.1.2.2, and intended for future releases.",
-                "Older Voicemeeter versions may work but are untested; legacy API differences can limit some features.",
-                "If DLLs are not found, you are prompted to pick the Voicemeeter installation folder manually.",
-                "Voicemeeter folder can be changed anytime from the tray icon context menu."
-              ]
-            },
-            {
-              "version": "v.1.0.0.5 — Experimental",
-              "date": "25 Nov 2025",
-              "badge": "prerelease",
-              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.5/VM-Xctrl_v1.0.0.5.exe",
-              "changes": [
-                "Possible fix for fader resistance when you move a fader suddenly or very quickly."
-              ]
-            },
-            {
-              "version": "v.1.0.0.4 — License system updated",
-              "date": "15 Oct 2025",
-              "badge": "",
-              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.4/VM-Xctrl_v1.0.0.4.exe",
-              "changes": [
-                "License system updated to accept keys purchased on Gumroad.",
-                "Use this version or newer to activate a purchased key successfully."
-              ]
-            },
-            {
-              "version": "v.1.0.0.3",
-              "date": "13 Oct 2025",
-              "badge": "",
-              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.3/VM-Xctrl_v1.0.0.3.exe",
-              "changes": [
-                "<strong>Fixed:</strong> Possible crash when moving or touching faders on the BUSES layer.",
-                "<strong>Improved:</strong> Fader feedback on the BUSES layer (near-instant response).",
-                "<strong>Optimized:</strong> Scribble strip update performance on the BUSES layer."
-              ]
-            },
-            {
-              "version": "v.1.0.0.2",
-              "date": "13 Oct 2025",
-              "badge": "",
-              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.2/VM-Xctrl_v1.0.0.2.exe",
-              "changes": [
-                "<strong>Fixed:</strong> Autostart path handling — with “Start on Login” enabled, you are prompted to specify the executable path added to system startup."
-              ]
-            },
-            {
-              "version": "v.1.0.0.1",
-              "date": "13 Oct 2025",
-              "badge": "",
-              "href": "https://github.com/vchaudio/VM-Xctrl/releases/download/1.0.0.1/VM-Xctrl_v1.0.0.1.exe",
-              "changes": [
-                "Initial release."
-              ]
-            }
-          ]
+          "github": "vchaudio/VM-Xctrl"
         },
         {
           "type": "accordion",

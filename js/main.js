@@ -214,16 +214,18 @@
       });
     });
 
-    document.querySelectorAll(".vm-xctrl-older-versions").forEach(function (nested) {
-      nested.addEventListener("toggle", function () {
-        var parentSpoiler = nested.closest("details.spoiler");
-        if (!parentSpoiler || !parentSpoiler.open) return;
-        var parentBody = parentSpoiler.querySelector(".spoiler-body");
-        var parentInner = parentSpoiler.querySelector(".spoiler-inner");
-        if (!parentBody || !parentInner) return;
-        parentBody.style.maxHeight = parentInner.scrollHeight + 24 + "px";
-      });
-    });
+    document.addEventListener("toggle", function (e) {
+      var nested = e.target;
+      if (!nested || !nested.classList) return;
+      if (!nested.classList.contains("vm-xctrl-older-versions") &&
+          !nested.classList.contains("vm-xctrl-release-notes")) return;
+      var parentSpoiler = nested.closest("details.spoiler");
+      if (!parentSpoiler || !parentSpoiler.open) return;
+      var parentBody = parentSpoiler.querySelector(".spoiler-body");
+      var parentInner = parentSpoiler.querySelector(".spoiler-inner");
+      if (!parentBody || !parentInner) return;
+      parentBody.style.maxHeight = parentInner.scrollHeight + 24 + "px";
+    }, true);
 
     if (resizeJobs.length) {
       window.addEventListener("resize", scheduleSpoilerResize, { passive: true });

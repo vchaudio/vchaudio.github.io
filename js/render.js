@@ -1705,6 +1705,15 @@
     clear(main);
     if (project.slug) main.classList.add("project-page--" + project.slug);
 
+    (project.blocks || []).forEach(function (block) {
+      if (block.type === "releases" && block.github) {
+        var cachedGh = readGithubReleasesCache(normalizeGithubRepo(block.github));
+        if (!(cachedGh && cachedGh.items && cachedGh.items.length && Date.now() - cachedGh.fetchedAt < GH_RELEASES_TTL_MS)) {
+          loadGithubReleases(block.github).catch(function () {});
+        }
+      }
+    });
+
     var bannerAdded = false;
     (project.blocks || []).forEach(function (block) {
       var node = buildProjectBlock(block, project);
@@ -1841,46 +1850,377 @@
     ]);
   }
 
-  /* Releases / downloads block: one "Latest" version shown prominently, the rest
-     nested under an "Older Versions" disclosure. Mirrors the static VM-Xctrl
-     markup so the existing vm-xctrl-* styles apply unchanged. */
-  function buildReleasesBlock(block) {
-    var items = block.items || [];
-    if (!items.length) return null;
-    var latestIdx = 0;
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].badge === "latest") { latestIdx = i; break; }
+  /* Releases / downloads: optional GitHub sync via `block.github` ("owner/repo").
+     Live list is fetched from the GitHub Releases API; `block.items` is a fallback. */
+  var GH_RELEASES_TTL_MS = 10 * 60 * 1000;
+  var GH_RELEASES_CACHE_PREFIX = "vchGhReleases:";
+  var githubReleasesInflight = {};
+
+  function normalizeGithubRepo(value) {
+    var s = String(value || "").trim();
+    s = s.replace(/^https?:\/\/github\.com\//i, "");
+    s = s.replace(/\.git$/i, "");
+    s = s.replace(/\/releases\/?$/i, "");
+    s = s.replace(/\/+$/, "");
+    if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(s)) return "";
+    return s;
+  }
+
+  function githubReleasesPageUrl(repo) {
+    var key = normalizeGithubRepo(repo);
+    return key ? "https://github.com/" + key + "/releases" : "https://github.com";
+  }
+
+  function readGithubReleasesCache(repo) {
+    var key = normalizeGithubRepo(repo);
+    if (!key) return null;
+    try {
+      var raw = localStorage.getItem(GH_RELEASES_CACHE_PREFIX + key);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.items)) return null;
+      return parsed;
+    } catch (e) {
+      return null;
     }
-    var latest = items[latestIdx];
-    var older = items.filter(function (_, i) { return i !== latestIdx; });
+  }
+
+  function writeGithubReleasesCache(repo, items) {
+    var key = normalizeGithubRepo(repo);
+    if (!key || !items || !items.length) return;
+    try {
+      localStorage.setItem(GH_RELEASES_CACHE_PREFIX + key, JSON.stringify({
+        fetchedAt: Date.now(),
+        items: items
+      }));
+    } catch (e) {}
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function inlineMarkdown(raw) {
+    var codes = [];
+    var s = String(raw == null ? "" : raw);
+    s = s.replace(/`([^`]+)`/g, function (_, code) {
+      codes.push(code);
+      return "%%CODE" + (codes.length - 1) + "%%";
+    });
+    s = escapeHtml(s);
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" rel="noopener noreferrer" target="_blank">$1</a>');
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/__([^_]+)__/g, "<strong>$1</strong>");
+    s = s.replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,]|$)/g, "$1<em>$2</em>");
+    s = s.replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,]|$)/g, "$1<em>$2</em>");
+    s = s.replace(/%%CODE(\d+)%%/g, function (_, i) {
+      return "<code>" + escapeHtml(codes[Number(i)]) + "</code>";
+    });
+    return s;
+  }
+
+  function isMarkdownTableSep(line) {
+    var t = String(line || "").trim().replace(/^\|/, "").replace(/\|$/, "");
+    var cells = t.split("|");
+    if (cells.length < 2) return false;
+    return cells.every(function (c) { return /^:?-{3,}:?$/.test(c.trim()); });
+  }
+
+  function splitMarkdownRow(line) {
+    var t = String(line || "").trim();
+    if (t.charAt(0) === "|") t = t.slice(1);
+    if (t.charAt(t.length - 1) === "|") t = t.slice(0, -1);
+    return t.split("|").map(function (c) { return c.trim(); });
+  }
+
+  function consumeMarkdownTable(lines, start, out) {
+    var headers = splitMarkdownRow(lines[start]);
+    var i = start + 2;
+    var rows = [];
+    while (i < lines.length) {
+      var t = lines[i].trim();
+      if (!t || t.indexOf("|") === -1 || isMarkdownTableSep(t)) break;
+      rows.push(splitMarkdownRow(lines[i]));
+      i++;
+    }
+    var html = "<table><thead><tr>";
+    headers.forEach(function (c) { html += "<th>" + inlineMarkdown(c) + "</th>"; });
+    html += "</tr></thead><tbody>";
+    rows.forEach(function (row) {
+      html += "<tr>";
+      for (var c = 0; c < headers.length; c++) html += "<td>" + inlineMarkdown(row[c] || "") + "</td>";
+      html += "</tr>";
+    });
+    html += "</tbody></table>";
+    out.push(html);
+    return i;
+  }
+
+  function consumeMarkdownList(lines, start, out) {
+    var i = start;
+
+    function parseAt(minIndent) {
+      var ordered = /^\s*\d+\.\s+/.test(lines[i] || "");
+      var tag = ordered ? "ol" : "ul";
+      var parts = [];
+      while (i < lines.length) {
+        var raw = lines[i];
+        if (!String(raw).trim()) {
+          var peek = i + 1 < lines.length ? lines[i + 1] : "";
+          if (/^\s*(?:[-*]|\d+\.)\s+/.test(peek)) { i++; continue; }
+          break;
+        }
+        var m = raw.match(/^(\s*)(?:[-*]|\d+\.)\s+(.*)$/);
+        if (!m) break;
+        var indent = m[1].replace(/\t/g, "  ").length;
+        if (indent < minIndent) break;
+        if (indent > minIndent) {
+          if (!parts.length) minIndent = indent;
+          else { parts[parts.length - 1] += parseAt(indent); continue; }
+        }
+        i++;
+        parts.push(inlineMarkdown(m[2]));
+        if (i < lines.length) {
+          var nm = lines[i].match(/^(\s*)(?:[-*]|\d+\.)\s+/);
+          if (nm && nm[1].replace(/\t/g, "  ").length > indent) {
+            parts[parts.length - 1] += parseAt(nm[1].replace(/\t/g, "  ").length);
+          }
+        }
+      }
+      return "<" + tag + ">" + parts.map(function (p) { return "<li>" + p + "</li>"; }).join("") + "</" + tag + ">";
+    }
+
+    var base = ((lines[start].match(/^(\s*)/) || ["", ""])[1]).replace(/\t/g, "  ").length;
+    out.push(parseAt(base));
+    return i;
+  }
+
+  function githubMarkdownToHtml(md) {
+    if (!md) return "";
+    var lines = String(md).replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+    var out = [];
+    var para = [];
+    var i = 0;
+
+    function flushPara() {
+      if (!para.length) return;
+      var text = para.join(" ").trim();
+      para = [];
+      if (text) out.push("<p>" + inlineMarkdown(text) + "</p>");
+    }
+
+    while (i < lines.length) {
+      var line = lines[i];
+      var trimmed = line.trim();
+      if (!trimmed) { flushPara(); i++; continue; }
+      if (/^(-{3,}|\*{3,}|_{3,})$/.test(trimmed)) { flushPara(); out.push("<hr>"); i++; continue; }
+      var heading = trimmed.match(/^(#{1,4})\s+(.+)$/);
+      if (heading) {
+        flushPara();
+        var tag = "h" + heading[1].length;
+        out.push("<" + tag + ">" + inlineMarkdown(heading[2]) + "</" + tag + ">");
+        i++;
+        continue;
+      }
+      if (trimmed.indexOf("|") !== -1 && i + 1 < lines.length && isMarkdownTableSep(lines[i + 1])) {
+        flushPara();
+        i = consumeMarkdownTable(lines, i, out);
+        continue;
+      }
+      if (/^[-*]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed)) {
+        flushPara();
+        i = consumeMarkdownList(lines, i, out);
+        continue;
+      }
+      para.push(trimmed);
+      i++;
+    }
+    flushPara();
+    return out.join("");
+  }
+
+  function pickReleaseAsset(assets) {
+    var list = (assets || []).filter(function (a) {
+      return a && a.browser_download_url && a.state !== "new";
+    });
+    if (!list.length) return null;
+    var exe = list.filter(function (a) { return /\.exe$/i.test(a.name || ""); });
+    var pool = exe.length ? exe : list;
+    pool.sort(function (a, b) {
+      var as = /setup/i.test(a.name || "") ? 0 : 1;
+      var bs = /setup/i.test(b.name || "") ? 0 : 1;
+      return as - bs;
+    });
+    return pool[0];
+  }
+
+  function formatReleaseDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
+  }
+
+  function formatBytes(n) {
+    n = Number(n);
+    if (!n || n < 0) return "";
+    var mb = n / (1024 * 1024);
+    if (mb >= 1) {
+      var t = mb >= 10 ? String(Math.round(mb)) : mb.toFixed(1);
+      return t.replace(/\.0$/, "") + " MB";
+    }
+    return Math.max(1, Math.round(n / 1024)) + " KB";
+  }
+
+  function mapGithubReleases(payload) {
+    var list = Array.isArray(payload) ? payload.slice() : [];
+    list = list.filter(function (r) { return r && !r.draft; });
+    list.sort(function (a, b) {
+      return new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime();
+    });
+    var latestTagged = false;
+    return list.map(function (r) {
+      var asset = pickReleaseAsset(r.assets);
+      var badge = "";
+      if (r.prerelease) badge = "prerelease";
+      else if (!latestTagged) { badge = "latest"; latestTagged = true; }
+      var date = formatReleaseDate(r.published_at || r.created_at);
+      var size = asset ? formatBytes(asset.size) : "";
+      var version = String(r.name || "").trim() || ("v." + (r.tag_name || "release"));
+      return {
+        version: version,
+        date: [date, size].filter(Boolean).join(" · "),
+        badge: badge,
+        href: asset ? asset.browser_download_url : (r.html_url || "#"),
+        filename: asset ? asset.name : "",
+        notesHtml: githubMarkdownToHtml(r.body || "")
+      };
+    });
+  }
+
+  function loadGithubReleases(repo) {
+    var key = normalizeGithubRepo(repo);
+    if (!key) return Promise.reject(new Error("Invalid GitHub repo"));
+    if (githubReleasesInflight[key]) return githubReleasesInflight[key];
+    var url = "https://api.github.com/repos/" + key + "/releases?per_page=100";
+    var p = fetch(url, {
+      headers: { Accept: "application/vnd.github+json" }
+    }).then(function (r) {
+      if (!r.ok) throw new Error("GitHub API " + r.status);
+      return r.json();
+    }).then(function (json) {
+      var items = mapGithubReleases(json);
+      writeGithubReleasesCache(key, items);
+      return items;
+    });
+    githubReleasesInflight[key] = p;
+    p.then(function () { delete githubReleasesInflight[key]; }, function () { delete githubReleasesInflight[key]; });
+    return p;
+  }
+
+  function refreshOpenSpoilerHeight(el) {
+    var spoiler = el && el.closest ? el.closest("details.spoiler") : null;
+    if (!spoiler || !spoiler.open) return;
+    var body = spoiler.querySelector(".spoiler-body");
+    var inner = spoiler.querySelector(".spoiler-inner");
+    if (!body || !inner) return;
+    body.style.maxHeight = inner.scrollHeight + 24 + "px";
+  }
+
+  function fillReleasesHost(host, block, items, opts) {
+    opts = opts || {};
+    clear(host);
+    if (opts.loading) {
+      host.appendChild(h("p", { class: "vm-xctrl-release__status", text: "Loading releases from GitHub…" }));
+      refreshOpenSpoilerHeight(host);
+      return;
+    }
+    if ((!items || !items.length) && opts.error) {
+      var ghUrl = githubReleasesPageUrl(block.github);
+      host.appendChild(h("p", { class: "vm-xctrl-release__status", html:
+        'Could not load releases. <a href="' + escapeHtml(ghUrl) + '" rel="noopener noreferrer" target="_blank">Open GitHub Releases</a>.'
+      }));
+      refreshOpenSpoilerHeight(host);
+      return;
+    }
+    if (!items || !items.length) {
+      host.appendChild(h("p", { class: "vm-xctrl-release__status", text: "No published releases yet." }));
+      refreshOpenSpoilerHeight(host);
+      return;
+    }
+
+    var latest = items[0];
+    var older = items.slice(1);
 
     var releases = h("div", { class: "vm-xctrl-releases", role: "list" });
     releases.appendChild(buildReleaseArticle(latest));
-
     if (older.length) {
       var nested = h("div", { class: "vm-xctrl-releases vm-xctrl-releases--nested", role: "list" });
       older.forEach(function (it) { nested.appendChild(buildReleaseArticle(it)); });
-      var olderDetails = h("details", { class: "vm-xctrl-older-versions" }, [
-        h("summary", { text: "Older Versions" }),
+      releases.appendChild(h("details", { class: "vm-xctrl-older-versions", open: "" }, [
+        h("summary", { text: "Older Versions (" + older.length + ")" }),
         nested
-      ]);
-      releases.appendChild(olderDetails);
+      ]));
     }
+    host.appendChild(releases);
+    refreshOpenSpoilerHeight(host);
+    requestAnimationFrame(function () { refreshOpenSpoilerHeight(host); });
+  }
+
+  function hydrateGithubReleases(host, block) {
+    var repo = normalizeGithubRepo(block.github);
+    var cached = readGithubReleasesCache(repo);
+    var fresh = !!(cached && cached.items && cached.items.length && Date.now() - cached.fetchedAt < GH_RELEASES_TTL_MS);
+
+    if (cached && cached.items && cached.items.length) fillReleasesHost(host, block, cached.items);
+    else fillReleasesHost(host, block, null, { loading: true });
+
+    if (fresh) return;
+
+    loadGithubReleases(repo).then(function (items) {
+      fillReleasesHost(host, block, items);
+    }).catch(function () {
+      if (cached && cached.items && cached.items.length) return;
+      fillReleasesHost(host, block, block.items || [], { error: true });
+    });
+  }
+
+  function buildReleasesBlock(block) {
+    var repo = normalizeGithubRepo(block.github);
+    var staticItems = block.items || [];
+    if (!repo && !staticItems.length) return null;
 
     var inner = h("div", { class: "spoiler-inner" });
     if (block.lead) inner.appendChild(h("p", { class: "vm-xctrl-download-lead", html: block.lead }));
-    inner.appendChild(releases);
+    var host = h("div", { class: "vm-xctrl-releases-host" });
+    inner.appendChild(host);
 
     var details = h("details", { class: "spoiler reveal", open: block.open ? "" : null }, [
       buildSpoilerSummary(block.heading || "Download"),
       h("div", { class: "spoiler-body" }, [inner])
     ]);
-    return h("div", { class: "project-page-spoilers " + (block.wrapClass || "") }, [details]);
+    var wrap = h("div", { class: "project-page-spoilers " + (block.wrapClass || "") }, [details]);
+
+    if (repo) hydrateGithubReleases(host, block);
+    else fillReleasesHost(host, block, staticItems);
+    return wrap;
   }
 
   function buildReleaseArticle(it) {
+    var isFile = !!(it.href && /\.(exe|zip|msi|7z)(\?|$)/i.test(it.href));
+    var linkAttrs = { href: it.href || "#", text: it.version || "Version" };
+    if (it.filename) linkAttrs.title = "Download " + it.filename;
+    if (isFile) linkAttrs.download = "";
+    else {
+      linkAttrs.target = "_blank";
+      linkAttrs.rel = "noopener noreferrer";
+    }
     var heading = h("h3", { class: "vm-xctrl-release__heading" }, [
-      h("a", { href: it.href || "#", download: "", text: it.version || "Version" })
+      h("a", linkAttrs)
     ]);
     if (it.badge === "latest") {
       heading.appendChild(h("span", { class: "vm-xctrl-release__badge vm-xctrl-release__badge--latest", text: "Latest" }));
@@ -1889,13 +2229,27 @@
     }
     var article = h("article", { class: "vm-xctrl-release", role: "listitem" }, [heading]);
     if (it.date) article.appendChild(h("p", { class: "vm-xctrl-release__meta", text: it.date }));
-    var changes = it.changes || [];
-    if (changes.length) {
-      var ul = h("ul", { class: "detail-list" });
-      changes.forEach(function (c) { ul.appendChild(h("li", { html: c || "" })); });
-      article.appendChild(ul);
-    }
+    var notes = buildReleaseNotesSpoiler(it);
+    if (notes) article.appendChild(notes);
     return article;
+  }
+
+  function buildReleaseNotesSpoiler(it) {
+    var body = null;
+    if (it.notesHtml) {
+      body = h("div", { class: "vm-xctrl-release__notes", html: it.notesHtml });
+    } else {
+      var changes = it.changes || [];
+      if (!changes.length) return null;
+      body = h("ul", { class: "detail-list" });
+      changes.forEach(function (c) { body.appendChild(h("li", { html: c || "" })); });
+    }
+    var attrs = { class: "vm-xctrl-release-notes", open: "" };
+    if (it.badge === "latest") attrs.class += " vm-xctrl-release-notes--latest";
+    return h("details", attrs, [
+      h("summary", { text: "Release Notes" }),
+      body
+    ]);
   }
 
   /* Accordion block: a set of collapsible <details> sections, each holding a
@@ -2164,11 +2518,11 @@
         var type = pageType();
         if (type === "project") {
           renderProject(data);
-          return loadScript("js/main.js?v=20260717e").then(function () { return loadScript("js/audio-player.js"); });
+          return loadScript("js/main.js?v=20260825b").then(function () { return loadScript("js/audio-player.js"); });
         }
         if (type === "home") {
           renderHome(data);
-          return loadScript("js/main.js?v=20260717e")
+          return loadScript("js/main.js?v=20260825b")
             .then(function () { return loadScript("js/home.js?v=20260714c"); })
             .then(function () { scheduleProjectBannerPrefetch(data); });
         }

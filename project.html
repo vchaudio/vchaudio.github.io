@@ -31,13 +31,13 @@
       rel="stylesheet"
     />
     <script>
-      window.__VCH_PROJECTS_FETCH__ = fetch("data/projects.json", { cache: "default" }).then(function (r) {
+      window.__VCH_PROJECTS_FETCH__ = fetch("data/projects.json?v=20260826d", { cache: "default" }).then(function (r) {
         if (!r.ok) throw new Error(String(r.status));
         return r.json();
       });
     </script>
     <link rel="preload" as="image" href="assets/vch-mark-transparent.png" fetchpriority="high" />
-    <link rel="stylesheet" href="css/styles.css?v=20260813a" />
+    <link rel="stylesheet" href="css/styles.css?v=20260826e" />
     <link rel="stylesheet" href="css/project-portfolio.css?v=20260717v" />
     <link rel="stylesheet" href="css/audio-player.css?v=20260713d" />
     <script src="js/nav-arrival.js?v=20260714a"></script>
@@ -77,7 +77,7 @@
     <noscript>
       <p style="padding:2rem;text-align:center">This site requires JavaScript to display content.</p>
     </noscript>
-    <script src="js/render.js?v=20260813a" defer></script>
+    <script src="js/render.js?v=20260826c" defer></script>
     <script src="js/deeplink.js?v=20260717e" defer></script>
   </body>
 </html>

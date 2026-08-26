@@ -1158,7 +1158,7 @@
       { label: "Video (single)", type: "video-single", make: function () { return { type: "video-single", heading: "", intro: "", stretchPreview: false, video: { id: "", heading: "", sub: "", poster: false, thumb: null, thumbClass: "", thumbW: 1280, thumbH: 720, ratio: "" }, captionTitle: "" }; } },
     { label: "Showreel (2-up)", type: "video-showreel", make: function () { return { type: "video-showreel", heading: "ShowReels", videos: [] }; } },
     { label: "Video grid", type: "video-grid", make: function () { return { type: "video-grid", heading: "", date: "", rows: 2, noNav: true, videos: [] }; } },
-    { label: "Releases / downloads (versioned)", type: "releases", make: function () { return { type: "releases", heading: "Download", open: true, wrapClass: "vm-xctrl-spoilers", lead: "", items: [] }; } },
+    { label: "Releases / downloads (versioned)", type: "releases", make: function () { return { type: "releases", heading: "Download", open: true, wrapClass: "vm-xctrl-spoilers", lead: "", github: "", items: [] }; } },
     { label: "Accordion (collapsible sections)", type: "accordion", make: function () { return { type: "accordion", wrapClass: "vm-xctrl-spoilers", items: [] }; } },
     { label: "Raw HTML section", type: "raw", make: function () { return { type: "raw", html: "" }; } },
     { label: "Raw HTML (no wrapper)", type: "raw-flat", make: function () { return { type: "raw-flat", html: "" }; } }
@@ -1173,7 +1173,7 @@
     if (b.type === "video-single") return "Video single — " + (b.video ? b.video.id : "");
     if (b.type === "video-showreel") return "Showreel — " + (b.videos ? b.videos.length : 0) + " videos";
     if (b.type === "video-grid") return "Video grid — " + (b.videos ? b.videos.length : 0) + " videos";
-    if (b.type === "releases") return "Releases — " + (b.items ? b.items.length : 0) + " versions";
+    if (b.type === "releases") return b.github ? "Releases — GitHub " + b.github : "Releases — " + (b.items ? b.items.length : 0) + " versions";
     if (b.type === "accordion") return "Accordion — " + (b.items ? b.items.length : 0) + " sections";
     if (b.type === "raw") return "Raw HTML section";
     if (b.type === "raw-flat") return "Raw HTML (no wrapper)";
@@ -1228,6 +1228,13 @@
       out.push(fieldBool("Open by default", b.open, function (v) { b.open = v; dirty(); }));
       out.push(fieldText("Extra wrapper class (e.g. vm-xctrl-spoilers)", b.wrapClass, function (v) { b.wrapClass = v; dirty(); }, { full: true }));
       out.push(fieldTextarea("Lead (HTML — intro above the version list)", b.lead, function (v) { b.lead = v; dirty(); }));
+      out.push(fieldText("GitHub repo (owner/name — loads releases automatically)", b.github || "", function (v) { b.github = v; dirty(); onChange(); }, { full: true, placeholder: "vchaudio/VM-Xctrl" }));
+      if (b.github) {
+        out.push(el("p", {
+          style: "color:var(--text-muted);font-size:0.85rem;margin:0 0 0.75rem",
+          text: "The live site fetches versions from GitHub Releases. Manual versions below are only used if GitHub is unreachable."
+        }));
+      }
       out.push(releasesItemsEditor(b, dirty));
     } else if (b.type === "accordion") {
       out.push(fieldText("Extra wrapper class (e.g. vm-xctrl-spoilers)", b.wrapClass, function (v) { b.wrapClass = v; dirty(); }, { full: true }));
