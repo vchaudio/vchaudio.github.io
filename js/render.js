@@ -1853,7 +1853,7 @@
   /* Releases / downloads: optional GitHub sync via `block.github` ("owner/repo").
      Live list is fetched from the GitHub Releases API; `block.items` is a fallback. */
   var GH_RELEASES_TTL_MS = 10 * 60 * 1000;
-  var GH_RELEASES_CACHE_PREFIX = "vchGhReleases:";
+  var GH_RELEASES_CACHE_PREFIX = "vchGhReleases:v4:";
   var githubReleasesInflight = {};
 
   function normalizeGithubRepo(value) {
@@ -1904,21 +1904,75 @@
       .replace(/"/g, "&quot;");
   }
 
+  function isSafeHttpUrl(url) {
+    return /^https?:\/\//i.test(String(url || "").trim());
+  }
+
+  function safeReleaseImageHtml(src, alt, width) {
+    if (!isSafeHttpUrl(src)) return "";
+    var w = width && /^\d+$/.test(String(width)) ? String(width) : "";
+    /* GitHub-style: only width drives layout; height stays auto / proportional. */
+    var style = "max-width:100%;height:auto;";
+    if (w) style += "width:" + w + "px;";
+    var attrs = ' class="vm-xctrl-release__img" src="' + escapeHtml(src) + '" alt="' + escapeHtml(alt || "") +
+      '" loading="eager" decoding="async" style="' + style + '"';
+    if (w) attrs += ' width="' + w + '"';
+    return "<img" + attrs + ">";
+  }
+
+  function extractHtmlImg(tag) {
+    var srcM = String(tag || "").match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+    if (!srcM || !isSafeHttpUrl(srcM[1])) return "";
+    var altM = String(tag).match(/\balt\s*=\s*["']([^"']*)["']/i);
+    var wM = String(tag).match(/\bwidth\s*=\s*["']?(\d+)/i);
+    return safeReleaseImageHtml(srcM[1], altM ? altM[1] : "", wM && wM[1]);
+  }
+
+  function isStandaloneImageLine(trimmed) {
+    if (/^<img\b[^>]*>$/i.test(trimmed)) return true;
+    if (/^!\[[^\]]*\]\(https?:\/\/[^)\s]+\)$/i.test(trimmed)) return true;
+    return false;
+  }
+
+  function standaloneImageHtml(trimmed) {
+    var htmlImg = trimmed.match(/^<img\b[^>]*>$/i);
+    if (htmlImg) return extractHtmlImg(trimmed);
+    var md = trimmed.match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/i);
+    if (md) return safeReleaseImageHtml(md[2], md[1]);
+    return "";
+  }
+
   function inlineMarkdown(raw) {
-    var codes = [];
+    var slots = [];
+    function stash(html) {
+      slots.push(html);
+      return "%%SLOT" + (slots.length - 1) + "%%";
+    }
     var s = String(raw == null ? "" : raw);
     s = s.replace(/`([^`]+)`/g, function (_, code) {
-      codes.push(code);
-      return "%%CODE" + (codes.length - 1) + "%%";
+      return stash("<code>" + escapeHtml(code) + "</code>");
+    });
+    s = s.replace(/<img\b[^>]*>/gi, function (tag) {
+      var html = extractHtmlImg(tag);
+      return html ? stash(html) : "";
+    });
+    s = s.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g, function (_, alt, src) {
+      var html = safeReleaseImageHtml(src, alt);
+      return html ? stash(html) : "";
     });
     s = escapeHtml(s);
     s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" rel="noopener noreferrer" target="_blank">$1</a>');
-    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-    s = s.replace(/__([^_]+)__/g, "<strong>$1</strong>");
-    s = s.replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,]|$)/g, "$1<em>$2</em>");
-    s = s.replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,]|$)/g, "$1<em>$2</em>");
-    s = s.replace(/%%CODE(\d+)%%/g, function (_, i) {
-      return "<code>" + escapeHtml(codes[Number(i)]) + "</code>";
+    s = s.replace(/\*\*\*([^*\n]+)\*\*\*/g, "<strong><em>$1</em></strong>");
+    s = s.replace(/___([^_\n]+)___/g, "<strong><em>$1</em></strong>");
+    s = s.replace(/\*\*_([^*\n]+)_\*\*/g, "<strong><em>$1</em></strong>");
+    s = s.replace(/__\*([^_\n]+)\*__/g, "<strong><em>$1</em></strong>");
+    s = s.replace(/_\*\*([^_\n]+)\*\*_/g, "<em><strong>$1</strong></em>");
+    s = s.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/__([^_\n]+)__/g, "<strong>$1</strong>");
+    s = s.replace(/(^|[^A-Za-z0-9*])\*([^*\n]+)\*(?![A-Za-z0-9*])/g, "$1<em>$2</em>");
+    s = s.replace(/(^|[^A-Za-z0-9_])_([^_\n]+)_(?![A-Za-z0-9_])/g, "$1<em>$2</em>");
+    s = s.replace(/%%SLOT(\d+)%%/g, function (_, i) {
+      return slots[Number(i)] || "";
     });
     return s;
   }
@@ -1999,6 +2053,26 @@
     return i;
   }
 
+  function consumeMarkdownBlockquote(lines, start, out) {
+    var i = start;
+    var parts = [];
+    while (i < lines.length) {
+      var raw = lines[i];
+      if (!/^>\s?/.test(raw)) break;
+      var body = raw.replace(/^>\s?/, "");
+      if (String(body).trim()) parts.push(inlineMarkdown(body));
+      else if (parts.length) parts.push("");
+      i++;
+    }
+    var html = parts.filter(function (p, idx) {
+      return p || (idx > 0 && idx < parts.length - 1);
+    }).map(function (p) {
+      return p ? "<p>" + p + "</p>" : "";
+    }).join("");
+    if (html) out.push("<blockquote>" + html + "</blockquote>");
+    return i;
+  }
+
   function githubMarkdownToHtml(md) {
     if (!md) return "";
     var lines = String(md).replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
@@ -2023,6 +2097,18 @@
         flushPara();
         var tag = "h" + heading[1].length;
         out.push("<" + tag + ">" + inlineMarkdown(heading[2]) + "</" + tag + ">");
+        i++;
+        continue;
+      }
+      if (/^>\s?/.test(line) || /^>\s?/.test(trimmed)) {
+        flushPara();
+        i = consumeMarkdownBlockquote(lines, i, out);
+        continue;
+      }
+      if (isStandaloneImageLine(trimmed)) {
+        flushPara();
+        var imgHtml = standaloneImageHtml(trimmed);
+        if (imgHtml) out.push(imgHtml);
         i++;
         continue;
       }
@@ -2131,6 +2217,23 @@
     body.style.maxHeight = inner.scrollHeight + 24 + "px";
   }
 
+  function watchReleaseImagesForSpoilerResize(host) {
+    if (!host) return;
+    var imgs = host.querySelectorAll("img.vm-xctrl-release__img");
+    if (!imgs.length) return;
+    var refresh = function () { refreshOpenSpoilerHeight(host); };
+    Array.prototype.forEach.call(imgs, function (img) {
+      if (img.complete && img.naturalHeight) return;
+      img.addEventListener("load", refresh);
+      img.addEventListener("error", refresh);
+    });
+    if (typeof ResizeObserver === "function") {
+      var ro = new ResizeObserver(function () { refresh(); });
+      ro.observe(host);
+      setTimeout(function () { try { ro.disconnect(); } catch (e) {} }, 15000);
+    }
+  }
+
   function fillReleasesHost(host, block, items, opts) {
     opts = opts || {};
     clear(host);
@@ -2168,7 +2271,10 @@
     }
     host.appendChild(releases);
     refreshOpenSpoilerHeight(host);
-    requestAnimationFrame(function () { refreshOpenSpoilerHeight(host); });
+    requestAnimationFrame(function () {
+      refreshOpenSpoilerHeight(host);
+      watchReleaseImagesForSpoilerResize(host);
+    });
   }
 
   function hydrateGithubReleases(host, block) {

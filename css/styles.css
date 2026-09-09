@@ -2819,6 +2819,38 @@ main.project-page--hero-glow .project-page-spoilers details.spoiler[open] .vm-xc
   color: var(--accent);
 }
 
+.vm-xctrl-release__notes img,
+.vm-xctrl-release__notes .vm-xctrl-release__img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.55rem 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.vm-xctrl-release__notes blockquote {
+  margin: 0.45rem 0;
+  padding: 0.2rem 0 0.2rem 0.75rem;
+  border-left: 3px solid rgba(228, 160, 74, 0.5);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.vm-xctrl-release__notes blockquote p {
+  margin: 0.15rem 0;
+}
+
+.vm-xctrl-release__notes blockquote em,
+.vm-xctrl-release__notes em {
+  font-style: italic;
+}
+
+.vm-xctrl-release-notes--latest .vm-xctrl-release__notes blockquote {
+  color: var(--text-muted);
+}
+
 .project-page-spoilers .vm-xctrl-release-notes.vm-xctrl-release-notes--latest > .vm-xctrl-release__notes,
 .project-page-spoilers .vm-xctrl-release-notes.vm-xctrl-release-notes--latest > .detail-list {
   padding: 0.55rem 0.7rem;
